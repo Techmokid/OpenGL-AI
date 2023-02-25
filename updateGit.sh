@@ -7,6 +7,5 @@ git commit -m "Automated Git Push"
 git branch -M main
 git push -u origin main
 
-pause
-
+read -p "Press [Enter] key to finish"
 '
