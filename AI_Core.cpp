@@ -276,11 +276,13 @@ void SaveNetworkNodes_MTwTDC(ThreadDataContainer* TDC) {
 
 // W.I.P WIP
 void SaveNetworkConnections_MTwTDC(ThreadDataContainer* TDC) {
+	print(std::to_string(TDC->ID) + "|" + std::to_string(TDC->EndIndex));
+	TDC->threadCompletionStatus = true;return;
+	
 	Node_GPU C[TDC->EndIndex - TDC->ID + 1];
 	for(int i = TDC->ID; i <= TDC->EndIndex; i++) {
 		C[i - TDC->ID] = NGPU->nodes[i];
 	}
-	TDC->threadCompletionStatus = true;return;
 	
 	std::string filepath = TDC->path + "Node Connections/Connection Data " + std::to_string(TDC->ID) + ".json";
 	std::fstream f;
@@ -392,7 +394,7 @@ void SaveNeuralNetworkInternal(std::string dir) {
 		}
 		
 		if (run) {
-			while (currentThreadCount == maxThreadCount) {
+			while (currentThreadCount >= maxThreadCount) {
 				for (int x = 0; x < TDC_List.size(); x++) {
 					if (TDC_List[x]->threadCompletionStatus) {
 						TDC_List.erase(TDC_List.begin() + x);

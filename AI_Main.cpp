@@ -33,6 +33,7 @@ int main() {
 	
 	printFormatted("Main", "Log", "Generating Neural Network");
 	CreateNewLayeredNetwork(1000,300,200,4,2);
+	//CreateNewLayeredNetwork(1000,10,10,10,10);
 	printFormatted("Main", "Success", "Neural Network Generated");
 	print();
 	
