@@ -232,21 +232,25 @@ void SaveNeuralNetwork() {
 	printFormatted("Save","Success","Saved AI network!");
 }
 
-// W.I.P WIP
 void SaveNetworkGenomes_MTwTDC(ThreadDataContainer* TDC) {
 	Genome_GPU G[TDC->EndIndex - TDC->ID + 1];
+	
 	for(int i = TDC->ID; i <= TDC->EndIndex; i++) {
 		G[i - TDC->ID] = NGPU->genomes[i];
 	}
 	
-	std::string filepath = TDC->path + "Genomes/Genome Data " + std::to_string(TDC->ID) + ".json";
+	std::string filepath = TDC->path + "Genomes/Genome Data " + std::to_string(TDC->ID) + ".csv";
 	
 	std::fstream f;
 	f.open(filepath, std::fstream::out | std::fstream::trunc);
 	for (int i = 0; i < sizeof(G) / sizeof(G[0]); i++) {
-		//f << NeuralGenomesToCSV(G);
-		std::string line = "";
-		f << line;
+		// Convert the neural genome to CSV format
+		std::string line = std::to_string(G[i].ID) + ",";
+		line += std::to_string(G[i].fitness) + ",";
+		line += std::to_string(G[i].prev_fitness) + ",";
+		line += std::to_string(G[i].Nodes_Start_Index) + ",";
+		line += std::to_string(G[i].Nodes_End_Index);
+		f << line << std::endl;
 	}
 	f.close();
 	
@@ -259,15 +263,24 @@ void SaveNetworkNodes_MTwTDC(ThreadDataContainer* TDC) {
 	for(int i = TDC->ID; i <= TDC->EndIndex; i++) {
 		N[i - TDC->ID] = NGPU->nodes[i];
 	}
-	TDC->threadCompletionStatus = true;return;
 	
-	std::string filepath = TDC->path + "Nodes/Node Data " + std::to_string(TDC->ID) + ".json";
+	std::string filepath = TDC->path + "Nodes/Node Data " + std::to_string(TDC->ID) + ".csv";
 	std::fstream f;
 	f.open(filepath, std::fstream::out | std::fstream::trunc);
 	for (int i = 0; i < sizeof(N) / sizeof(N[0]); i++) {
-		//f << NeuralNodesToCSV(G);
-		std::string line = "";
-		f << line;
+		// Convert the neural node to CSV format
+		std::string line = std::to_string(N[i].ID) + ",";
+		line += std::to_string(N[i].nTT) + ",";
+		line += std::to_string(N[i].nB) + ",";
+		line += std::to_string(N[i].pNB) + ",";
+		line += std::to_string(N[i].nII) + ",";
+		line += std::to_string(N[i].nIO) + ",";
+		line += std::to_string(N[i].tNIO) + ",";
+		line += std::to_string(N[i].nIV) + ",";
+		line += std::to_string(N[i].pO) + ",";
+		line += std::to_string(N[i].wSI) + ",";
+		line += std::to_string(N[i].wEI);
+		f << line << std::endl;
 	}
 	f.close();
 	
@@ -276,21 +289,20 @@ void SaveNetworkNodes_MTwTDC(ThreadDataContainer* TDC) {
 
 // W.I.P WIP
 void SaveNetworkConnections_MTwTDC(ThreadDataContainer* TDC) {
-	print(std::to_string(TDC->EndIndex - TDC->ID) + "|" + std::to_string(TDC->ID) + "|" + std::to_string(TDC->EndIndex));
-	TDC->threadCompletionStatus = true;return;
-	
-	Node_GPU C[TDC->EndIndex - TDC->ID + 1];
+	NodeConnection_GPU C[TDC->EndIndex - TDC->ID + 1];
 	for(int i = TDC->ID; i <= TDC->EndIndex; i++) {
-		C[i - TDC->ID] = NGPU->nodes[i];
+		C[i - TDC->ID] = NGPU->connections[i];
 	}
 	
-	std::string filepath = TDC->path + "Node Connections/Connection Data " + std::to_string(TDC->ID) + ".json";
+	std::string filepath = TDC->path + "Node Connections/Connection Data " + std::to_string(TDC->ID) + ".csv";
 	std::fstream f;
 	f.open(filepath, std::fstream::out | std::fstream::trunc);
 	for (int i = 0; i < sizeof(C) / sizeof(C[0]); i++) {
-		//f << NeuralConnectionsToCSV(G);
-		std::string line = "";
-		f << line;
+		// Convert the neural connection to CSV format
+		std::string line = std::to_string(C[i].NodePos) + ",";
+		line += std::to_string(C[i].Weight) + ",";
+		line += std::to_string(C[i].Prev_Weight);
+		f << line << std::endl;
 	}
 	f.close();
 	
