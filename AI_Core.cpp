@@ -276,7 +276,7 @@ void SaveNetworkNodes_MTwTDC(ThreadDataContainer* TDC) {
 
 // W.I.P WIP
 void SaveNetworkConnections_MTwTDC(ThreadDataContainer* TDC) {
-	print(std::to_string(TDC->ID) + "|" + std::to_string(TDC->EndIndex));
+	print(std::to_string(TDC->EndIndex - TDC->ID) + "|" + std::to_string(TDC->ID) + "|" + std::to_string(TDC->EndIndex));
 	TDC->threadCompletionStatus = true;return;
 	
 	Node_GPU C[TDC->EndIndex - TDC->ID + 1];
