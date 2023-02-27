@@ -96,7 +96,7 @@ void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer,
 		NGPU->nodes[i].nTT = 1;
 				
 		NGPU->nodes[i].nB = getRandomFloat();	//Node Bias
-		NGPU->nodes[i].pNB = NGPU->nodes[i].NB;
+		NGPU->nodes[i].pNB = NGPU->nodes[i].nB;
 				
 		int startOfGenome = (int)(totalNodeCountPerGenome * floor((double)NGPU->nodes[i].ID / (double)totalNodeCountPerGenome));
 		NGPU->nodes[i].nII = i < startOfGenome + inputNodes;
@@ -274,7 +274,6 @@ void SaveNetworkNodes_MTwTDC(ThreadDataContainer* TDC) {
 		line += std::to_string(N[i].pNB) + ",";
 		line += std::to_string(N[i].nII) + ",";
 		line += std::to_string(N[i].nIO) + ",";
-		line += std::to_string(N[i].tNIO) + ",";
 		line += std::to_string(N[i].nIV) + ",";
 		line += std::to_string(N[i].pO) + ",";
 		line += std::to_string(N[i].wSI) + ",";

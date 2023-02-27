@@ -127,9 +127,7 @@ void printFormatted(std::string module, std::string status, std::string msg) {
 }
 
 std::string TimeFormatter(double x) {
-	if (x >= 365 * 24 * 60 * 60 * 1000) {
-		return std::to_string(x/(365*1000*60*60*24)) + " years";
-	} else if (x >= 7 * 24 * 60 * 60 * 1000) {
+	if (x >= 7 * 24 * 60 * 60 * 1000) {
 		return std::to_string(x/(7*1000*60*60*24)) + " weeks";
 	} else if (x >= 24 * 60 * 60 * 1000) {
 		return std::to_string(x/(1000*60*60*24)) + " days";
