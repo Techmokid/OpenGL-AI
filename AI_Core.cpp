@@ -4,6 +4,8 @@
 
 int numberOfIndexesPerThread = 10000;
 
+const int numberOfAvailableActivationFunctions = 2;
+
 // Struct definitions
 struct Genome_GPU {
 	Genome_GPU() { }
@@ -55,6 +57,8 @@ float getRandomFloat(float HI, float LO) {
 }
 
 void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer, int hiddenLayerCount, int outputNodes) {
+	srand(time(NULL));
+	
 	int nodeCountPerGenome = inputNodes + nodesPerLayer*hiddenLayerCount + outputNodes;
 	int connCountPerGenome = inputNodes*nodesPerLayer + hiddenLayerCount*(hiddenLayerCount-1) + outputNodes*nodesPerLayer;
 			
@@ -89,12 +93,9 @@ void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer,
 	
 	for (int i = 0; i < NGPU->nodes.size(); i++) {
 		NGPU->nodes[i].ID = i;
-				
-		//char[] genomeActivationTypes = new char[] { 'c','n' };
-		//int randomIndex = AI_Internal_Core.rand.Next(genomeActivationTypes.Length);
-		//nodes[i].nAT = genomeActivationTypes[randomIndex];
-		NGPU->nodes[i].nTT = 1;
-				
+		//NGPU->nodes[i].nTT = 1;	//Node trigger type. 0 for step, 1 for sigmoid
+		NGPU->nodes[i].nTT = rand() % numberOfAvailableActivationFunctions;
+		
 		NGPU->nodes[i].nB = getRandomFloat();	//Node Bias
 		NGPU->nodes[i].pNB = NGPU->nodes[i].nB;
 				
@@ -107,8 +108,29 @@ void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer,
 		NGPU->nodes[i].wSI = tempWeightsCount;
 				
 		int startOfNonInputs = startOfGenome + inputNodes;
-		int startOfLastLayer = (int)(startOfNonInputs + floor((double)(i - startOfNonInputs)/(double)nodesPerLayer) - nodesPerLayer);
 		int numConnections = nodesPerLayer;
+		int startOfLastLayer = startOfGenome;
+		int currentLayer = std::floor(((i - startOfGenome) - inputNodes)/nodesPerLayer) + 1;
+		
+		std::string msg = std::to_string(i) + "|";
+		msg += std::to_string(startOfNonInputs) + "|";
+		msg += std::to_string(startOfGenome) + "\t\t\t";
+		if (i - startOfGenome >= inputNodes) {
+			if (i - startOfGenome < totalNodeCountPerGenome - outputNodes) {
+				// Node is hidden node
+				if (currentLayer > 1) {
+					startOfLastLayer = (currentLayer - 2)*nodesPerLayer + inputNodes + startOfGenome;
+				}
+				msg += "HIDDEN|" + std::to_string(currentLayer) + "|" + std::to_string(startOfLastLayer);
+			} else {
+				// Node is output node
+				startOfLastLayer = startOfGenome + totalNodeCountPerGenome - outputNodes - nodesPerLayer;
+				msg += "OUTPUT|" + std::to_string(startOfLastLayer);
+			}
+		}
+		
+		print(msg);
+		
 		if (NGPU->nodes[i].nIO) {
 			NGPU->nodes[i].wEI = tempWeightsCount + numConnections - 1;
 					
