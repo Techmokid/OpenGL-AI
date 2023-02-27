@@ -52,6 +52,10 @@ struct ThreadDataContainer {
 
 void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer, int hiddenLayerCount, int outputNodes);
 void quit();
+
+void LoadNetworkGPU(std::string dir);
+void LoadNetworkGPU();
+
 void SaveNeuralNetwork();
 void SaveNeuralNetwork(std::string dir);
 void SaveNeuralNetworkInternal(std::string dir);

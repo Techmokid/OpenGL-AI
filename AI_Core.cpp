@@ -203,7 +203,7 @@ void quit() {
 void SaveNeuralNetwork(std::string dir) { saveDirectory = dir + "/"; SaveNeuralNetwork(); }
 void SaveNeuralNetwork() {
 	if (saveDirectory == "") {
-		printFormatted("Save","Error","Could not save GPU network. SaveNetworkGPU was called without setting save directory");
+		printFormatted("Save","Error","Could not save GPU network. SaveNeuralNetwork was called without setting save directory");
 		quit();
 	}
 	
@@ -331,6 +331,11 @@ void SaveNetworkConnections_MTwTDC(ThreadDataContainer* TDC) {
 void SetCPUSaveThreadCount(int x) { numberOfIndexesPerThread = x; }
 
 void SaveNeuralNetworkInternal(std::string dir) {
+	if (saveDirectory == "") {
+		printFormatted("Save","Error","Could not save GPU network. SaveNeuralNetworkInternal was called without setting save directory");
+		quit();
+	}
+	
 	auto start = std::chrono::high_resolution_clock::now();
 	
 	std::filesystem::remove_all(dir + "Genomes/");
@@ -451,3 +456,43 @@ void SaveNeuralNetworkInternal(std::string dir) {
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 	printFormatted("Save","Log","Real time taken to save network: " + TimeFormatter(duration.count()));
 }
+
+void LoadNetworkGPU(std::string dir) { saveDirectory = dir + "/"; LoadNetworkGPU(); }
+void LoadNetworkGPU() {
+	if (saveDirectory == "") {
+		printFormatted("Load","Error","Could not load GPU network. LoadNetworkGPU was called without setting save directory");
+		quit();
+	}
+	
+	std::string netSaveDir    = saveDirectory + "Network Save Orig/";
+	std::string netBackupDir  = saveDirectory + "Network Save Backup/";
+	std::string netStatusFile = saveDirectory + "saveStatus.txt";
+	
+	std::string loadDirectory = "";
+	if (std::filesystem::exists(saveDirectory)) {
+		print("Yes");
+	} else {
+		print("No");
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
