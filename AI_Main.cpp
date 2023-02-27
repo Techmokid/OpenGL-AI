@@ -32,17 +32,18 @@ int main() {
 	printFormatted("Main", "Debug", "Let me boot the server up for you!");
 	
 	printFormatted("Main", "Log", "Generating Neural Network");
-	//CreateNewLayeredNetwork(1000,300,200,4,2);
-	CreateNewLayeredNetwork(5,2,6,6,5);
-	printFormatted("Main", "Success", "Neural Network Generated");
-	print();
+	//CreateNewLayeredNetwork(100,300,200,4,2);
+	//CreateNewLayeredNetwork(5,2,6,6,5);
+	//printFormatted("Main", "Success", "Neural Network Generated");
+	//print();
 	
 	//printFormatted("Main", "Log", "Saving Neural Network");
 	//SetCPUSaveThreadCount(100);
-	SaveNeuralNetwork("/home/andrey/Desktop/AI Network/");
-	LoadNetworkGPU();
-	print();
+	//SaveNeuralNetwork("/home/andrey/Desktop/AI Network");
+	LoadNetworkGPU("/home/andrey/Desktop/AI Network");
 	
+	print();
+	quit();
 	
 	
 	

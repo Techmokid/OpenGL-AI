@@ -457,6 +457,99 @@ void SaveNeuralNetworkInternal(std::string dir) {
 	printFormatted("Save","Log","Real time taken to save network: " + TimeFormatter(duration.count()));
 }
 
+void saveFileRepair() {
+	if (saveDirectory == "") {
+		printFormatted("File Repair","Error","Could not repair save files. saveFileRepair was called without setting save directory");
+		quit();
+	}
+	
+	std::string netSaveDir = saveDirectory + "Network Save Orig/";
+	std::string netBackupDir = saveDirectory + "Network Save Backup/";
+	std::string netStatusFile = saveDirectory + "saveStatus.txt";
+	
+	std::string intactDirectory = "";
+	std::string corruptedDirectory = "";
+	if (std::filesystem::exists(netStatusFile)) {
+		//0 	Means it's completely safe to read from either.							Read from the first one
+		//1 	Means it was in the middle of writing to the first copy. 				Read from the second
+		//2 	Means it was in the middle of writing to the backup copy. 				Read from the first one
+		//null  Means it was in the middle of writing to the save status directory.		Read from the first one
+		std::string saveStatus;
+		std::ifstream myfile;
+		myfile.open(netStatusFile);
+		std::getline(myfile,saveStatus);
+		myfile.close();
+		
+		if (saveStatus == "0") {
+			// Both saves should be fine
+			printFormatted("File Repair","Log","No save file errors found");
+		} else if (saveStatus == "1") {
+			//Primary save is corrupted
+			printFormatted("File Repair","Warning","Detected primary save folder corruption");
+			if (std::filesystem::exists(netBackupDir)) {
+				printFormatted("File Repair","Log","Detected intact backup save folder");
+				intactDirectory = netBackupDir;
+				corruptedDirectory = netSaveDir;
+			} else {
+				printFormatted("File Repair","Error","No backup save folder detected. Could not repair saved data");
+				quit();
+			}
+		} else if (saveStatus == "2") {
+			//Backup save is corrupted
+			printFormatted("File Repair","Warning","Detected backup save folder corruption");
+			if (std::filesystem::exists(netBackupDir)) {
+				printFormatted("File Repair","Log","Detected intact primary save folder");
+				intactDirectory = netSaveDir;
+				corruptedDirectory = netBackupDir;
+			} else {
+				printFormatted("File Repair","Error","No primary save folder detected. Could not repair saved data");
+				quit();
+			}
+		} else {
+			printFormatted("File Repair","Warning","Invalid save status detected in save directory. Checking save directories");
+			if ((!std::filesystem::exists(netBackupDir)) && (!std::filesystem::exists(netSaveDir))) {
+				printFormatted("File Repair","Error","Missing both save directories!");
+				quit();
+			} else if (!std::filesystem::exists(netBackupDir)) {
+				printFormatted("File Repair","Warning","Missing backup save directory");
+			} else if (!std::filesystem::exists(netSaveDir)) {
+			printFormatted("File Repair","Warning","Missing primary save directory");
+			} else {
+				printFormatted("File Repair","Log","Both save directories detected");
+			}
+			printFormatted("File Repair","Error","Due to unusual save directory status, cannot continue. Please manually check the save directory before restarting this program");
+			quit();
+		}
+	} else {
+		printFormatted("File Repair","Warning","Could not find save status file");
+		if ((!std::filesystem::exists(netBackupDir)) && (!std::filesystem::exists(netSaveDir))) {
+			printFormatted("File Repair","Error","Missing both save directories!");
+			quit();
+		} else if (!std::filesystem::exists(netBackupDir)) {
+			printFormatted("File Repair","Warning","Missing backup save directory");
+		} else if (!std::filesystem::exists(netSaveDir)) {
+		printFormatted("File Repair","Warning","Missing primary save directory");
+		} else {
+			printFormatted("File Repair","Log","Both save directories detected");
+		}
+		printFormatted("File Repair","Error","Due to unusual save directory status, cannot continue. Please manually check the save directory before restarting this program");
+		quit();
+	}
+	
+	//intactDirectory
+	//corruptedDirectory
+	if (!std::filesystem::exists(intactDirectory)) {
+		printFormatted("File Repair","Error","Could not find intact file directory for repairs: " + intactDirectory);
+		quit();
+	}
+	
+	if (std::filesystem::exists(corruptedDirectory))
+		std::filesystem::remove_all(corruptedDirectory);
+	
+	std::filesystem::copy(intactDirectory,corruptedDirectory);
+	printFormatted("File Repair","Success","Repaired save directory!");
+}
+
 void LoadNetworkGPU(std::string dir) { saveDirectory = dir + "/"; LoadNetworkGPU(); }
 void LoadNetworkGPU() {
 	if (saveDirectory == "") {
@@ -469,11 +562,87 @@ void LoadNetworkGPU() {
 	std::string netStatusFile = saveDirectory + "saveStatus.txt";
 	
 	std::string loadDirectory = "";
-	if (std::filesystem::exists(saveDirectory)) {
-		print("Yes");
+	if (std::filesystem::exists(netStatusFile)) {
+		std::string saveStatus;
+		std::ifstream myfile;
+		myfile.open(netStatusFile);
+		std::getline(myfile,saveStatus);
+		myfile.close();
+		
+		if (saveStatus == "0") {
+			printFormatted("Load","Log","Loading AI network from primary save");
+			loadDirectory = netSaveDir;
+		} else if (saveStatus == "1") {
+			printFormatted("Load","Warning","Primary save corrupted. Attempting file repairs");
+			saveFileRepair();
+			printFormatted("Load","Log","Loading AI network from backup save");
+			loadDirectory = netBackupDir;
+		} else if (saveStatus == "2") {
+			printFormatted("Load","Warning","Backup save corrupted. Attempting file repairs");
+			saveFileRepair();
+			printFormatted("Load","Log","Loading AI network from primary save");
+			loadDirectory = netSaveDir;
+		} else {
+			printFormatted("Load","Warning","Invalid save status detected in save directory. Defaulting to primary save");
+			loadDirectory = netSaveDir;
+		}
 	} else {
-		print("No");
+		printFormatted("Load","Warning","Could not find save status file. Searching for save directory directly");
+		if (std::filesystem::exists(saveDirectory)) {
+			if (std::filesystem::exists(netSaveDir)) {
+				printFormatted("Load","Warning","Found direct copy of neural network primary save on disk. Uncertain save status detected, but continuing to load anyways");
+				printFormatted("Load","Warning","Please note, since the save status file is missing, I cannot assure the purity of the saved network. Proceed with caution");
+				loadDirectory = netSaveDir;
+			} else if (std::filesystem::exists(netBackupDir)) {
+				printFormatted("Load","Warning","Found direct copy of neural network backup save on disk. Uncertain save status detected, but continuing to load anyways");
+				printFormatted("Load","Warning","Please note, since the save status file is missing, I cannot assure the purity of the saved network. Proceed with caution");
+				loadDirectory = netSaveDir;
+			} else {
+				printFormatted("Load","Error","Could not load network. No save folder detected in directory:" + saveDirectory);
+				quit();
+			}
+		} else {
+			printFormatted("Load","Error","Could not load network. Save directory does not exist:" + saveDirectory);
+			quit();
+		}
 	}
+	
+	delete(NGPU);
+	NGPU = new Network_GPU();
+	
+	//W.I.P
+	// Now that we have confirmed the status of the save files and attempted any necessary repairs on them, we can now load up the neural network from disk.
+	printFormatted("Load","Log","Loading from internal directory: " + loadDirectory);
+	
+	std::string connectionsTestData;
+	std::ifstream connectionsTestFile;
+	connectionsTestFile.open(loadDirectory + "Node Connections/Connection Data 0.csv");
+	numberOfIndexesPerThread = 0;
+	while(std::getline(connectionsTestFile,connectionsTestData)) { numberOfIndexesPerThread++; }
+	connectionsTestFile.close();
+	
+	printFormatted("Load","Debug","Detected an IndexPerThread value of: " + std::to_string(numberOfIndexesPerThread));
+	
+	// Now we start pulling the required directories
+	std::vector<std::string> genomes;
+	std::vector<std::string> nodes;
+	std::vector<std::string> connections;
+	std::filesystem::path genomesDirectory{loadDirectory + "Genomes/"};
+	std::filesystem::path nodesDirectory{loadDirectory + "Nodes/"};
+	std::filesystem::path connectionsDirectory{loadDirectory + "Node Connections/"};
+	for (auto const& dir_entry : std::filesystem::directory_iterator{genomesDirectory}) { genomes.push_back(dir_entry.path()); }
+	for (auto const& dir_entry : std::filesystem::directory_iterator{nodesDirectory}) { nodes.push_back(dir_entry.path()); }
+	for (auto const& dir_entry : std::filesystem::directory_iterator{connectionsDirectory}) { connections.push_back(dir_entry.path()); }
+	printFormatted("Load","Debug","Detected " + std::to_string(genomes.size()) + " genomes");
+	printFormatted("Load","Debug","Detected " + std::to_string(nodes.size()) + " nodes");
+	printFormatted("Load","Debug","Detected " + std::to_string(connections.size()) + " connections");
+	
+	//for (std::string i : nodes) {
+	//	print(i);
+	//}
+	
+	// Now that we have all the directories, we can start calling the multithreads to load the network
+	
 }
 
 
