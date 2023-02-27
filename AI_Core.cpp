@@ -124,6 +124,9 @@ void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer,
 		}
 		
 		if (NGPU->nodes[i].nIO) {
+			// Node is output node
+			//startOfLastLayer = startOfGenome + totalNodeCountPerGenome - outputNodes - nodesPerLayer;
+			
 			NGPU->nodes[i].wEI = tempWeightsCount + numConnections - 1;
 					
 			int firstIndex = startOfGenome + totalNodeCountPerGenome - outputNodes - nodesPerLayer;
@@ -136,6 +139,10 @@ void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer,
 					
 			tempWeightsCount += numConnections;
 		} else if (!(NGPU->nodes[i].nII)) {
+			// Node is hidden node
+			//if (currentLayer > 1)
+			//	startOfLastLayer = (currentLayer - 2)*nodesPerLayer + inputNodes + startOfGenome;
+			
 			bool isSecondLayer = i < startOfGenome + inputNodes + nodesPerLayer;
 			if (isSecondLayer) { numConnections = inputNodes; }
 			NGPU->nodes[i].wEI = tempWeightsCount + numConnections - 1;
