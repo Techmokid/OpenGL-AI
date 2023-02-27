@@ -128,24 +128,24 @@ void printFormatted(std::string module, std::string status, std::string msg) {
 
 std::string TimeFormatter(double x) {
 	if (x >= 7 * 24 * 60 * 60 * 1000) {
-		return std::to_string(x/(7*1000*60*60*24)) + " weeks";
+		return std::to_string((int)std::floor(x/(7*1000*60*60*24))) + " weeks";
 	} else if (x >= 24 * 60 * 60 * 1000) {
-		return std::to_string(x/(1000*60*60*24)) + " days";
+		return std::to_string((int)std::floor(x/(1000*60*60*24))) + " days";
 	} else if (x >= 60 * 60 * 1000) {
-		return std::to_string(x/(1000*60*60)) + " hours";
+		return std::to_string((int)std::floor(x/(1000*60*60))) + " hours";
 	} else if (x >= 60 * 1000) {
-		return std::to_string(x/(1000*60)) + " minutes";
+		return std::to_string((int)std::floor(x/(1000*60))) + " minutes";
 	} else if (x >= 1000) {
-		return std::to_string(x/1000) + " seconds";
+		return std::to_string((int)std::floor(x/1000)) + " seconds";
 	} else if (x >= 1) {
-		return std::to_string(x) + " milliseconds";
+		return std::to_string((int)std::floor(x)) + " milliseconds";
 	} else if (x >= 1/1000) {
-		return std::to_string(x*1000) + " microseconds";
+		return std::to_string((int)std::floor(x*1000)) + " microseconds";
 	} else if (x >= 1/(1000*1000)) {
-		return std::to_string(x*1000*1000) + " nanoseconds";
+		return std::to_string((int)std::floor(x*1000*1000)) + " nanoseconds";
 	} else if (x >= 1/(1000*1000*1000)) {
-		return std::to_string(x*1000*1000*1000) + " picoseconds";
-	} else if (x <= 1/(1000*1000*1000)){
+		return std::to_string((int)std::floor(x*1000*1000*1000)) + " picoseconds";
+	} else if (x <= 1/(1000*1000*1000)) {
 		return "Time too small for formatting";
 	} else {
 		return "Time too large for formatting";
