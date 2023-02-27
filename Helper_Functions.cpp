@@ -127,31 +127,29 @@ void printFormatted(std::string module, std::string status, std::string msg) {
 }
 
 std::string TimeFormatter(double x) {
-	if (x > 24*365.25*1000) {
-		return std::to_string(x/24/365.25/1000) + " millenia";
-	} else if (x >= 24*365.25*100) {
-		return std::to_string(x/24/365.25/100) + " centuries";
-	} else if (x >= 24*365.25*10) {
-		return std::to_string(x/24/365.25/10) + " decades";
-	} else if (x >= 24*365.25) {
-		return std::to_string(x/24/365.25) + " years";
-	} else if (x >= 24) {
-		return std::to_string(x/24) + " days";
+	if (x >= 365 * 24 * 60 * 60 * 1000) {
+		return std::to_string(x/(365*1000*60*60*24)) + " years";
+	} else if (x >= 7 * 24 * 60 * 60 * 1000) {
+		return std::to_string(x/(7*1000*60*60*24)) + " weeks";
+	} else if (x >= 24 * 60 * 60 * 1000) {
+		return std::to_string(x/(1000*60*60*24)) + " days";
+	} else if (x >= 60 * 60 * 1000) {
+		return std::to_string(x/(1000*60*60)) + " hours";
+	} else if (x >= 60 * 1000) {
+		return std::to_string(x/(1000*60)) + " minutes";
+	} else if (x >= 1000) {
+		return std::to_string(x/1000) + " seconds";
 	} else if (x >= 1) {
-		return std::to_string(x) + " hours";
-	} else if (x >= 1/60) {
-		return std::to_string(x*60) + " minutes";
-	} else if (x >= 1/60/60) {
-		return std::to_string(x*60*60) + " seconds";
-	} else if (x >= 1/60/60/1000) {
-		return std::to_string(x*60*60*1000) + " milliseconds";
-	} else if (x >= 1/60/60/1000/1000) {
-		return std::to_string(x*60*60*1000*1000) + " microseconds";
-	} else if (x >= 1/60/60/1000/1000/1000) {
-		return std::to_string(x*60*60*1000*1000*1000) + " nanoseconds";
-	} else if (x >= 1/60/60/1000/1000/1000/1000) {
-		return std::to_string(x*60*60*1000*1000*1000*1000) + " picoseconds";
-	} else {
+		return std::to_string(x) + " milliseconds";
+	} else if (x >= 1/1000) {
+		return std::to_string(x*1000) + " microseconds";
+	} else if (x >= 1/(1000*1000)) {
+		return std::to_string(x*1000*1000) + " nanoseconds";
+	} else if (x >= 1/(1000*1000*1000)) {
+		return std::to_string(x*1000*1000*1000) + " picoseconds";
+	} else if (x <= 1/(1000*1000*1000)){
 		return "Time too small for formatting";
+	} else {
+		return "Time too large for formatting";
 	}
 }

@@ -24,7 +24,6 @@ struct Node_GPU {
 			
 	bool nII = false; 	//node Is Input				// Is the node is an input or not
 	bool nIO = false; 	//node Is Output			// Is the node is an output or not
-	bool tNIO = false;	//node temporary output		
 	double nIV = 0;			//node Input Value			// If the node is an input, what have we entered
 	double pO = -99999;	//precalculated Output		// This variable just allows for quicker genome output computing
 			
@@ -97,7 +96,7 @@ void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer,
 		NGPU->nodes[i].nTT = 1;
 				
 		NGPU->nodes[i].nB = getRandomFloat();	//Node Bias
-		NGPU->nodes[i].pNB = NGPU->nodes[i].pNB;
+		NGPU->nodes[i].pNB = NGPU->nodes[i].NB;
 				
 		int startOfGenome = (int)(totalNodeCountPerGenome * floor((double)NGPU->nodes[i].ID / (double)totalNodeCountPerGenome));
 		NGPU->nodes[i].nII = i < startOfGenome + inputNodes;
@@ -429,6 +428,6 @@ void SaveNeuralNetworkInternal(std::string dir) {
 	}
 	
 	auto end = std::chrono::high_resolution_clock::now();
-	auto duration = std::chrono::duration_cast<std::chrono::hours>(end - start);
+	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 	printFormatted("Save","Log","Real time taken to save network: " + TimeFormatter(duration.count()));
 }
