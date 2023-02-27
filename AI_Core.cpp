@@ -112,24 +112,16 @@ void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer,
 		int startOfLastLayer = startOfGenome;
 		int currentLayer = std::floor(((i - startOfGenome) - inputNodes)/nodesPerLayer) + 1;
 		
-		std::string msg = std::to_string(i) + "|";
-		msg += std::to_string(startOfNonInputs) + "|";
-		msg += std::to_string(startOfGenome) + "\t\t\t";
 		if (i - startOfGenome >= inputNodes) {
 			if (i - startOfGenome < totalNodeCountPerGenome - outputNodes) {
 				// Node is hidden node
-				if (currentLayer > 1) {
+				if (currentLayer > 1)
 					startOfLastLayer = (currentLayer - 2)*nodesPerLayer + inputNodes + startOfGenome;
-				}
-				msg += "HIDDEN|" + std::to_string(currentLayer) + "|" + std::to_string(startOfLastLayer);
 			} else {
 				// Node is output node
 				startOfLastLayer = startOfGenome + totalNodeCountPerGenome - outputNodes - nodesPerLayer;
-				msg += "OUTPUT|" + std::to_string(startOfLastLayer);
 			}
 		}
-		
-		print(msg);
 		
 		if (NGPU->nodes[i].nIO) {
 			NGPU->nodes[i].wEI = tempWeightsCount + numConnections - 1;
