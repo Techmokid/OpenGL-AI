@@ -41,6 +41,8 @@ void waitForUserInput();
 std::string stringToLower(std::string in);
 std::string stringToLowerCapitalized(std::string in);
 std::string stringToUpper(std::string in);
+std::vector<std::string> SplitString(std::string inputVal, char delimiter);
+std::string ASCII_To_Numeric(std::string x);
 
 // AI_Core.cpp
 struct ThreadDataContainer {

@@ -645,6 +645,84 @@ void LoadNetworkGPU() {
 	
 }
 
+void LoadNetworkGenomesGPU_MT(ThreadDataContainer* TDC) {
+	std::string saveStatus;
+	std::ifstream myfile;
+	myfile.open(TDC->path);
+	
+	std::string line;
+	std::getline(myfile,line);
+	while(line != "") {
+		// Use "line" to get out the data
+		std::vector<std::string> loadData = SplitString(line,',');
+		int ID = std::stoi(loadData[0]);
+		NGPU->genomes[ID].ID = 								ID;
+		NGPU->genomes[ID].fitness = 					std::stoi(loadData[1]);
+		NGPU->genomes[ID].prev_fitness = 			std::stoi(loadData[2]);
+		NGPU->genomes[ID].Nodes_Start_Index = std::stoi(loadData[3]);
+		NGPU->genomes[ID].Nodes_End_Index = 	std::stoi(loadData[4]);
+		
+		std::getline(myfile,line);
+	}
+	
+	myfile.close();
+	TDC->threadCompletionStatus = true;
+}
+
+void LoadNetworkNodesGPU_MT(ThreadDataContainer* TDC) {
+	std::string saveStatus;
+	std::ifstream myfile;
+	myfile.open(TDC->path);
+	
+	std::string line;
+	std::getline(myfile,line);
+	while(line != "") {
+		// Use "line" to get out the data
+		std::vector<std::string> loadData = SplitString(line,',');
+		int ID = std::stoi(loadData[0]);
+		NGPU->nodes[ID].ID = ID;
+		NGPU->nodes[ID].nTT =	std::stoi(loadData[1]);
+		NGPU->nodes[ID].nB =	std::stoi(loadData[2]);
+		NGPU->nodes[ID].nII = std::stoi(loadData[3]);
+		NGPU->nodes[ID].nIO =	std::stoi(loadData[4]);
+		NGPU->nodes[ID].nIV =	std::stoi(loadData[5]);
+		NGPU->nodes[ID].pO = 	std::stoi(loadData[6]);
+		NGPU->nodes[ID].wSI =	std::stoi(loadData[7]);
+		NGPU->nodes[ID].wEI =	std::stoi(loadData[8]);
+		
+		std::getline(myfile,line);
+	}
+	
+	myfile.close();
+	TDC->threadCompletionStatus = true;
+}
+
+void LoadNetworkConnectionsGPU_MT(ThreadDataContainer* TDC) {
+	std::string saveStatus;
+	std::ifstream myfile;
+	myfile.open(TDC->path);
+	
+	int startVal = std::stoi(ASCII_To_Numeric(TDC->path));
+	
+	int i = 0;
+	std::string line;
+	std::getline(myfile,line);
+	while(line != "") {
+		// Use "line" to get out the data
+		std::vector<std::string> loadData = SplitString(line,',');
+		int ID = startVal + i;
+		NGPU->connections[ID].NodePos = 		std::stoi(loadData[0]);
+		NGPU->connections[ID].Weight =			std::stoi(loadData[1]);
+		NGPU->connections[ID].Prev_Weight =	std::stoi(loadData[2]);
+		
+		std::getline(myfile,line);
+		i++;
+	}
+	
+	myfile.close();
+	TDC->threadCompletionStatus = true;
+}
+
 
 
 

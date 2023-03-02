@@ -151,3 +151,27 @@ std::string TimeFormatter(double x) {
 		return "Time too large for formatting";
 	}
 }
+
+std::vector<std::string> SplitString(std::string inputVal, char delimiter) {
+	std::vector<std::string> result;
+	result.push_back("");
+	int x = 0;
+	for (int i = 0; i < inputVal.length(); i++) {
+		if (inputVal[i] == delimiter) {
+			result.push_back("");
+			x++;
+		} else {
+			result[x] += inputVal[i];
+		}
+	}
+	return result;
+}
+
+std::string ASCII_To_Numeric(std::string x) {
+	std::string result = "";
+	for (int i = 0; i < x.length(); i++) {
+		if (x[i] >= '0' && x[i] <= '9')
+			result += x[i];
+	}
+	return result;
+}
