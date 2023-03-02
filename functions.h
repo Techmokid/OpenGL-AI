@@ -27,6 +27,7 @@ void ClearConsole();
 void print();
 void print(int x);
 void print(float x);
+void print(double x);
 void print(long unsigned int x);
 void print(std::string x);
 void printFormatted(std::string module, std::string status, std::string msg);
@@ -66,6 +67,9 @@ void SetCPUSaveThreadCount(int x);
 float getRandomFloat();
 float getRandomFloat(float HI, float LO);
 
+void LoadNetworkGenomes_MTwTDC(ThreadDataContainer* TDC);
+void LoadNetworkNodes_MTwTDC(ThreadDataContainer* TDC);
+void LoadNetworkConnections_MTwTDC(ThreadDataContainer* TDC);
 void SaveNetworkGenomes_MTwTDC		(ThreadDataContainer* TDC);
 void SaveNetworkNodes_MTwTDC			(ThreadDataContainer* TDC);
 void SaveNetworkConnections_MTwTDC(ThreadDataContainer* TDC);

@@ -608,6 +608,9 @@ void LoadNetworkGPU() {
 	}
 	
 	delete(NGPU);
+	
+	auto start = std::chrono::high_resolution_clock::now();
+	
 	NGPU = new Network_GPU();
 	
 	//W.I.P
@@ -637,15 +640,116 @@ void LoadNetworkGPU() {
 	printFormatted("Load","Debug","Detected " + std::to_string(nodes.size()) + " nodes");
 	printFormatted("Load","Debug","Detected " + std::to_string(connections.size()) + " connections");
 	
+	NGPU->genomes.resize(genomes.size() * numberOfIndexesPerThread);
+	NGPU->nodes.resize(nodes.size() * numberOfIndexesPerThread);
+	NGPU->connections.resize(connections.size() * numberOfIndexesPerThread);
+	
 	//for (std::string i : nodes) {
 	//	print(i);
 	//}
 	
 	// Now that we have all the directories, we can start calling the multithreads to load the network
+	std::vector<ThreadDataContainer*> TDC_List;
+	bool run = true;
+	int genomeIndex = 0;
+	int maxThreadCount = std::thread::hardware_concurrency();
+	int currentThreadCount = 0;
+	while(run) {
+		while(currentThreadCount < maxThreadCount) {
+			if (genomeIndex == connections.size()) { run = false; break; }
+			
+			// Here we start the threads
+			ThreadDataContainer* Connection_TDC = new ThreadDataContainer();
+			Connection_TDC->ID = genomeIndex;
+			Connection_TDC->path = connections[genomeIndex];
+			TDC_List.push_back(Connection_TDC);
+			std::thread connectionThread(LoadNetworkConnections_MTwTDC, Connection_TDC);
+			connectionThread.detach();
+			
+			currentThreadCount++;
+			
+			if (genomeIndex < nodes.size()) {
+				ThreadDataContainer* Node_TDC = new ThreadDataContainer();
+				Node_TDC->ID = genomeIndex;
+				Node_TDC->path = nodes[genomeIndex];
+				TDC_List.push_back(Node_TDC);
+				std::thread nodeThread(LoadNetworkNodes_MTwTDC, Node_TDC);
+				nodeThread.detach();
+				
+				currentThreadCount++;
+			}
+			
+			if (genomeIndex < genomes.size()) {
+				ThreadDataContainer* Genome_TDC = new ThreadDataContainer();
+				Genome_TDC->ID = genomeIndex;
+				Genome_TDC->path = genomes[genomeIndex];
+				TDC_List.push_back(Genome_TDC);
+				std::thread genomeThread(LoadNetworkGenomes_MTwTDC, Genome_TDC);
+				genomeThread.detach();
+				
+				currentThreadCount++;
+			}
+			
+			genomeIndex++;
+		}
+		if (run) {
+			for (int x = 0; x < TDC_List.size(); x++) {
+				if (TDC_List[x]->threadCompletionStatus) {
+					TDC_List.erase(TDC_List.begin() + x);
+					currentThreadCount--;
+					x--;
+				}
+			}
+		}
+	}
 	
+	while(TDC_List.size() > 0) {
+		for (int x = 0; x < TDC_List.size(); x++) {
+			if (TDC_List[x]->threadCompletionStatus) {
+				TDC_List.erase(TDC_List.begin() + x);
+				currentThreadCount--;
+				x--;
+			}
+		}
+	}
+	
+	printFormatted("Load","Log","Trimming network...");
+	
+	// Trim network of undeclared objects
+	int i = NGPU->genomes.size();
+	while(true) {
+		i--;
+		if (NGPU->genomes[i].ID == -1) {
+			NGPU->genomes.erase(NGPU->genomes.begin() + i);
+		} else { break; }
+	}
+	
+	i = NGPU->nodes.size();
+	while(true) {
+		i--;
+		if (NGPU->nodes[i].ID == -1) {
+			NGPU->nodes.erase(NGPU->nodes.begin() + i);
+		} else { break; }
+	}
+	
+	i = NGPU->connections.size();
+	while(true) {
+		i--;
+		if (NGPU->connections[i].NodePos == 0) {
+			NGPU->connections.erase(NGPU->connections.begin() + i);
+		} else { break; }
+	}
+	
+	auto end = std::chrono::high_resolution_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+	printFormatted("Load","Log","Real time taken to load network: " + TimeFormatter(duration.count()));
+	
+	for (int i = 0; i < 100; i++) {
+		print(NGPU->connections[i].Weight);
+	}
 }
 
-void LoadNetworkGenomesGPU_MT(ThreadDataContainer* TDC) {
+void LoadNetworkGenomes_MTwTDC(ThreadDataContainer* TDC) {
 	std::string saveStatus;
 	std::ifstream myfile;
 	myfile.open(TDC->path);
@@ -669,7 +773,7 @@ void LoadNetworkGenomesGPU_MT(ThreadDataContainer* TDC) {
 	TDC->threadCompletionStatus = true;
 }
 
-void LoadNetworkNodesGPU_MT(ThreadDataContainer* TDC) {
+void LoadNetworkNodes_MTwTDC(ThreadDataContainer* TDC) {
 	std::string saveStatus;
 	std::ifstream myfile;
 	myfile.open(TDC->path);
@@ -697,7 +801,7 @@ void LoadNetworkNodesGPU_MT(ThreadDataContainer* TDC) {
 	TDC->threadCompletionStatus = true;
 }
 
-void LoadNetworkConnectionsGPU_MT(ThreadDataContainer* TDC) {
+void LoadNetworkConnections_MTwTDC(ThreadDataContainer* TDC) {
 	std::string saveStatus;
 	std::ifstream myfile;
 	myfile.open(TDC->path);

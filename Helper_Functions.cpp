@@ -37,6 +37,7 @@ void ClearConsole() { std::system("reset"); }
 void print() { std::cout << std::endl; }
 void print(int x) { std::cout << x << std::endl; }
 void print(float x) { std::cout << x << std::endl; }
+void print(double x) { std::cout << x << std::endl; }
 void print(long unsigned int x) { std::cout << x << std::endl; }
 void print(std::string x) { std::cout << x << std::endl; }
 
