@@ -761,8 +761,8 @@ void LoadNetworkGenomes_MTwTDC(ThreadDataContainer* TDC) {
 		std::vector<std::string> loadData = SplitString(line,',');
 		int ID = std::stoi(loadData[0]);
 		NGPU->genomes[ID].ID = 								ID;
-		NGPU->genomes[ID].fitness = 					std::stoi(loadData[1]);
-		NGPU->genomes[ID].prev_fitness = 			std::stoi(loadData[2]);
+		NGPU->genomes[ID].fitness = 					std::stof(loadData[1]);
+		NGPU->genomes[ID].prev_fitness = 			std::stof(loadData[2]);
 		NGPU->genomes[ID].Nodes_Start_Index = std::stoi(loadData[3]);
 		NGPU->genomes[ID].Nodes_End_Index = 	std::stoi(loadData[4]);
 		
@@ -786,11 +786,11 @@ void LoadNetworkNodes_MTwTDC(ThreadDataContainer* TDC) {
 		int ID = std::stoi(loadData[0]);
 		NGPU->nodes[ID].ID = ID;
 		NGPU->nodes[ID].nTT =	std::stoi(loadData[1]);
-		NGPU->nodes[ID].nB =	std::stoi(loadData[2]);
+		NGPU->nodes[ID].nB =	std::stof(loadData[2]);
 		NGPU->nodes[ID].nII = std::stoi(loadData[3]);
 		NGPU->nodes[ID].nIO =	std::stoi(loadData[4]);
-		NGPU->nodes[ID].nIV =	std::stoi(loadData[5]);
-		NGPU->nodes[ID].pO = 	std::stoi(loadData[6]);
+		NGPU->nodes[ID].nIV =	std::stof(loadData[5]);
+		NGPU->nodes[ID].pO = 	std::stof(loadData[6]);
 		NGPU->nodes[ID].wSI =	std::stoi(loadData[7]);
 		NGPU->nodes[ID].wEI =	std::stoi(loadData[8]);
 		
@@ -816,8 +816,8 @@ void LoadNetworkConnections_MTwTDC(ThreadDataContainer* TDC) {
 		std::vector<std::string> loadData = SplitString(line,',');
 		int ID = startVal + i;
 		NGPU->connections[ID].NodePos = 		std::stoi(loadData[0]);
-		NGPU->connections[ID].Weight =			std::stoi(loadData[1]);
-		NGPU->connections[ID].Prev_Weight =	std::stoi(loadData[2]);
+		NGPU->connections[ID].Weight =			std::stof(loadData[1]);
+		NGPU->connections[ID].Prev_Weight =	std::stof(loadData[2]);
 		
 		std::getline(myfile,line);
 		i++;

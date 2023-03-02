@@ -171,7 +171,7 @@ std::vector<std::string> SplitString(std::string inputVal, char delimiter) {
 std::string ASCII_To_Numeric(std::string x) {
 	std::string result = "";
 	for (int i = 0; i < x.length(); i++) {
-		if (x[i] >= '0' && x[i] <= '9')
+		if ((x[i] >= '0' && x[i] <= '9') || (x[i] == '.'))
 			result += x[i];
 	}
 	return result;
