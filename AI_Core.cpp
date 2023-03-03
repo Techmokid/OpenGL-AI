@@ -142,6 +142,7 @@ void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer,
 			}
 		} else if (!(NGPU->nodes[i].nII)) {
 			// Node is hidden node
+			print("Connections Length: " + std::to_string(NGPU->connections.size()) + "\t\tNode Range: " + std::to_string(NGPU->nodes[i].wSI) + " to " + std::to_string(NGPU->nodes[i].wEI));
 			bool isSecondLayer = i < startOfGenome + inputNodes + nodesPerLayer;
 			if (isSecondLayer) {
 				NGPU->nodes[i].wEI = tempWeightsCount + inputNodes - 1;
