@@ -1,11 +1,12 @@
 // Shows a trivial use of OpenGL bitmaps, so trivial in fact, that it uses
 // nothing but the default settings for glPixelStore*.
 
-#ifdef __APPLE_CC__
-#include <GLUT/glut.h>
+#ifdef _WIN32
+#include <GL/freeglut.h>
 #else
 #include <GL/glut.h>
 #endif
+
 #include <cstdlib>
 
 // A fish bitmap, size is 27x11, but all rows must have a multiple of 8 bits,

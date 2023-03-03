@@ -2,8 +2,8 @@
 // of a triangle, whose three vertices are red, green and blue.  The program
 // illustrates viewing with default viewing parameters only.
 
-#ifdef __APPLE_CC__
-#include <GLUT/glut.h>
+#ifdef _WIN32
+#include <GL/freeglut.h>
 #else
 #include <GL/glut.h>
 #endif

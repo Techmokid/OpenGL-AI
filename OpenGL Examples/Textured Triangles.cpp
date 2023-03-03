@@ -3,11 +3,12 @@
 // is used for each triangle, but the mappings vary quite a bit so it looks as
 // if each triangle has a different texture.
 
-#ifdef __APPLE_CC__
-#include <GLUT/glut.h>
+#ifdef _WIN32
+#include <GL/freeglut.h>
 #else
 #include <GL/glut.h>
 #endif
+
 #include <cstdlib>
 
 // Define a 2 x 2 red and yellow checkered pattern using RGB colors.

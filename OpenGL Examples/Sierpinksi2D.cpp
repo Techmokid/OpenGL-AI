@@ -1,10 +1,11 @@
 // This program generates a Sierpinski gasket with 10000 points.
 
-#ifdef __APPLE_CC__
-#include <GLUT/glut.h>
+#ifdef _WIN32
+#include <GL/freeglut.h>
 #else
 #include <GL/glut.h>
 #endif
+
 #include <cstdlib>
 
 // A simple two-dimensional point class to make life easy.  It allows you to

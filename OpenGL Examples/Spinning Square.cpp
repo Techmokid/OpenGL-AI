@@ -4,8 +4,8 @@
 // the animation properly, using timers, not the idle function.  Start the
 // animation with the left mouse button and stop it with the right.
 
-#ifdef __APPLE_CC__
-#include <GLUT/glut.h>
+#ifdef _WIN32
+#include <GL/freeglut.h>
 #else
 #include <GL/glut.h>
 #endif

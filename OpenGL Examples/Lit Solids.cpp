@@ -1,8 +1,8 @@
 // This program shows three cyan objects illuminated with a single yellow
 // light source.  It illustrates several of the lighting parameters.
 
-#ifdef __APPLE_CC__
-#include <GLUT/glut.h>
+#ifdef _WIN32
+#include <GL/freeglut.h>
 #else
 #include <GL/glut.h>
 #endif

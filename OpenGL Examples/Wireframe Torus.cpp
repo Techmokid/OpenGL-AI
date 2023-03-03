@@ -3,11 +3,12 @@
 // setup with gluLookAt(), which is conceptually simpler than transforming
 // objects to move into a predefined view volume.
 
-#ifdef __APPLE_CC__
-#include <GLUT/glut.h>
+#ifdef _WIN32
+#include <GL/freeglut.h>
 #else
 #include <GL/glut.h>
 #endif
+
 
 // Clears the window and draws the torus.
 void display() {

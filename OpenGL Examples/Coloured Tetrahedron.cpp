@@ -6,8 +6,8 @@
 // easier to use gluLookAt()), but it's nice to see how viewing is done at
 // a very low level.
 
-#ifdef __APPLE_CC__
-#include <GLUT/glut.h>
+#ifdef _WIN32
+#include <GL/freeglut.h>
 #else
 #include <GL/glut.h>
 #endif

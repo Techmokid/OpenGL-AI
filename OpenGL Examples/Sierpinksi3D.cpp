@@ -3,11 +3,12 @@
 // OpenGL.  It plots the 3-D Sierpinski Tetrahedron using colors in a nice
 // way.
 
-#ifdef __APPLE_CC__
-#include <GLUT/glut.h>
+#ifdef _WIN32
+#include <GL/freeglut.h>
 #else
 #include <GL/glut.h>
 #endif
+
 #include <cstdlib>
 
 // A simple three-dimensional point class to make life easy.  It allows you

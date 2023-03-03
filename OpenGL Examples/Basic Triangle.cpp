@@ -1,5 +1,9 @@
 // http://www.codebind.com/linux-tutorials/install-opengl-ubuntu-linux/
+#ifdef _WIN32
+#include <GL/freeglut.h>
+#else
 #include <GL/glut.h>
+#endif
 
 void displayMe(void) {
     glClear(GL_COLOR_BUFFER_BIT);

@@ -1,8 +1,8 @@
 // This program is from the OpenGL Programming Guide.  It shows a robot arm
 // that you can rotate by pressing the arrow keys.
 
-#ifdef __APPLE_CC__
-#include <GLUT/glut.h>
+#ifdef _WIN32
+#include <GL/freeglut.h>
 #else
 #include <GL/glut.h>
 #endif

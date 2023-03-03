@@ -1,11 +1,12 @@
 // In this program the camera orbits a lit moon to simulate the phases of the
 // moon.
 
-#ifdef __APPLE_CC__
-#include <GLUT/glut.h>
+#ifdef _WIN32
+#include <GL/freeglut.h>
 #else
 #include <GL/glut.h>
 #endif
+
 #include <cmath>
 
 // A class for the moon.  A moon is really just an OpenGL display list.  The

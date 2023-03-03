@@ -3,11 +3,12 @@
 // spins on its own axis and it rotates around the sun.  The viewer is
 // sitting on a comet and is always facing the sun.
 
-#ifdef __APPLE_CC__
-#include <GLUT/glut.h>
+#ifdef _WIN32
+#include <GL/freeglut.h>
 #else
 #include <GL/glut.h>
 #endif
+
 #include <cmath>
 
 // In the GLUT library someone put the polar regions on the z-axis - yech!!

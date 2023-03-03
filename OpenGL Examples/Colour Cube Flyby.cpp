@@ -3,11 +3,12 @@
 // in the scene, we can render it using backface culling only. i.e., there
 // is no need for a depth buffer.
 
-#ifdef __APPLE_CC__
-#include <GLUT/glut.h>
+#ifdef _WIN32
+#include <GL/freeglut.h>
 #else
 #include <GL/glut.h>
 #endif
+
 #include <cmath>
 
 // The cube has opposite corners at (0,0,0) and (1,1,1), which are black and
