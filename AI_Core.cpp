@@ -131,6 +131,7 @@ void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer,
 		if (NGPU->nodes[i].nIO) {
 			// Node is output node
 			NGPU->nodes[i].wEI = tempWeightsCount + nodesPerLayer - 1;
+			print("Connections Length: " + std::to_string(NGPU->connections.size()) + "\t\tNode Range: " + std::to_string(NGPU->nodes[i].wSI) + " to " + std::to_string(NGPU->nodes[i].wEI));
 			
 			for (int x = 0; x < nodesPerLayer; x++) {
 				int pos = tempWeightsCount + x;
@@ -171,9 +172,8 @@ void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer,
 	}
 	
 	for (int i = 0; i < NGPU->connections.size(); i++) {
-		print();
-		print(NGPU->connections[i].NodePos);
-		print(NGPU->connections[i].Weight);
+		std::string msg = "Node position: " + std::to_string(NGPU->connections[i].NodePos);
+		msg += "\t\tNode Weight: " + std::to_string(NGPU->connections[i].Weight);
 	}
 	
 	// Now just check to make sure the network has no circular definitions and all nodes are ID'd
