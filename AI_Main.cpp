@@ -33,15 +33,16 @@ int main() {
 	
 	printFormatted("Main", "Log", "Generating Neural Network");
 	//CreateNewLayeredNetwork(100,300,200,4,2);
-	CreateNewLayeredNetwork(100,3,2,4,2);
+	CreateNewLayeredNetwork(3,3,2,4,2);
 	printFormatted("Main", "Success", "Neural Network Generated");
 	print();
 	
 	printFormatted("Main", "Log", "Saving Neural Network");
 	SaveNeuralNetwork("/home/andrey/Desktop/AI Network");
-	LoadNetworkGPU("/home/andrey/Desktop/AI Network");
+	//LoadNetworkGPU("/home/andrey/Desktop/AI Network");
 	
 	print();
+	print("Hit \"Enter\" to close window");
 	quit();
 	
 	

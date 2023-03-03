@@ -72,7 +72,11 @@ void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer,
 	delete NGPU;
 	NGPU = new Network_GPU();
 	int totalNodeCountPerGenome = (inputNodes + nodesPerLayer*hiddenLayerCount + outputNodes);
-	int totalNodeConnectionsCountPerGenome = (inputNodes*nodesPerLayer + nodesPerLayer*nodesPerLayer*hiddenLayerCount + outputNodes*nodesPerLayer) * genomeCount;
+	
+	int inputConnections = inputNodes*nodesPerLayer;
+	int hiddenConnections = nodesPerLayer*nodesPerLayer*(hiddenLayerCount - 1);
+	int outputConnections = outputNodes*nodesPerLayer;
+	int totalNodeConnectionsCountPerGenome = (inputConnections + hiddenConnections + outputConnections);
 	
 	NGPU->genomes.clear();
 	NGPU->genomes.resize(genomeCount);
@@ -85,7 +89,7 @@ void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer,
 	}
 	
 	NGPU->connections.clear();
-	NGPU->connections.resize(totalNodeConnectionsCountPerGenome);
+	NGPU->connections.resize(totalNodeConnectionsCountPerGenome * genomeCount);
 	
 	int tempWeightsCount = 0;
 	NGPU->nodes.clear();
@@ -106,17 +110,18 @@ void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer,
 		//NGPU.nodes[i].nIV = 0;
 		//NGPU.nodes[i].pO = -99999;
 		NGPU->nodes[i].wSI = tempWeightsCount;
-				
+		
+		// Everything before this point is confirmed working
 		int startOfNonInputs = startOfGenome + inputNodes;
-		int numConnections = nodesPerLayer;
 		int startOfLastLayer = startOfGenome;
 		int currentLayer = std::floor(((i - startOfGenome) - inputNodes)/nodesPerLayer) + 1;
 		
 		if (i - startOfGenome >= inputNodes) {
 			if (i - startOfGenome < totalNodeCountPerGenome - outputNodes) {
 				// Node is hidden node
-				if (currentLayer > 1)
+				if (currentLayer > 1) {
 					startOfLastLayer = (currentLayer - 2)*nodesPerLayer + inputNodes + startOfGenome;
+				}
 			} else {
 				// Node is output node
 				startOfLastLayer = startOfGenome + totalNodeCountPerGenome - outputNodes - nodesPerLayer;
@@ -125,37 +130,41 @@ void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer,
 		
 		if (NGPU->nodes[i].nIO) {
 			// Node is output node
-			//startOfLastLayer = startOfGenome + totalNodeCountPerGenome - outputNodes - nodesPerLayer;
+			NGPU->nodes[i].wEI = tempWeightsCount + nodesPerLayer - 1;
 			
-			NGPU->nodes[i].wEI = tempWeightsCount + numConnections - 1;
-					
-			int firstIndex = startOfGenome + totalNodeCountPerGenome - outputNodes - nodesPerLayer;
-			for (int x = 0; x < numConnections; x++) {
+			for (int x = 0; x < nodesPerLayer; x++) {
 				int pos = tempWeightsCount + x;
-				NGPU->connections[pos].NodePos = firstIndex + x;
+				NGPU->connections[pos].NodePos = startOfLastLayer + x;
 				NGPU->connections[pos].Weight = getRandomFloat();
 				NGPU->connections[pos].Prev_Weight = NGPU->connections[pos].Weight;
+				tempWeightsCount++;
 			}
-					
-			tempWeightsCount += numConnections;
 		} else if (!(NGPU->nodes[i].nII)) {
 			// Node is hidden node
-			//if (currentLayer > 1)
-			//	startOfLastLayer = (currentLayer - 2)*nodesPerLayer + inputNodes + startOfGenome;
-			
 			bool isSecondLayer = i < startOfGenome + inputNodes + nodesPerLayer;
-			if (isSecondLayer) { numConnections = inputNodes; }
-			NGPU->nodes[i].wEI = tempWeightsCount + numConnections - 1;
-			tempWeightsCount += numConnections;
-					
-			int startPoint = startOfLastLayer;
 			if (isSecondLayer) {
-				startPoint = startOfGenome;
-				for (int x = 0; x < numConnections; x++) {
-					int pos = NGPU->nodes[i].wSI + x;
-					NGPU->connections[pos].NodePos = startPoint + x;
+				NGPU->nodes[i].wEI = tempWeightsCount + inputNodes - 1;
+				tempWeightsCount += inputNodes;
+			} else {
+				NGPU->nodes[i].wEI = tempWeightsCount + nodesPerLayer - 1;
+				tempWeightsCount += nodesPerLayer;
+			}
+			
+			if (isSecondLayer) {
+				for (int x = 0; x < inputNodes; x++) {
+					int pos = tempWeightsCount;
+					NGPU->connections[pos].NodePos = startOfGenome + x;
 					NGPU->connections[pos].Weight = getRandomFloat();
 					NGPU->connections[pos].Prev_Weight = NGPU->connections[pos].Weight;
+					tempWeightsCount++;
+				}
+			} else {
+				for (int x = 0; x < nodesPerLayer; x++) {
+					int pos = tempWeightsCount;
+					NGPU->connections[pos].NodePos = startOfGenome + inputNodes + x + nodesPerLayer*(currentLayer - 2);
+					NGPU->connections[pos].Weight = getRandomFloat();
+					NGPU->connections[pos].Prev_Weight = NGPU->connections[pos].Weight;
+					tempWeightsCount++;
 				}
 			}
 		}
