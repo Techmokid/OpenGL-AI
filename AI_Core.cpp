@@ -161,6 +161,12 @@ void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer,
 		}
 	}
 	
+	for (int i = 0; i < NGPU->connections.size(); i++) {
+		print();
+		print(NGPU->connections[i].NodePos);
+		print(NGPU->connections[i].Weight);
+	}
+	
 	// Now just check to make sure the network has no circular definitions and all nodes are ID'd
 	int trimmableGenomes = 0;
 	for (int i = 0; i < NGPU->genomes.size(); i++) {
@@ -189,7 +195,6 @@ void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer,
 	
 	if (trimmableGenomes > 0) { throw std::invalid_argument(std::to_string(trimmableGenomes) + " genomes found with unset ID"); }
 	if (trimmableNodes > 0) { throw std::invalid_argument(std::to_string(trimmableNodes) + " nodes found with unset ID"); }
-	
 }
 
 void quit() {
