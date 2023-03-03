@@ -10,7 +10,7 @@ echo Finished Compiling. If errors were found, hitting enter will run the last k
 printf "%s " "Press enter to run program"
 read ans
 
-./AI_Server.out
+./AI_Server_Ubuntu.out
 
 printf "%s " "Press enter to close terminal"
 read ans
