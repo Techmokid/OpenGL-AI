@@ -111,7 +111,6 @@ void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer,
 		//NGPU.nodes[i].pO = -99999;
 		NGPU->nodes[i].wSI = tempWeightsCount;
 		
-		// Everything before this point is confirmed working
 		int startOfNonInputs = startOfGenome + inputNodes;
 		int startOfLastLayer = startOfGenome;
 		int currentLayer = std::floor(((i - startOfGenome) - inputNodes)/nodesPerLayer) + 1;
@@ -128,13 +127,13 @@ void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer,
 			}
 		}
 		
+		// Everything before this point is confirmed working
 		if (NGPU->nodes[i].nIO) {
 			// Node is output node
 			NGPU->nodes[i].wEI = tempWeightsCount + nodesPerLayer - 1;
-			print("Connections Length: " + std::to_string(NGPU->connections.size()) + "\t\tNode Range: " + std::to_string(NGPU->nodes[i].wSI) + " to " + std::to_string(NGPU->nodes[i].wEI));
 			
 			for (int x = 0; x < nodesPerLayer; x++) {
-				int pos = tempWeightsCount + x;
+				int pos = tempWeightsCount;
 				NGPU->connections[pos].NodePos = startOfLastLayer + x;
 				NGPU->connections[pos].Weight = getRandomFloat();
 				NGPU->connections[pos].Prev_Weight = NGPU->connections[pos].Weight;
@@ -142,15 +141,11 @@ void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer,
 			}
 		} else if (!(NGPU->nodes[i].nII)) {
 			// Node is hidden node
-			print("Connections Length: " + std::to_string(NGPU->connections.size()) + "\t\tNode Range: " + std::to_string(NGPU->nodes[i].wSI) + " to " + std::to_string(NGPU->nodes[i].wEI));
 			bool isSecondLayer = i < startOfGenome + inputNodes + nodesPerLayer;
-			if (isSecondLayer) {
+			
+			NGPU->nodes[i].wEI = tempWeightsCount + nodesPerLayer - 1;
+			if (isSecondLayer)
 				NGPU->nodes[i].wEI = tempWeightsCount + inputNodes - 1;
-				tempWeightsCount += inputNodes;
-			} else {
-				NGPU->nodes[i].wEI = tempWeightsCount + nodesPerLayer - 1;
-				tempWeightsCount += nodesPerLayer;
-			}
 			
 			if (isSecondLayer) {
 				for (int x = 0; x < inputNodes; x++) {
@@ -170,11 +165,6 @@ void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer,
 				}
 			}
 		}
-	}
-	
-	for (int i = 0; i < NGPU->connections.size(); i++) {
-		std::string msg = "Node position: " + std::to_string(NGPU->connections[i].NodePos);
-		msg += "\t\tNode Weight: " + std::to_string(NGPU->connections[i].Weight);
 	}
 	
 	// Now just check to make sure the network has no circular definitions and all nodes are ID'd
