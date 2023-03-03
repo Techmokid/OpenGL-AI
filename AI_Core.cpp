@@ -131,6 +131,7 @@ void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer,
 		if (NGPU->nodes[i].nIO) {
 			// Node is output node
 			NGPU->nodes[i].wEI = tempWeightsCount + nodesPerLayer - 1;
+			print("Connections Length: " + std::to_string(NGPU->connections.size()) + "\t\tNode Range: " + std::to_string(NGPU->connections[i].wSI) + " to " + std::to_string(NGPU->connections[i].wEI));
 			
 			for (int x = 0; x < nodesPerLayer; x++) {
 				int pos = tempWeightsCount + x;
