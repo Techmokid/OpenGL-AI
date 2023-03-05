@@ -32,7 +32,13 @@
 #define gray			"\033[90m"
 #endif
 
-void ClearConsole() { std::system("reset"); }
+void ClearConsole() {
+	#ifdef __WIN32
+	std::system("cls");
+	#else
+	std::system("reset");
+	#endif
+}
 
 void print() { std::cout << std::endl; }
 void print(int x) { std::cout << x << std::endl; }
@@ -42,7 +48,11 @@ void print(long unsigned int x) { std::cout << x << std::endl; }
 void print(std::string x) { std::cout << x << std::endl; }
 
 void waitForUserInput () {
+	#ifdef __WIN32
+	std::system("pause");
+	#else
 	std::system("read ans");
+	#endif
 }
 
 std::string stringToLower(std::string in) {

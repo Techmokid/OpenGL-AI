@@ -1,6 +1,6 @@
 #include "functions.h"
 #include <vector>
-#include <filesystem> // Required to do file management
+#include <filesystem>
 
 int numberOfIndexesPerThread = 10000;
 
@@ -638,9 +638,18 @@ void LoadNetworkGPU() {
 	std::filesystem::path genomesDirectory{loadDirectory + "Genomes/"};
 	std::filesystem::path nodesDirectory{loadDirectory + "Nodes/"};
 	std::filesystem::path connectionsDirectory{loadDirectory + "Node Connections/"};
-	for (auto const& dir_entry : std::filesystem::directory_iterator{genomesDirectory}) { genomes.push_back(dir_entry.path()); }
-	for (auto const& dir_entry : std::filesystem::directory_iterator{nodesDirectory}) { nodes.push_back(dir_entry.path()); }
-	for (auto const& dir_entry : std::filesystem::directory_iterator{connectionsDirectory}) { connections.push_back(dir_entry.path()); }
+	for (auto const& dir_entry : std::filesystem::directory_iterator{genomesDirectory}) {
+		std::string strFromPath = dir_entry.path().string();
+		genomes.push_back(strFromPath);
+	}
+	for (auto const& dir_entry : std::filesystem::directory_iterator{nodesDirectory}) {
+		std::string strFromPath = dir_entry.path().string();
+		nodes.push_back(strFromPath);
+	}
+	for (auto const& dir_entry : std::filesystem::directory_iterator{connectionsDirectory}) {
+		std::string strFromPath = dir_entry.path().string();
+		connections.push_back(strFromPath);
+	}
 	printFormatted("Load","Debug","Detected " + std::to_string(genomes.size()) + " genomes");
 	printFormatted("Load","Debug","Detected " + std::to_string(nodes.size()) + " nodes");
 	printFormatted("Load","Debug","Detected " + std::to_string(connections.size()) + " connections");

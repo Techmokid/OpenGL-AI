@@ -129,7 +129,7 @@ std::string GetClientResponse() {
 		}
 	}
 	
-	result = clientResponse.substr(0,clientResponse.find("\n"));
+	std::string result = clientResponse.substr(0,clientResponse.find("\n"));
 	clientResponse = clientResponse.substr(clientResponse.find("\n"),clientResponse.length() - 1);
 	return std::string(result);
 }
