@@ -841,6 +841,29 @@ void LoadNetworkConnections_MTwTDC(ThreadDataContainer* TDC) {
 	TDC->threadCompletionStatus = true;
 }
 
+std::vector<std::vector<double>> GetNetworkOutput(std::vector<double> inputs) {
+	int outputsCount = 0;
+	for(int i = 0; i < NGPU->nodes.size(); i++) {
+		if (NGPU->nodes[i].nII && NGPU->nodes[i].nIO)
+			printFormatted("Main","ERROR","Could not get network output. Network detected duplicate input/output node");
+		if (NGPU->nodes[i].nIO)
+			outputsCount++;
+	}
+	
+	outputsCount *= NGPU->genomes.size();
+	
+	Genome_GPU 				 genomeArray		[NGPU->genomes.size()];
+	Node_GPU 					 nodeArray			[NGPU->nodes.size()];
+	NodeConnection_GPU connectionArray[NGPU->connections.size()];
+	std::copy(NGPU->genomes.begin(),     NGPU->genomes.end(),     genomeArray);
+	std::copy(NGPU->nodes.begin(),  NGPU->nodes.end(),       nodeArray);
+	std::copy(NGPU->connections.begin(), NGPU->connections.end(), connectionArray);
+	
+	double outputsArray[outputsCount];
+	
+	
+}
+
 
 
 
