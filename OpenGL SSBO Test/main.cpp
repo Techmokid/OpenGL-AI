@@ -1,13 +1,9 @@
 #include <iostream>
-#include <windows.h>
 
 #include <GL/glew.h>
 #include <GL/gl.h>
-#include <GL/freeglut.h>
+#include <GL/glut.h>
 #include <fstream>
-
-//#define GL_GLEXT_PROTOTYPES
-//#include <GL/glext.h>
 
 struct myStruct {
   int x = 7;
@@ -24,13 +20,13 @@ int main() {
     testArr[i].y *= testArr[i].x;
   }
   //End of GPU part
+  std::cout << "Done Iterating" << std::endl;
   
   
   
   
   
-  
-  
+  std::cout << "Reading Compute Shader" << std::endl;
   std::ifstream myfile;
   myfile.open("compute.shader");
   std::string computeShaderSourceString;
@@ -43,16 +39,19 @@ int main() {
   const char* computeShaderSource = computeShaderSourceString.c_str();
   
   //Initialize the shader
+  std::cout << "Initializing Shader" << std::endl;
   GLuint computeShader = glCreateShader(GL_COMPUTE_SHADER);
   glShaderSource(computeShader, 1, &computeShaderSource, NULL);
   glCompileShader(computeShader);
   
   //Initialize the shader program
+  std::cout << "Initializing Shader Program" << std::endl;
   GLuint computeProgram = glCreateProgram();
   glAttachShader(computeProgram, computeShader);
   glLinkProgram(computeProgram);
   
   //Run the shader program
+  std::cout << "Running Shader Program" << std::endl;
   glUseProgram(computeProgram);
   glDispatchCompute(128, 128, 1);
   glMemoryBarrier(GL_ALL_BARRIER_BITS);
