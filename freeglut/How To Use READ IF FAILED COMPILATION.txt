@@ -1,3 +1,0 @@
-Place this entire folder "freeglut" in your "F" drive, then run the following command to compile
-
-g++ *.cpp *.h -IF:\freeglut\include -LF:\freeglut\lib -w -Wl,-subsystem,windows -lOpenGL32 -lglu32 -lfreeGLUT -std=c++17 -m32 -o testFile.out
