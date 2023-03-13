@@ -9,12 +9,18 @@
 #include <fstream>
 #include <string.h>
 #include <iostream>
+#include <vector>
 #endif
+
+struct ssbo_data {
+  int x = 7;
+  float y = 0.23;
+};
 
 std::string GetShaderCode(std::string shaderPath);
 static void error_callback(int error, const char* description);
 void StartWindow();
-void SetBufferValue(auto arr);
+void SetBufferValue(std::vector<auto> arr);
 GLuint CompileShader(const char* computeShaderSource);
 GLuint StartShaderProgram(GLuint computeShader);
 GLuint InitializeShader(std::string shaderPath);
