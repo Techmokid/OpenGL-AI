@@ -47,14 +47,6 @@ void StartWindow() {
   }
 }
 
-void SetBufferValue(auto arr) {
-	GLuint ssbo;
-  glGenBuffers(1,&ssbo);
-  glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
-  //glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(arr), arr, GLenum usage);
-  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssbo);
-}
-
 GLuint CompileShader(const char* computeShaderSource) {
 	GLuint computeShader = glCreateShader(GL_COMPUTE_SHADER);
   glShaderSource(computeShader, 1, &computeShaderSource, NULL);

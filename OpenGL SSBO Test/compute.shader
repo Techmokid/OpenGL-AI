@@ -6,6 +6,7 @@ layout(binding = 1, std430) buffer exampleData {
 };
 
 void main() {
-	int ID = gl_GlobalInvocationID.x;
-  exampleData[ID].y = exampleData[ID].x + exampleData[ID].y;
+  exampleData[gl_GlobalInvocationID.x].x = 4;
+  exampleData[gl_GlobalInvocationID.x].y = 4;
 }
+
