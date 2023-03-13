@@ -23,8 +23,8 @@ void StartWindow() {
 		exit(EXIT_FAILURE);
 	}
 	
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	
 	window = glfwCreateWindow(640,480, "Simple Example", NULL, NULL);
 	if (!window) {
@@ -41,10 +41,10 @@ void StartWindow() {
   	std::cout << "glewInit() failed to start" << std::endl;
   	exit(EXIT_FAILURE);
   }
-  if (!GLEW_VERSION_2_1) {
-  	std::cout << "GLEW version does not support 2.1" << std::endl;
-  	exit(EXIT_FAILURE);
-  }
+  //if (!GLEW_VERSION_2_1) {
+  //	std::cout << "GLEW version does not support 2.1" << std::endl;
+  //	exit(EXIT_FAILURE);
+  //}
 }
 
 GLuint CompileShader(const char* computeShaderSource) {
