@@ -31,7 +31,7 @@ int main() {
   glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
   
   ssbo_data* ptr = (ssbo_data*)glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_WRITE);
-  for (int i = 0; i < 32; i++) {
+  for (int i = 0; i < 500; i++) {
   	testArr[i] = ptr[i];
   }
   glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
