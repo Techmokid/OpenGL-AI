@@ -3,7 +3,7 @@
 
 int main() {
   std::cout << "Initializing array" << std::endl;
-  ssbo_data testArr[50000];
+  ssbo_data testArr[500];
   //Put this part on the GPU
   //for (int i = 0; i < sizeof(testArr)/sizeof(testArr[0]); i++) {
   //  testArr[i].y *= testArr[i].x;
@@ -23,7 +23,7 @@ int main() {
   
   //Run the shader program
   std::cout << "Running Shader Program" << std::endl;
-  glDispatchCompute(32,1,1);
+  glDispatchCompute(500,1,1);
   glMemoryBarrier(GL_ALL_BARRIER_BITS);
   glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, 0);
   
