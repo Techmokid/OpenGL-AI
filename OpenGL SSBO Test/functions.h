@@ -20,7 +20,6 @@ struct ssbo_data {
 std::string GetShaderCode(std::string shaderPath);
 static void error_callback(int error, const char* description);
 void StartWindow();
-void SetBufferValue(std::vector<auto> arr);
 GLuint CompileShader(const char* computeShaderSource);
 GLuint StartShaderProgram(GLuint computeShader);
 GLuint InitializeShader(std::string shaderPath);

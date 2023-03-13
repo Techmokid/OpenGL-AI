@@ -69,3 +69,4 @@ GLuint InitializeShader(std::string shaderPath) {
   StartShaderProgram(computeHandle);
   return computeHandle;
 }
+
