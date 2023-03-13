@@ -31,11 +31,12 @@ int main() {
   glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
   
   ssbo_data* ptr = (ssbo_data*)glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_WRITE);
-  std::cout << ptr->y << std::endl;
-  //for (int i = 0; i < 32; i++) { testArr[i] = ptr[i]; }
+  for (int i = 0; i < 32; i++) {
+  	testArr[i] = ptr[i];
+  }
   glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
   
-  
+  std::cout << testArr[4].y << std::endl;
   std::cout << "Done" << std::endl;
   return 1;
 }
