@@ -5,10 +5,10 @@ std::string GetShaderCode(std::string shaderPath) {
   std::ifstream myfile;
   myfile.open(shaderPath);
   std::string computeShaderSourceString;
-  if (myfile.is_open()) {
-	  while (myfile) {
-		  computeShaderSourceString += myfile.get();
-	  }
+  
+  char c;
+  while(myfile.get(c)) {
+  	computeShaderSourceString += c;
   }
   myfile.close();
   return computeShaderSourceString;
@@ -51,6 +51,19 @@ GLuint CompileShader(const char* computeShaderSource) {
 	GLuint computeShader = glCreateShader(GL_COMPUTE_SHADER);
   glShaderSource(computeShader, 1, &computeShaderSource, NULL);
   glCompileShader(computeShader);
+  
+  GLint result = GL_FALSE;
+  int logLength;
+  
+  // Check shader compilation status
+  glGetShaderiv(computeShader, GL_COMPILE_STATUS, &result);
+  glGetShaderiv(computeShader, GL_INFO_LOG_LENGTH, &logLength);
+  if (logLength > 0) {
+  	std::vector<char> shaderErrorMessage(logLength + 1);
+  	glGetShaderInfoLog(computeShader, logLength, NULL, &shaderErrorMessage[0]);
+  	std::cout << &shaderErrorMessage[0] << std::endl;
+  }
+  
   return computeShader;
 }
 
@@ -64,6 +77,10 @@ GLuint StartShaderProgram(GLuint computeShader) {
 GLuint InitializeShader(std::string shaderPath) {
 	const char* computeShaderSource = GetShaderCode(shaderPath).c_str();
   StartWindow();
+  
+  //const char* versionStr = (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
+	//std::cout << "GLSL version supported by the current context: " << versionStr << std::endl;
+  std::cout << "OpenGL version supported by the current context: " << glGetString(GL_VERSION) << std::endl;
   
   GLuint computeHandle = CompileShader(computeShaderSource);
   StartShaderProgram(computeHandle);
