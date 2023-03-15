@@ -26,7 +26,8 @@ int main() {
   //Run the shader program
   std::cout << "Running Shader Program" << std::endl;
   glDispatchCompute(512,1,1);														// Dispatch the task to run on the GPU
-  glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);				// Wait for the GPU to finish
+  //glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);				// Wait for the GPU to finish
+  glMemoryBarrier(GL_ALL_BARRIER_BITS);				// Wait for the GPU to finish
   glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, 0);			// Unbind our code from the compute shader
   
   //Get the data back from the GPU
