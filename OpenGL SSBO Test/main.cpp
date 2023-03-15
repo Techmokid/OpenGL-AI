@@ -36,6 +36,7 @@ int main() {
   glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);							// Disconnect from
   
   std::cout << testArr[2].y << std::endl;
+  std::cout << ptr[0].y << std::endl;
   std::cout << "Done" << std::endl;
   return 1;
 }

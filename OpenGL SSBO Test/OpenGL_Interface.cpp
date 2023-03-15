@@ -48,7 +48,7 @@ void StartWindow() {
 }
 
 GLuint CompileShader(const char* computeShaderSource) {
-	GLuint computeShader = glCreateShader(GL_COMPUTE_SHADER);
+  GLuint computeShader = glCreateShader(GL_COMPUTE_SHADER);
   glShaderSource(computeShader, 1, &computeShaderSource, NULL);
   glCompileShader(computeShader);
   
@@ -62,6 +62,8 @@ GLuint CompileShader(const char* computeShaderSource) {
   	std::vector<char> shaderErrorMessage(logLength + 1);
   	glGetShaderInfoLog(computeShader, logLength, NULL, &shaderErrorMessage[0]);
   	std::cout << &shaderErrorMessage[0] << std::endl;
+  } else {
+  	std::cout << "Shader compiled successfully" << std::endl;
   }
   
   return computeShader;
@@ -75,15 +77,21 @@ GLuint StartShaderProgram(GLuint computeShader) {
 }
 
 GLuint InitializeShader(std::string shaderPath) {
-	const char* computeShaderSource = GetShaderCode(shaderPath).c_str();
+  std::string computeShaderCode = GetShaderCode(shaderPath);
+  
   StartWindow();
   
   //const char* versionStr = (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
 	//std::cout << "GLSL version supported by the current context: " << versionStr << std::endl;
   std::cout << "OpenGL version supported by the current context: " << glGetString(GL_VERSION) << std::endl;
   
-  GLuint computeHandle = CompileShader(computeShaderSource);
+  char* cstr = new char[computeShaderCode.length() + 1];
+  std::strcpy(cstr, computeShaderCode.c_str());
+  
+  GLuint computeHandle = CompileShader(cstr);
   StartShaderProgram(computeHandle);
+  
+  //std::cout << computeShaderCode;
   return computeHandle;
 }
 
