@@ -15,8 +15,15 @@ echo "\n\nCleaning Up..."
 sudo apt autoremove -y
 
 echo "\n\nCompleted OS Updates!"
+
+echo "\n\nSetting up OpenGL"
+sudo apt install build-essential -y
+sudo apt-get install freeglut3-dev -y
+sudo apt-get install libglfw3 -y
+sudo apt-get install libglfw3-dev -y
+sudo apt-get install -y libglew-dev
+
 echo "\nRebooting now..."
 
 reboot
-
 '
