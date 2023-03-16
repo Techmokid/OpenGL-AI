@@ -17,7 +17,7 @@ int main() {
   //Apply the SSBO
   std::cout << "Applying Shader SSBO" << std::endl;
   GLuint ssbo = 1;
-  glGenBuffers(1, &ssbo);																// Generate 1 new buffer
+  glGenBuffers(1,&ssbo);  // Generate 1 new buffer
   glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);					// Bind the new buffer to our accessable memory
   glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(ssbo_data) * (sizeof(testArr)/sizeof(testArr[0])), &testArr, GL_STATIC_DRAW);	// Insert data to buffer
   glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssbo);	// Now bind the buffer to it's shader binding index
