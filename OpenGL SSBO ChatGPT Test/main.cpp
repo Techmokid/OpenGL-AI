@@ -75,12 +75,14 @@ int main() {
   GLuint program = glCreateProgram();
   glAttachShader(program, compute_shader);
 
-  // Bind the SSBO to a binding point
-  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo);
+  
 
   // Link the program object and use it
   glLinkProgram(program);
   glUseProgram(program);
+  
+  // Bind the SSBO to a binding point
+  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo);
 
   // Dispatch the compute shader
   glDispatchCompute(100 / 64, 1, 1);
