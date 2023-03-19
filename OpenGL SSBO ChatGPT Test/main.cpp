@@ -6,6 +6,24 @@ struct ssbo_data {
   float y = 0.23;
 };
 
+void checkGLErrors(const char* file, int line) {
+  GLenum err;
+  while ((err = glGetError()) != GL_NO_ERROR) {
+    std::cerr << "OpenGL error (" << file << ":" << line << "): " << err << std::endl;
+  }
+}
+
+void checkShaderCompileStatus(GLuint shader) {
+  GLint success = 0;
+  glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+  if (success == GL_FALSE) {
+    char log[1024];
+    GLsizei length;
+    glGetShaderInfoLog(shader, sizeof(log), &length, log);
+    std::cerr << "Shader compilation failed: " << log << std::endl;
+  }
+}
+
 int main() {
   // Initialize GLFW and GLEW
   glfwInit();
@@ -21,13 +39,13 @@ int main() {
   GLuint ssbo;
   glGenBuffers(1, &ssbo);
   glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
-  glBufferData(GL_SHADER_STORAGE_BUFFER, 10000 * sizeof(ssbo_data), NULL, GL_STATIC_DRAW);
+  glBufferData(GL_SHADER_STORAGE_BUFFER, 100 * sizeof(ssbo_data), NULL, GL_STATIC_DRAW);
 
   // Map the SSBO to client memory
-  ssbo_data* my_data = (ssbo_data*)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, 10000 * sizeof(ssbo_data), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+  ssbo_data* my_data = (ssbo_data*)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, 100 * sizeof(ssbo_data), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
   // Initialize the SSBO data
-  for (int i = 0; i < 10000; i++) {
+  for (int i = 0; i < 100; i++) {
     my_data[i].x = 7;
     my_data[i].y = 0.23;
   }
@@ -40,6 +58,7 @@ int main() {
 
   // Compile the compute shader
   const char* compute_shader_source = "#version 430\n"
+									  "\nstruct ssbo_data {\nint x;\nfloat y;\n};\n"
                                       "layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;\n"
                                       "layout(std430, binding = 0) buffer my_ssbo {\n"
                                       "  ssbo_data my_data[];\n"
@@ -50,6 +69,7 @@ int main() {
                                       "}\n";
   glShaderSource(compute_shader, 1, &compute_shader_source, NULL);
   glCompileShader(compute_shader);
+  checkShaderCompileStatus(compute_shader);
 
   // Create a program object and attach the compute shader to it
   GLuint program = glCreateProgram();
@@ -63,16 +83,16 @@ int main() {
   glUseProgram(program);
 
   // Dispatch the compute shader
-  glDispatchCompute(10000 / 64, 1, 1);
+  glDispatchCompute(100 / 64, 1, 1);
 
   // Wait for the compute shader to finish
   glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
   // Map the SSBO to client memory again to read the result
-  my_data = (ssbo_data*)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, 10000 * sizeof(ssbo_data), GL_MAP_READ_BIT);
+  my_data = (ssbo_data*)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, 100 * sizeof(ssbo_data), GL_MAP_READ_BIT);
 
   // Print the result
-  for (int i = 0; i < 10000; i++) {
+  for (int i = 0; i < 100; i++) {
     std::cout << my_data[i].y << std::endl;
   }
   
