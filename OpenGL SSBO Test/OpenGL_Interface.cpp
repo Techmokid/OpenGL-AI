@@ -114,6 +114,7 @@ void checkShaderCompileStatus(GLuint shader) {
     GLsizei length;
     glGetShaderInfoLog(shader, sizeof(log), &length, log);
     std::cerr << "Shader compilation failed: " << log << std::endl;
+	exit(1);
   }
 }
 
@@ -126,7 +127,7 @@ void ShutDownOpenGL() {
   }
   while (shaderShader.size() != 0) {
     glDeleteShader(shaderShader[0]);
-	shaderShader.erase(shaderPrograms.begin());
+	shaderShader.erase(shaderShader.begin());
   }
   
   //while (ssbos.size() != 0) {
