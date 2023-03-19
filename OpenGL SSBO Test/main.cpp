@@ -1,4 +1,3 @@
-#include <iostream>
 #include "functions.h"
 
 //ssbo_data testArr[512];
@@ -28,13 +27,11 @@ int main() {
     my_data[i].y = 0.23;
   }
   glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo);
   
   //Initialize the shader
   std::cout << "Initializing Shader" << std::endl;
   GLuint computeHandle = InitializeShader("compute.shader");
-  
-  // Bind the SSBO to a binding point
-  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo);
   
   //Run the shader program
   std::cout << "Running Shader Program" << std::endl;
@@ -42,15 +39,15 @@ int main() {
   glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);				// Wait for the GPU to finish
   
   // Map the SSBO to client memory again to read the result
+  std::cout << "Reading Out Results" << std::endl;
   my_data = (ssbo_data*)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, arrLen * sizeof(ssbo_data), GL_MAP_READ_BIT);
   
   for (int i = 0; i < arrLen; i++) {
     std::cout << my_data[i].y << std::endl;
   }
   
+  std::cout << "Shutting Down" << std::endl;
   glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
-  //glDeleteProgram(program);
-  //glDeleteShader(compute_shader);
-  glfwTerminate();
+  ShutDownOpenGL();
   return 1;
 }

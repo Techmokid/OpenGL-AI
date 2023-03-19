@@ -7,6 +7,9 @@
 //  - Use StartShaderProgram(GLuint compiledShader) to start the shader up ready to be used
 //  - Use InitializeShader() in order to skip needing to call GetShaderCode(), CompileShader(), and StartShaderProgram()
 
+std::vector<GLuint> shaderPrograms = std::vector<GLuint>();
+std::vector<GLuint> shaderShader = std::vector<GLuint>();
+
 std::string GetShaderCode(std::string shaderPath) {
 	// Get the compute shader from disk
   std::ifstream myfile;
@@ -57,6 +60,14 @@ GLuint CompileShader(const char* computeShaderSource) {
   glCompileShader(computeShader);
   checkShaderCompileStatus(computeShader);
   
+  bool addVal = true;
+  for (int i = 0; i < shaderShader.size(); i++) {
+    if (shaderShader[i] == computeShader)
+      addVal = false;
+  }
+  if (addVal)
+    shaderShader.push_back(computeShader);
+  
   return computeShader;
 }
 
@@ -66,6 +77,15 @@ GLuint StartShaderProgram(GLuint computeShader) {
   //glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo);
   glLinkProgram(computeProgram);
   glUseProgram(computeProgram);
+  
+  bool addVal = true;
+  for (int i = 0; i < shaderPrograms.size(); i++) {
+    if (shaderPrograms[i] == computeProgram)
+      addVal = false;
+  }
+  if (addVal)
+    shaderPrograms.push_back(computeProgram);
+  
   return computeProgram;
 }
 
@@ -97,13 +117,22 @@ void checkShaderCompileStatus(GLuint shader) {
   }
 }
 
-//void ShutDownOpenGL(GLuint program, GLuint compute_shader, std::vector<GLuint> ssbos = std::vector<GLuint>()) {
-//  glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
-//  glDeleteProgram(program);
-//  glDeleteShader(compute_shader);
-//  while (ssbos.size() != 0) {
-//    glDeleteBuffers(1, &ssbos[0]);
-//    ssbos.erase(ssbos.begin());
-//  }
-//  glfwTerminate();
-//}
+void ShutDownOpenGL() {
+  glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+  
+  while (shaderPrograms.size() != 0) {
+	glDeleteProgram(shaderPrograms[0]);
+	shaderPrograms.erase(shaderPrograms.begin());
+  }
+  while (shaderShader.size() != 0) {
+    glDeleteShader(shaderShader[0]);
+	shaderShader.erase(shaderPrograms.begin());
+  }
+  
+  //while (ssbos.size() != 0) {
+  //  glDeleteBuffers(1, &ssbos[0]);
+  //  ssbos.erase(ssbos.begin());
+  //}
+  
+  glfwTerminate();
+}
