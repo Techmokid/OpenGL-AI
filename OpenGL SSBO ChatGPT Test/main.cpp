@@ -1,6 +1,5 @@
 #include <iostream>
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
+#include "functions.h"
 
 struct ssbo_data {
   int x = 7;
@@ -12,7 +11,7 @@ int main() {
   glfwInit();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  //glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   GLFWwindow* window = glfwCreateWindow(800, 600, "OpenGL Window", NULL, NULL);
   glfwMakeContextCurrent(window);
   glewExperimental = GL_TRUE;
@@ -74,7 +73,7 @@ int main() {
 
   // Print the result
   for (int i = 0; i < 10000; i++) {
-    std::cout << my_data[i].y
+    std::cout << my_data[i].y << std::endl;
   }
   
   // Unmap the SSBO again
