@@ -1,3 +1,7 @@
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 #ifndef functionsList
 #define functionsList
 #define GLFW_INCLUDE_NONE
@@ -12,4 +16,3 @@
 #include <iostream>
 #include <vector>
 #endif
-
