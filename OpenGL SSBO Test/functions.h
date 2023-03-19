@@ -11,6 +11,7 @@
 #include <cstring>
 #include <iostream>
 #include <vector>
+#include <optional>
 #endif
 
 struct ssbo_data {
@@ -26,5 +27,4 @@ GLuint StartShaderProgram(GLuint computeShader);
 GLuint StartShaderProgram(GLuint computeShader, std::vector<GLuint*> ssbo);
 GLuint InitializeShader(std::string shaderPath);
 void checkShaderCompileStatus(GLuint shader);
-void ShutDownOpenGL(GLuint program, GLuint compute_shader);
-void ShutDownOpenGL(GLuint program, GLuint compute_shader, std::vector<GLuint> ssbos);
+void ShutDownOpenGL(GLuint program, GLuint compute_shader, std::vector<GLuint> ssbos = std::vector<GLuint>());
