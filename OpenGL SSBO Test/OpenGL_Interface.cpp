@@ -3,7 +3,9 @@
 // How to use:
 //  - Use GetShaderCode(std::string path) to get a shader from a file instead of directly via code
 //  - Use StartWindow() to begin. This is required to allow OpenGL to boot up and get everything running
-//  - Use CompileShader(const char* shader) to compile the shader and get back it's corresponding GLuint memory ID. For program performance, I recommend only calling this once at the start of your program, then simply saving it's resulting GLuint ID somewhere to have a precompiled version of your shader ready to go
+//  - Use CompileShader(const char* shader) to compile the shader and get back it's corresponding GLuint memory ID.
+//    For program performance, I recommend only calling this once at the start of your program, then simply saving it's
+//    resulting GLuint ID somewhere to have a precompiled version of your shader ready to go
 //  - Use StartShaderProgram(GLuint compiledShader) to start the shader up ready to be used
 //  - Use InitializeShader() in order to skip needing to call GetShaderCode(), CompileShader(), and StartShaderProgram()
 
@@ -31,13 +33,14 @@ void StartWindow() {
     std::cout << "glfwInit() failed to start" << std::endl;
     exit(EXIT_FAILURE);
   }
-	
+  
+  glfwSetErrorCallback(error_callback);
+  glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // Optional
   
-  glfwSetErrorCallback(error_callback);
-  GLFWwindow* window = glfwCreateWindow(800, 600, "OpenGL Window", NULL, NULL);
+  GLFWwindow* window = glfwCreateWindow(1, 1, "OpenGL Window", NULL, NULL);
   if (!window) {
     glfwTerminate();
     std::cout << "glfwCreateWindow() failed to start" << std::endl;
@@ -114,6 +117,7 @@ void checkShaderCompileStatus(GLuint shader) {
     GLsizei length;
     glGetShaderInfoLog(shader, sizeof(log), &length, log);
     std::cerr << "Shader compilation failed: " << log << std::endl;
+	exit(1);
   }
 }
 
@@ -126,7 +130,7 @@ void ShutDownOpenGL() {
   }
   while (shaderShader.size() != 0) {
     glDeleteShader(shaderShader[0]);
-	shaderShader.erase(shaderPrograms.begin());
+	shaderShader.erase(shaderShader.begin());
   }
   
   //while (ssbos.size() != 0) {
@@ -136,3 +140,22 @@ void ShutDownOpenGL() {
   
   glfwTerminate();
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

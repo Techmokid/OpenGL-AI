@@ -13,6 +13,10 @@ int main() {
   //Starting computation window
   StartWindow();
   
+  //Initialize the shader
+  std::cout << "Initializing Shader" << std::endl;
+  GLuint computeHandle = InitializeShader("compute.shader");
+  
   //Apply the SSBO
   std::cout << "Applying Shader SSBO" << std::endl;
   GLuint ssbo;
@@ -21,17 +25,13 @@ int main() {
   glBufferData(GL_SHADER_STORAGE_BUFFER, arrLen * sizeof(ssbo_data), NULL, GL_STATIC_DRAW);
   
   // Map the SSBO to client memory and then write to it
-  ssbo_data* my_data = (ssbo_data*)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, arrLen * sizeof(ssbo_data), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+  ssbo_data* myInputData = (ssbo_data*)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, arrLen * sizeof(ssbo_data), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
   for (int i = 0; i < arrLen; i++) {
-    my_data[i].x = 7;
-    my_data[i].y = 0.23;
+    myInputData[i].x = 14;
+    myInputData[i].y = 0.23;  
   }
   glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
   glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo);
-  
-  //Initialize the shader
-  std::cout << "Initializing Shader" << std::endl;
-  GLuint computeHandle = InitializeShader("compute.shader");
   
   //Run the shader program
   std::cout << "Running Shader Program" << std::endl;
@@ -40,10 +40,10 @@ int main() {
   
   // Map the SSBO to client memory again to read the result
   std::cout << "Reading Out Results" << std::endl;
-  my_data = (ssbo_data*)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, arrLen * sizeof(ssbo_data), GL_MAP_READ_BIT);
+  ssbo_data* myOutputData = (ssbo_data*)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, arrLen * sizeof(ssbo_data), GL_MAP_READ_BIT);
   
   for (int i = 0; i < arrLen; i++) {
-    std::cout << my_data[i].y << std::endl;
+    std::cout << myOutputData[i].y << std::endl;
   }
   
   std::cout << "Shutting Down" << std::endl;

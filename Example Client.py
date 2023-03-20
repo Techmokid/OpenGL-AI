@@ -9,7 +9,9 @@ def sendMsg(s,msg):
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     s.connect((HOST, PORT))
     sendMsg(s,"Data from python 1. Hello!")
-    print(s.recv(1024).decode("utf-8"))
+    #print(s.recv(1024).decode("utf-8"))
     sendMsg(s,"Data from python 2. Testing?")
-    print(s.recv(1024).decode("utf-8"))
+    #print(s.recv(1024).decode("utf-8"))
+    sendMsg(s,"Generate New Network from scratch")
+    sendMsg(s,"Data from python 3. Testing")
 

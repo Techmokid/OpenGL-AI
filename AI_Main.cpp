@@ -11,6 +11,9 @@
 
 #define PORT 3490
 
+GLuint CSH_GetNetworkOutput = -1;
+GLuint CSH_TraingNetwork = -1;
+
 int main() {
 	// This is how to change the terminal title. I have no clue how this works, but StackOverflow does!
 	// PS1='\[\e]0;Neural Server\a\]${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
@@ -31,24 +34,16 @@ int main() {
 	printFormatted("Main", "Debug", "Good morning user! Let's get started shall we?");
 	printFormatted("Main", "Debug", "Let me boot the server up for you!");
 	
-	printFormatted("Main", "Log", "Generating Neural Network");
-	CreateNewLayeredNetwork(100,300,200,4,2);
+	//CreateNewLayeredNetwork(100,300,200,4,2);
 	//CreateNewLayeredNetwork(3,3,2,4,2);
-	printFormatted("Main", "Success", "Neural Network Generated");
-	print();
 	
-	printFormatted("Main", "Log", "Saving Neural Network");
 	//SaveNeuralNetwork("/home/andrey/Desktop/AI Network");
 	//LoadNetworkGPU("/home/andrey/Desktop/AI Network");
-	
 	print();
-	print("Hit \"Enter\" to close window");
-	quit();
 	
-	
-	
-	
-	
+	StartWindow();
+	printFormatted("Main", "Success", "OpenGL operational and ready");
+	printFormatted("Main", "Success", "Shaders compiled");
 	
 	// Try to start up the server
 	if (StartSocket(PORT) < 0) {
@@ -62,6 +57,14 @@ int main() {
 		quitProgram();
 	}
 	
+	while(true) {
+		std::string cR = GetClientResponse();
+		//if (cR.find("Generate New Network") >= 0) {
+		//	printFormatted("MAIN", "Log", "Received New Network Generation Message");
+		//} else {
+		//	printFormatted("MAIN", "Log", "Wrong message detected");
+		//}
+	}
 	//printFormatted("Main","Log","Received data from client: " + GetClientResponse());
 	//SendToClient("Hello Python, from c++");
 	//printFormatted("Main","Log","Received data from client: " + GetClientResponse());
@@ -70,10 +73,26 @@ int main() {
 	// Set up the neural network with the parameters requested by AI_Core.cpp
 	
 	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	// Finally shut down the server	
 	CloseClientSocket();
 	printFormatted("MAIN","Success","Closed the client socket");
 	print("Press any key to quit");
 	endProgram();
 }
-

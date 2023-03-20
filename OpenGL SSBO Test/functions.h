@@ -15,8 +15,8 @@
 #endif
 
 struct ssbo_data {
-  int x = 7;
-  float y = 0.23;
+  int x = 0;
+  float y = 0;
 };
 
 std::string GetShaderCode(std::string shaderPath);
