@@ -12,7 +12,9 @@ layout(std430, binding = 0) buffer mySsboBuffer {
 
 void main() {
   uint ID = gl_GlobalInvocationID.x;
-  ED[ID].x = 4;
-  ED[ID].y = 4.0f;
+  //ED[ID].x = 4;
+  //ED[ID].y = 4.0f;
+  
+  ED[ID].y *= ED[ID].x;
 }
 
