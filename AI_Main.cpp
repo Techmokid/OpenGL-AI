@@ -59,12 +59,17 @@ int main() {
 	
 	while(true) {
 		std::string cR = GetClientResponse();
-		//if (cR.find("Generate New Network") >= 0) {
-		//	printFormatted("MAIN", "Log", "Received New Network Generation Message");
-		//} else {
-		//	printFormatted("MAIN", "Log", "Wrong message detected");
-		//}
+		if (cR.length() > 0) {
+			if (cR.find("Generate New Network") != std::string::npos) {
+				printFormatted("MAIN", "Log", "Received New Network Generation Message");
+			} else {
+				printFormatted("MAIN", "Log", "Wrong message detected");
+			}
+		} else {
+			printFormatted("MAIN", "Log", "Client Timeout");
+		}
 	}
+	
 	//printFormatted("Main","Log","Received data from client: " + GetClientResponse());
 	//SendToClient("Hello Python, from c++");
 	//printFormatted("Main","Log","Received data from client: " + GetClientResponse());

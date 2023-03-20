@@ -3,7 +3,7 @@
 gnome-terminal -- sh -c '
 #!/bin/bash
 
-g++ *.cpp *.h -lpthread -lglut -lGLU -lGL -std=c++17 -o AI_Server_Ubuntu.out
+g++ *.cpp *.h -lpthread -lglut -lGLEW -lglfw -lGLU -lGL -std=c++17 -o AI_Server_Ubuntu.out
 
 echo Finished Compiling. If errors were found, hitting enter will run the last known working version
 
