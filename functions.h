@@ -2,6 +2,7 @@
 #define COMPILER_FUNCTIONS_LIST
 
 #include <iostream>		// Required for User I/O operations
+#include <string.h>
 #include <cstring>
 #include <chrono>			// Required for time keeping and timeout periods
 #include <stdlib.h>		// Required to clear the console
@@ -10,6 +11,12 @@
 #include <stdexcept>	// Required for error handling
 #include <thread>			// Required to allow for CPU multithreading
 #include <fstream>
+
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
+#include <GL/glew.h>
+#include <GL/glut.h>
+#include <GL/gl.h>
 
 #ifdef _WIN32
 #include <winsock2.h>	// Required for server socket connections
@@ -90,3 +97,15 @@ bool AcceptClient();
 std::string GetClientResponse();
 bool SendToClient(std::string dataToSend);
 #endif
+
+//OpenGL_Interface.cpp
+std::string GetShaderCode(std::string shaderPath);
+static void error_callback(int error, const char* description);
+void StartWindow();
+GLuint CompileShader(std::string computeShaderCode);
+GLuint CompileShader(const char* computeShaderSource);
+GLuint StartShaderProgram(GLuint computeShader);
+GLuint StartShaderProgram(GLuint computeShader, std::vector<GLuint*> ssbo);
+GLuint InitializeShader(std::string shaderPath);
+void checkShaderCompileStatus(GLuint shader);
+void ShutDownOpenGL();

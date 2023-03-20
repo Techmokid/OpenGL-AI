@@ -57,6 +57,8 @@ float getRandomFloat(float HI, float LO) {
 }
 
 void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer, int hiddenLayerCount, int outputNodes) {
+	print();
+	printFormatted("Neural", "Log", "Generating new layered neural network");
 	srand(time(NULL));
 	
 	int nodeCountPerGenome = inputNodes + nodesPerLayer*hiddenLayerCount + outputNodes;
@@ -172,7 +174,7 @@ void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer,
 	for (int i = 0; i < NGPU->genomes.size(); i++) {
 		if (NGPU->genomes[i].ID == -1) { trimmableGenomes++; }
 		if ((NGPU->genomes[i].Nodes_Start_Index > (int)NGPU->nodes.size() + 1) || (NGPU->genomes[i].Nodes_End_Index < 0)) {
-			printFormatted("Main","Error","While creating neural net. Genome indexing failure");
+			printFormatted("Neural","Error","While creating neural net. Genome indexing failure");
 			quit();
 		}
 	}
@@ -181,20 +183,21 @@ void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer,
 	for (int i = 0; i < NGPU->nodes.size(); i++) {
 		if (NGPU->nodes[i].ID == -1) { trimmableNodes++; }
 		if ((NGPU->nodes[i].wEI > (int)NGPU->connections.size() + 1) || (NGPU->nodes[i].wSI < 0)) {
-			printFormatted("Main","Error","While creating neural net. Node indexing failure");
+			printFormatted("Neural","Error","While creating neural net. Node indexing failure");
 			quit();
 		}
 	}
 	
 	for (int i = 0; i < NGPU->connections.size(); i++) {
 		if ((NGPU->connections[i].NodePos > NGPU->nodes.size()) || (NGPU->connections[i].NodePos < 0)) {
-			printFormatted("Main","Error","While creating neural net. Connection indexing failure");
+			printFormatted("Neural","Error","While creating neural net. Connection indexing failure");
 			quit();
 		}
 	}
 	
 	if (trimmableGenomes > 0) { throw std::invalid_argument(std::to_string(trimmableGenomes) + " genomes found with unset ID"); }
 	if (trimmableNodes > 0) { throw std::invalid_argument(std::to_string(trimmableNodes) + " nodes found with unset ID"); }
+	printFormatted("Neural", "Success", "Neural Network generated");
 }
 
 void quit() {
@@ -207,6 +210,8 @@ void quit() {
 
 void SaveNeuralNetwork(std::string dir) { saveDirectory = dir + "/"; SaveNeuralNetwork(); }
 void SaveNeuralNetwork() {
+	print();
+	printFormatted("Save", "Log", "Saving Neural Network");
 	if (saveDirectory == "") {
 		printFormatted("Save","Error","Could not save GPU network. SaveNeuralNetwork was called without setting save directory");
 		quit();
@@ -254,7 +259,7 @@ void SaveNeuralNetwork() {
 	netStatusFile.open(netStatusFileDir, std::fstream::out | std::fstream::trunc);
 	netStatusFile << "0";
 	netStatusFile.close();
-	printFormatted("Save","Success","Saved AI network!");
+	printFormatted("Save", "Success", "Neural Network Saved");
 }
 
 void SaveNetworkGenomes_MTwTDC(ThreadDataContainer* TDC) {
@@ -463,6 +468,7 @@ void SaveNeuralNetworkInternal(std::string dir) {
 }
 
 void saveFileRepair() {
+	print();
 	if (saveDirectory == "") {
 		printFormatted("File Repair","Error","Could not repair save files. saveFileRepair was called without setting save directory");
 		quit();
@@ -557,6 +563,9 @@ void saveFileRepair() {
 
 void LoadNetworkGPU(std::string dir) { saveDirectory = dir + "/"; LoadNetworkGPU(); }
 void LoadNetworkGPU() {
+	print();
+	printFormatted("Load","Log","Loading neural network from parent disk directory: " + saveDirectory);
+	
 	if (saveDirectory == "") {
 		printFormatted("Load","Error","Could not load GPU network. LoadNetworkGPU was called without setting save directory");
 		quit();
@@ -756,11 +765,8 @@ void LoadNetworkGPU() {
 	
 	auto end = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-	printFormatted("Load","Log","Real time taken to load network: " + TimeFormatter(duration.count()));
-	
-	for (int i = 0; i < 100; i++) {
-		print(NGPU->connections[i].Weight);
-	}
+	printFormatted("Load","Debug","Real time taken to load network: " + TimeFormatter(duration.count()));
+	printFormatted("Load","Success","Neural network loaded from disk");
 }
 
 void LoadNetworkGenomes_MTwTDC(ThreadDataContainer* TDC) {

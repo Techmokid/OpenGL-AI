@@ -13,6 +13,10 @@ int main() {
   //Starting computation window
   StartWindow();
   
+  //Initialize the shader
+  std::cout << "Initializing Shader" << std::endl;
+  GLuint computeHandle = InitializeShader("compute.shader");
+  
   //Apply the SSBO
   std::cout << "Applying Shader SSBO" << std::endl;
   GLuint ssbo;
@@ -28,10 +32,6 @@ int main() {
   }
   glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
   glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo);
-  
-  //Initialize the shader
-  std::cout << "Initializing Shader" << std::endl;
-  GLuint computeHandle = InitializeShader("compute.shader");
   
   //Run the shader program
   std::cout << "Running Shader Program" << std::endl;
