@@ -33,12 +33,6 @@ int main() {
 			
 	printFormatted("Main", "Debug", "Good morning user! Let's get started shall we?");
 	printFormatted("Main", "Debug", "Let me boot the server up for you!");
-	
-	//CreateNewLayeredNetwork(100,300,200,4,2);
-	//CreateNewLayeredNetwork(3,3,2,4,2);
-	
-	//SaveNeuralNetwork("/home/andrey/Desktop/AI Network");
-	//LoadNetworkGPU("/home/andrey/Desktop/AI Network");
 	print();
 	
 	StartWindow();
@@ -58,42 +52,102 @@ int main() {
 	}
 	
 	while(true) {
-		std::string cR = GetClientResponse();
-		if (cR.length() > 0) {
-			if (cR.find("Generate New Network") != std::string::npos) {
-				printFormatted("MAIN", "Log", "Received New Network Generation Message");
+		std::string msgRaw = GetClientResponse();
+		
+		try {
+			if (msgRaw.length() > 0) {
+				msgRaw = RemoveSpecificCharacter(msgRaw,' ');
+				std::string command = SplitString(msgRaw,':')[0];
+				std::vector<std::string> msgParams = SplitString(SplitString(msgRaw,':')[1],',');
+				//ChkSum = 1000*(Sqrt(Inputs)+Sqrt(HiddenLayers))/(Sqrt(HiddenNodesPerLayer + Outputs) + Sqrt(Outputs))
+				
+				if (command == "GenerateNewNetwork") {
+					printFormatted("MAIN", "Log", "Received New Network Generation Command");
+					
+					int genomes=-1,inputs=-1,outputs=-1,hiddenLayers=-1,nodesPerLayer=-1;
+					for (int i = 0; i < msgParams.size(); i++) {
+						msgParams[i] = stringToLower(msgParams[i]);
+						std::vector<std::string> param = SplitString(msgParams[i],'=');
+						std::string key = param[0];
+						int val = std::stoi(param[1].c_str());
+						
+						if (key == "genomes");
+							genomes = val;
+						if (key == "inputs")
+							inputs = val;
+						if (key == "outputs")
+							outputs = val;
+						if (key == "hiddenlayers")
+							hiddenLayers = val;
+						if (key == "nodesperlayer")
+							nodesPerLayer = val;
+					}
+					
+					std::vector<std::string> errMsg;
+					if (genomes == -1)
+						errMsg.push_back("genomes");
+					if (inputs == -1)
+						errMsg.push_back("inputs");
+					if (outputs == -1)
+						errMsg.push_back("outputs");
+					if (hiddenLayers == -1)
+						errMsg.push_back("hiddenLayers");
+					if (nodesPerLayer == -1)
+						errMsg.push_back("nodesPerLayer");
+					if (errMsg.size() > 0) {
+						SendToClient("Error: Missing the following parameters:");
+						for (int i = 0; i < errMsg.size(); i++) {
+							SendToClient(" - " + errMsg[i]);
+						}
+					} else {
+						SendToClient("Generated New Network With the Following Local Parameters: ");
+						SendToClient(" - Genomes: " + std::to_string(genomes));
+						SendToClient(" - Inputs:  " + std::to_string(inputs));
+						SendToClient(" - Outputs: " + std::to_string(outputs));
+						SendToClient(" - Layers:  " + std::to_string(hiddenLayers));
+						SendToClient(" - Nodes Per Layer: " + std::to_string(nodesPerLayer));
+						CreateNewLayeredNetwork(genomes, inputs, nodesPerLayer, hiddenLayers, outputs);
+						
+						Network_GPU* NGPU = GetNetworkPointer();
+						SendToClient("Generated New Network With the Following Global Parameters: ");
+						SendToClient(" - Total Genome Count: " + std::to_string(NGPU->genomes.size()));
+						SendToClient(" - Nodes per Genome:   " + std::to_string(NGPU->nodes.size() / NGPU->genomes.size()));
+						SendToClient(" - Total Node Count:   " + std::to_string(NGPU->nodes.size()));
+						SendToClient(" - Total Connections Count: " + std::to_string(NGPU->connections.size()));
+						
+						int gDiskUse = NGPU->genomes.size()*sizeof(Genome_GPU);
+						int nDiskUse = NGPU->nodes.size()*sizeof(Node_GPU);
+						int cDiskUse = NGPU->connections.size()*sizeof(NodeConnection_GPU);
+						int totalDiskUse = gDiskUse + nDiskUse + cDiskUse;
+						SendToClient(" - Theoretical disk usage:  " + std::to_string(totalDiskUse));
+					}
+				} else if (command == "LoadNetwork") { // WIP
+					printFormatted("MAIN", "Log", "Received Load Network Command");
+					//LoadNetworkGPU("/home/andrey/Desktop/AI Network");
+					
+					
+					
+				} else if (command == "SaveNetwork") { // WIP
+					printFormatted("MAIN", "Log", "Received Save Network Command");
+					//SaveNeuralNetwork("/home/andrey/Desktop/AI Network");
+					
+					
+					
+				} else if (command == "SaveNetwork") {
+					printFormatted("MAIN", "Log", "Received Ping");
+					SendToClient("Pong");
+				} else {
+					printFormatted("MAIN", "Log", "Unknown message detected");
+					SendToClient("Unknown command");
+				}
 			} else {
-				printFormatted("MAIN", "Log", "Wrong message detected");
+				printFormatted("MAIN", "Log", "Client Timeout");
 			}
-		} else {
-			printFormatted("MAIN", "Log", "Client Timeout");
+		} catch (const std::exception& e) {
+			printFormatted("MAIN", "Log", "Error while parsing client response");
+			SendToClient("Malformed request: " + msgRaw);
 		}
 	}
-	
-	//printFormatted("Main","Log","Received data from client: " + GetClientResponse());
-	//SendToClient("Hello Python, from c++");
-	//printFormatted("Main","Log","Received data from client: " + GetClientResponse());
-	//SendToClient("Hopefully you receive this");
-	
-	// Set up the neural network with the parameters requested by AI_Core.cpp
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	
 	// Finally shut down the server	
 	CloseClientSocket();

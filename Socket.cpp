@@ -137,6 +137,8 @@ std::string GetClientResponse() {
 bool SendToClient(std::string dataToSend) {
 	if (clientSock == INVALID_SOCKET) { printFormatted("SERVER","ERROR","Client socket not initialized"); return false; }
 	
+	dataToSend += "\n";
+	
 	char msg[dataToSend.length() + 1];
 	strcpy(msg, dataToSend.c_str());
 	
@@ -240,6 +242,8 @@ bool CloseSocket(int i) {
 bool SendToClient(std::string dataToSend) {
 	if (clientSock == -1) { printFormatted("SERVER","ERROR","Server socket not initialized"); return false; }
 	if (boundToPort == -1) { printFormatted("SERVER","ERROR","Server socket not bound to port"); return false; }
+	
+	dataToSend += "\n";
 	
 	const char* sendBuff = dataToSend.c_str();
 	send(clientSock, sendBuff, strlen(sendBuff), MSG_DONTWAIT);

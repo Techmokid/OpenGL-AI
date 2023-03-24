@@ -6,45 +6,6 @@ int numberOfIndexesPerThread = 10000;
 
 const int numberOfAvailableActivationFunctions = 2;
 
-// Struct definitions
-struct Genome_GPU {
-	Genome_GPU() { }
-	int ID = -1;
-	double fitness = std::numeric_limits<int>::min();
-	double prev_fitness = std::numeric_limits<int>::min();
-	int Nodes_Start_Index = -1;
-	int Nodes_End_Index = -1;
-};
-		
-struct Node_GPU {
-	Node_GPU() { }
-	int ID = -1;			//Identification code		// The ID of this node
-			
-	double nTT = 0;		//Node trigger typeof		// 0 is step, 1 is sigmoid
-	double nB = 0;		//Node bias
-	double pNB = 0;		//Previous node bias
-			
-	bool nII = false; 	//node Is Input				// Is the node is an input or not
-	bool nIO = false; 	//node Is Output			// Is the node is an output or not
-	double nIV = 0;			//node Input Value			// If the node is an input, what have we entered
-	double pO = -99999;	//precalculated Output		// This variable just allows for quicker genome output computing
-			
-	int wSI = 0; 		//weights Start Index		// This is the position in the weights array where the start of this nodes connections are held
-	int wEI = 0;			//weights End Index			// This is the position in the weights array where the end of this nodes connections are held
-};
-		
-struct NodeConnection_GPU {
-	int NodePos;
-	double Weight;
-	double Prev_Weight;
-};
-		
-struct Network_GPU {
-	std::vector<Genome_GPU> genomes;
-	std::vector<Node_GPU> nodes;
-	std::vector<NodeConnection_GPU> connections;
-};
-
 // Variable declarations
 Network_GPU* NGPU = new Network_GPU();
 int maxThreadCount = 8;
@@ -845,6 +806,10 @@ void LoadNetworkConnections_MTwTDC(ThreadDataContainer* TDC) {
 	
 	myfile.close();
 	TDC->threadCompletionStatus = true;
+}
+
+Network_GPU* GetNetworkPointer() {
+	return NGPU;
 }
 
 std::vector<std::vector<double>> GetNetworkOutput(std::vector<double> inputs) {

@@ -186,3 +186,12 @@ std::string ASCII_To_Numeric(std::string x) {
 	}
 	return result;
 }
+
+std::string RemoveSpecificCharacter(std::string x, char delim) {
+	std::string result = "";
+	for (int i = 0; i < x.length(); i++) {
+		if (x[i] != delim)
+			result += x[i];
+	}
+	return result;
+}
