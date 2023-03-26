@@ -2,14 +2,29 @@
 #include <vector>
 #include <filesystem>
 
+#define Use_CPU_Only
+//#define Use_GPU
+
 int numberOfIndexesPerThread = 10000;
 
 const int numberOfAvailableActivationFunctions = 2;
 
+
+
+//----------------------------------------------------------------------------------------------
+
+
+
+#ifdef Use_GPU
+#undef Use_CPU_Only
+#endif
+
 // Variable declarations
 Network_GPU* NGPU = new Network_GPU();
-int maxThreadCount = 8;
+int maxThreadCount = 4;
 std::string saveDirectory = "";
+
+int _genomeCount = 0, _inputCount = 0, _nodesPerLayer = 0, _hiddenLayerCount = 0, _outputNodes = 0;
 
 // Function declarations
 float getRandomFloat() { return getRandomFloat(0,1); }
@@ -158,6 +173,13 @@ void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer,
 	
 	if (trimmableGenomes > 0) { throw std::invalid_argument(std::to_string(trimmableGenomes) + " genomes found with unset ID"); }
 	if (trimmableNodes > 0) { throw std::invalid_argument(std::to_string(trimmableNodes) + " nodes found with unset ID"); }
+	
+	_genomeCount =      genomeCount;
+	_inputCount =       inputNodes;
+	_nodesPerLayer =    nodesPerLayer;
+	_hiddenLayerCount = hiddenLayerCount;
+	_outputNodes =      outputNodes;
+	
 	printFormatted("Neural", "Success", "Neural Network generated");
 }
 
@@ -816,7 +838,7 @@ std::vector<std::vector<double>> GetNetworkOutput(std::vector<double> inputs) {
 	int outputsCount = 0;
 	for(int i = 0; i < NGPU->nodes.size(); i++) {
 		if (NGPU->nodes[i].nII && NGPU->nodes[i].nIO)
-			printFormatted("Main","ERROR","Could not get network output. Network detected duplicate input/output node");
+			printFormatted("Internal","ERROR","Could not get network output. Network detected duplicate input/output node");
 		if (NGPU->nodes[i].nIO)
 			outputsCount++;
 	}
@@ -832,7 +854,19 @@ std::vector<std::vector<double>> GetNetworkOutput(std::vector<double> inputs) {
 	
 	double outputsArray[outputsCount];
 	
+	//WIP
+	#ifdef Use_GPU
+	printFormatted("Internal", "Error", "GPU code unfinished. Cannot continue. Defaulting to CPU");
+	#undef Use_GPU
+	#define Use_CPU_Only
+	#endif
 	
+	
+	
+	#ifdef Use_CPU_Only
+	// Run CPU code here
+	
+	#endif
 }
 
 
