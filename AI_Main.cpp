@@ -57,11 +57,11 @@ int main() {
 		try {
 			if (msgRaw.length() > 0) {
 				msgRaw = RemoveSpecificCharacter(msgRaw,' ');
-				std::string command = SplitString(msgRaw,':')[0];
+				std::string command = stringToLower(SplitString(msgRaw,':')[0]);
 				std::vector<std::string> msgParams = SplitString(SplitString(msgRaw,':')[1],',');
 				//ChkSum = 1000*(Sqrt(Inputs)+Sqrt(HiddenLayers))/(Sqrt(HiddenNodesPerLayer + Outputs) + Sqrt(Outputs))
 				
-				if (command == "GenerateNewNetwork") {
+				if (command == "generatenewnetwork") {
 					printFormatted("MAIN", "Log", "Received New Network Generation Command");
 					
 					int genomes=-1,inputs=-1,outputs=-1,hiddenLayers=-1,nodesPerLayer=-1;
@@ -121,19 +121,22 @@ int main() {
 						int totalDiskUse = gDiskUse + nDiskUse + cDiskUse;
 						SendToClient(" - Theoretical disk usage:  " + std::to_string(totalDiskUse));
 					}
-				} else if (command == "LoadNetwork") { // WIP
+				} else if (command == "loadnetwork") {
 					printFormatted("MAIN", "Log", "Received Load Network Command");
-					//LoadNetworkGPU("/home/andrey/Desktop/AI Network");
-					
-					
-					
-				} else if (command == "SaveNetwork") { // WIP
+					LoadNetworkGPU("/home/andrey/Desktop/AI Network");
+				} else if (command == "savenetwork") {
 					printFormatted("MAIN", "Log", "Received Save Network Command");
-					//SaveNeuralNetwork("/home/andrey/Desktop/AI Network");
+					SaveNeuralNetwork("/home/andrey/Desktop/AI Network");
+				} else if (command == "getoutput") { //WIP
+					printFormatted("MAIN", "Log", "Received Neural Output Retrieval Command");
 					
 					
 					
-				} else if (command == "SaveNetwork") {
+					
+					
+					
+					
+				} else if (command == "ping") {
 					printFormatted("MAIN", "Log", "Received Ping");
 					SendToClient("Pong");
 				} else {
