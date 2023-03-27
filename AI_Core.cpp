@@ -843,7 +843,7 @@ Network_GPU* GetNetworkPointer() { return NGPU; }
 std::vector<std::vector<float>> GetNetworkOutput(std::vector<float> inputs) {
 	if (_inputCount != inputs.size()) {
 		printFormatted("Internal","ERROR","Could not set network inputs. Incorrect quantity of data");
-		exit();
+		quit();
 	}
 	
 	for (int g = 0; g < _genomeCount; g++) {
