@@ -8,8 +8,16 @@ int numberOfIndexesPerThread = 10000;
 
 const int numberOfAvailableActivationFunctions = 2;
 
+#define PI 3.14159265358979323846264338
+#define e  2.71828182845904523536028747
+
+#define HYPERPARAMETER_P_ReLU 0.01
+#define HYPERPARAMETER_K_SOFTPLUS 1
+#define HYPERPARAMETER_A_ELU 1 			//A must be >= 0
+
 // Variable declarations
 Network_GPU* NGPU = new Network_GPU();
+std::vector<std::vector<float>>* NetworkOutputs = new std::vector<std::vector<float>>();
 int maxThreadCount = 4;
 std::string saveDirectory = "";
 
@@ -44,6 +52,17 @@ void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer,
 	int hiddenConnections = nodesPerLayer*nodesPerLayer*(hiddenLayerCount - 1);
 	int outputConnections = outputNodes*nodesPerLayer;
 	int totalNodeConnectionsCountPerGenome = (inputConnections + hiddenConnections + outputConnections);
+	
+	delete NetworkOutputs;
+	NetworkOutputs = new std::vector<std::vector<float>>(genomeCount);
+	for (int g = 0; g < genomeCount; g++) {
+		std::vector<float> tmp = std::vector<float>();
+		NetworkOutputs->at(g) = tmp;
+		NetworkOutputs->at(g).resize(outputNodes);
+		for (int o = 0; o < outputNodes; o++) {
+			NetworkOutputs->at(g).at(o) = 0;
+		}
+	}
 	
 	NGPU->genomes.clear();
 	NGPU->genomes.resize(genomeCount);
@@ -819,11 +838,11 @@ void LoadNetworkConnections_MTwTDC(ThreadDataContainer* TDC) {
 	TDC->threadCompletionStatus = true;
 }
 
-Network_GPU* GetNetworkPointer() {
-	return NGPU;
-}
+Network_GPU* GetNetworkPointer() { return NGPU; }
 
-std::vector<std::vector<double>> GetNetworkOutput(std::vector<double> inputs) {
+std::vector<std::vector<float>> GetNetworkOutput(std::vector<float> inputs) {
+	#ifdef Use_GPU
+	// Run GPU code here. WIP
 	int outputsCount = 0;
 	for(int i = 0; i < NGPU->nodes.size(); i++) {
 		if (NGPU->nodes[i].nII && NGPU->nodes[i].nIO)
@@ -843,18 +862,145 @@ std::vector<std::vector<double>> GetNetworkOutput(std::vector<double> inputs) {
 	
 	double outputsArray[outputsCount];
 	
-	//WIP
-	#ifdef Use_GPU
 	#error GPU code incomplete. Please undefine "Use_GPU" to continue compiling
-	#undef Use_GPU
 	#else
-	// Run CPU code here
-	
+	// Run CPU code here. WIP
+	std::vector<ThreadDataContainer*> TDC_List;
+	bool run = true;
+	bool nodesComplete = false;
+	int currentThreadCount = 0;
+	int nodeIndex = 0;
+	while(run) {
+		while(currentThreadCount < maxThreadCount) {
+			if (nodeIndex >= NGPU->nodes.size()) { run = false; break; }
+			
+			ThreadDataContainer* TDC_Node = new ThreadDataContainer();
+			TDC_Node->ID = nodeIndex;
+			
+			if (TDC_Node->ID >= NGPU->nodes.size()) {
+				printFormatted("Save","Error", "Node indexing error while retreiving network output!");
+				quit();
+			}
+			
+			TDC_List.push_back(TDC_Node);
+			
+			std::thread nodeThread(GetGenomeOutput_MTwTDC, TDC_Node);
+			nodeThread.detach();
+			
+			currentThreadCount++;
+			nodeIndex++;
+		}
+		if (run) {
+			for (int x = 0; x < TDC_List.size(); x++) {
+				if (TDC_List[x]->threadCompletionStatus) {
+					TDC_List.erase(TDC_List.begin() + x);
+					currentThreadCount--;
+					x--;
+				}
+			}
+		}
+	}
+	while(TDC_List.size() > 0) {
+		for (int x = 0; x < TDC_List.size(); x++) {
+			if (TDC_List[x]->threadCompletionStatus) {
+				TDC_List.erase(TDC_List.begin() + x);
+				currentThreadCount--;
+				x--;
+			}
+		}
+	}
 	#endif
+	
+	return *NetworkOutputs;
 }
 
+void GetGenomeOutput_MTwTDC(ThreadDataContainer* TDC) {
+	int nodesPerGenome = _inputCount + _nodesPerLayer*_hiddenLayerCount + _outputNodes;
+	int genomeStart = _genomeCount*nodesPerGenome;
+	int genomeEnd = (_genomeCount + 1)*nodesPerGenome - 1;
+	int outputsStart = TDC->ID * _outputNodes;
+	int outputsEnd = (TDC->ID + 1) * _outputNodes - 1;
+	
+	//*NetworkOutputs
+	for (int i = 0; i < _outputNodes; i++) {
+		NetworkOutputs->at(TDC->ID).at(i) = GetNodeOutput(NGPU->nodes[genomeEnd - i]);
+	}
+	
+	TDC->threadCompletionStatus = true;
+}
 
-
-
-
-
+float GetNodeOutput(int x) { return GetNodeOutput(NGPU->nodes[x]); }
+float GetNodeOutput(Node_GPU N) {
+	if (NGPU->nodes[N.ID].nII)
+		return NGPU->nodes[N.ID].nIV;
+	if (NGPU->nodes[N.ID].pO != -99999)
+		return NGPU->nodes[N.ID].pO;
+	
+	int result = 0;
+	for (int i = NGPU->nodes[N.ID].wSI; i <= NGPU->nodes[N.ID].wEI; i++) {
+		result += NGPU->connections[i].Weight * GetNodeOutput(NGPU->connections[i].NodePos);
+	}
+	
+	float nodeOutput = 0;
+	switch (N.nTT) {
+		case -1: //Disable Node
+			break;
+		case 0:  //Step
+			nodeOutput = (int)result>=0;
+			break;
+		case 1:  //Sine
+			nodeOutput = std::sin(result);
+			break;
+		case 2:  //Modded Sine
+			nodeOutput = result * std::sin(result);
+			break;
+		case 3:  //Cosine
+			nodeOutput = std::cos(result);
+			break;
+		case 4:  //Modded Cosine
+			nodeOutput = result * std::cos(result);
+			break;
+		case 5:  //Sigmoid
+			nodeOutput = 1/(1 + std::pow(e, -result));
+			break;
+		case 6:  //SiLU
+			nodeOutput = result * 1/(1 + std::pow(e, -result));
+			break;
+		case 7:  //ReLU
+			nodeOutput = result<=0?0:result;
+			break;
+		case 8:  //Leaky ReLU
+			nodeOutput = result<=0?0.01*result:result;
+			break;
+		case 9:  //Parametric ReLU
+			nodeOutput = result<=0?HYPERPARAMETER_P_ReLU*result:result;
+			break;
+		case 10: //Softplus
+			nodeOutput = std::log(1 + std::pow(e,result));
+			break;
+		case 11: //Modified Softplus
+			nodeOutput = result * std::log(1 + std::pow(e,result));
+			break;
+		case 12: //Hyperparameterized Softplus
+			nodeOutput = std::log(1 + std::pow(e,HYPERPARAMETER_K_SOFTPLUS*result))/HYPERPARAMETER_K_SOFTPLUS;
+			break;
+		case 13: //SReLU
+			nodeOutput = std::max(-HYPERPARAMETER_A_ELU, result);
+			break;
+		case 14: //ELU
+			nodeOutput = result<=0?HYPERPARAMETER_A_ELU*(std::pow(e,result) - 1):result;
+			break;
+		case 15: //Mish
+			nodeOutput = result*std::tanh(std::log(1 + std::pow(e,result)));
+			break;
+		case 16: //Metallic Means
+			nodeOutput = (result + std::sqrt(std::pow(result,2) + 4))/2;
+			break;
+		default: //Default Node Response
+			nodeOutput = result;
+			break;
+	}
+	
+	NGPU->nodes[N.ID].pO = nodeOutput;
+	return nodeOutput;
+}

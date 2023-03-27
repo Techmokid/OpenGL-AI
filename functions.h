@@ -67,7 +67,7 @@ struct Node_GPU {
 	Node_GPU() { }
 	int ID = -1;			//Identification code		// The ID of this node
 			
-	double nTT = 0;		//Node trigger typeof		// 0 is step, 1 is sigmoid
+	int nTT = 0;		//Node trigger typeof		// 0 is step, 1 is sigmoid
 	double nB = 0;		//Node bias
 	double pNB = 0;		//Previous node bias
 			
@@ -120,7 +120,10 @@ void SaveNetworkGenomes_MTwTDC		(ThreadDataContainer* TDC);
 void SaveNetworkNodes_MTwTDC			(ThreadDataContainer* TDC);
 void SaveNetworkConnections_MTwTDC(ThreadDataContainer* TDC);
 Network_GPU* GetNetworkPointer();
-
+std::vector<std::vector<float>> GetNetworkOutput(std::vector<float> inputs);
+void GetGenomeOutput_MTwTDC(ThreadDataContainer* TDC);
+float GetNodeOutput(int x);
+float GetNodeOutput(Node_GPU N);
 // Socket.cpp
 int StartSocket(int port);
 bool OpenSocket();
