@@ -841,6 +841,17 @@ void LoadNetworkConnections_MTwTDC(ThreadDataContainer* TDC) {
 Network_GPU* GetNetworkPointer() { return NGPU; }
 
 std::vector<std::vector<float>> GetNetworkOutput(std::vector<float> inputs) {
+	if (_inputCount != inputs.size()) {
+		printFormatted("Internal","ERROR","Could not set network inputs. Incorrect quantity of data");
+		exit();
+	}
+	
+	for (int g = 0; g < _genomeCount; g++) {
+		for (int n = 0; n < _inputCount; n++) {
+			NGPU->nodes[NGPU->genomes[g].Nodes_Start_Index + n].nIV = inputs[n];
+		}
+	}
+	
 	#ifdef Use_GPU
 	// Run GPU code here. WIP
 	int outputsCount = 0;
