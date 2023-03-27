@@ -1,6 +1,6 @@
 import socket
 
-HOST = "127.0.0.1"  # The server's hostname or IP address
+HOST = "192.168.1.12"  # The server's hostname or IP address
 PORT = 3490  # The port used by the server
 
 def sendMsg(s,msg):
@@ -8,10 +8,7 @@ def sendMsg(s,msg):
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     s.connect((HOST, PORT))
-    sendMsg(s,"Data from python 1. Hello!")
-    #print(s.recv(1024).decode("utf-8"))
-    sendMsg(s,"Data from python 2. Testing?")
-    #print(s.recv(1024).decode("utf-8"))
-    sendMsg(s,"Generate New Network from scratch")
-    sendMsg(s,"Data from python 3. Testing")
+    sendMsg(s,"Generate New Network: genomes = 9, outputs = 14, inputs =          3, HiDdENLayERs=6,n OdeS pEr lAYeR=9")
+    while(True):
+        print(s.recv(1024).decode("utf-8"))
 
