@@ -2,22 +2,11 @@
 #include <vector>
 #include <filesystem>
 
-#define Use_CPU_Only
 //#define Use_GPU
 
 int numberOfIndexesPerThread = 10000;
 
 const int numberOfAvailableActivationFunctions = 2;
-
-
-
-//----------------------------------------------------------------------------------------------
-
-
-
-#ifdef Use_GPU
-#undef Use_CPU_Only
-#endif
 
 // Variable declarations
 Network_GPU* NGPU = new Network_GPU();
@@ -856,33 +845,13 @@ std::vector<std::vector<double>> GetNetworkOutput(std::vector<double> inputs) {
 	
 	//WIP
 	#ifdef Use_GPU
-	printFormatted("Internal", "Error", "GPU code unfinished. Cannot continue. Defaulting to CPU");
+	#error GPU code incomplete. Please undefine "Use_GPU" to continue compiling
 	#undef Use_GPU
-	#define Use_CPU_Only
-	#endif
-	
-	
-	
-	#ifdef Use_CPU_Only
+	#else
 	// Run CPU code here
 	
 	#endif
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
