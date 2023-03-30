@@ -6,11 +6,12 @@
 
 int numberOfIndexesPerThread = 10000;
 
-const int numberOfAvailableActivationFunctions = 2;
+const int numberOfAvailableActivationFunctions = 17;
 
 #define PI 3.14159265358979323846264338
 #define e  2.71828182845904523536028747
 
+// Node activation hyperparameters
 #define HYPERPARAMETER_P_ReLU 0.01
 #define HYPERPARAMETER_K_SOFTPLUS 1
 #define HYPERPARAMETER_A_ELU 1 			//A must be >= 0
@@ -22,6 +23,8 @@ int maxThreadCount = 4;
 std::string saveDirectory = "";
 
 int _genomeCount = 0, _inputCount = 0, _nodesPerLayer = 0, _hiddenLayerCount = 0, _outputNodes = 0;
+
+//Variable declaration for training config. Load from disk
 
 // Function declarations
 float getRandomFloat() { return getRandomFloat(0,1); }
@@ -84,7 +87,7 @@ void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer,
 	for (int i = 0; i < NGPU->nodes.size(); i++) {
 		NGPU->nodes[i].ID = i;
 		//NGPU->nodes[i].nTT = 1;	//Node trigger type. 0 for step, 1 for sigmoid
-		NGPU->nodes[i].nTT = rand() % numberOfAvailableActivationFunctions;
+		NGPU->nodes[i].nTT = rand() % (numberOfAvailableActivationFunctions+1) - 1;
 		
 		NGPU->nodes[i].nB = getRandomFloat();	//Node Bias
 		NGPU->nodes[i].pNB = NGPU->nodes[i].nB;
@@ -1014,4 +1017,8 @@ float GetNodeOutput(Node_GPU N) {
 	
 	NGPU->nodes[N.ID].pO = nodeOutput;
 	return nodeOutput;
+}
+
+void TrainNetwork() {
+	
 }
