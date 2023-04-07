@@ -10,9 +10,11 @@
 #define stopProgram() 	waitForUserInput();return 0;
 
 #define PORT 3490
+#define NEURAL_NETWORK_SAVE_LOCATION "/home/andrey/Desktop/AI Network"
+//#define NEURAL_NETWORK_SAVE_LOCATION "%USERPROFILE%/Desktop/AI Network"
 
 GLuint CSH_GetNetworkOutput = -1;
-GLuint CSH_TraingNetwork = -1;
+GLuint CSH_TrainingNetwork = -1;
 
 int main() {
 	// This is how to change the terminal title. I have no clue how this works, but StackOverflow does!
@@ -39,7 +41,8 @@ int main() {
 	printFormatted("Main", "Success", "OpenGL operational and ready");
 	printFormatted("Main", "Success", "Shaders compiled");
 	
-	
+	CreateNewLayeredNetwork(10000, 365, 150, 3, 2);
+	SaveNeuralNetwork(NEURAL_NETWORK_SAVE_LOCATION);
 	
 	print("Press any key to quit");
 	endProgram();
