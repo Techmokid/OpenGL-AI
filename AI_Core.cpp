@@ -842,6 +842,29 @@ void LoadNetworkConnections_MTwTDC(ThreadDataContainer* TDC) {
 	TDC->threadCompletionStatus = true;
 }
 
+bool SaveFileExists(std::string dir) {
+	print();
+	printFormatted("Check","Log","Loading neural network from parent disk directory: " + dir);
+	
+	if (dir == "") {
+		printFormatted("Check","Error","No directory given. Cannot check save file status");
+		quit();
+	}
+	
+	std::string netSaveDir    = dir + "Network Save Orig/";
+	std::string netBackupDir  = dir + "Network Save Backup/";
+	std::string netStatusFile = dir + "saveStatus.txt";
+	
+	if (std::filesystem::is_directory(dir) &&
+		std::filesystem::is_directory(netSaveDir) &&
+		std::filesystem::is_directory(netBackupDir) &&
+		std::filesystem::is_file(netStatusFile)
+	) {
+		return true;
+	}
+	return false;
+}
+
 Network_GPU* GetNetworkPointer() { return NGPU; }
 
 std::vector<std::vector<float>> GetNetworkOutput(std::vector<float> inputs) {
