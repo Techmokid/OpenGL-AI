@@ -1051,14 +1051,14 @@ float GetRandomFloat(float min, float max) {
 }
 
 void TrainGenome_MTwTDC(ThreadDataContainer* TDC) {
-	int nSI = NGPU->genomes[TDC.ID].Nodes_Start_Index;
-	int nEI = NGPU->genomes[TDC.ID].Nodes_End_Index;
-	bool revertFitness = NGPU->genomes[TDC.ID].fitness < NGPU->genomes[TDC.ID].prev_fitness;
+	int nSI = NGPU->genomes[TDC->ID].Nodes_Start_Index;
+	int nEI = NGPU->genomes[TDC->ID].Nodes_End_Index;
+	bool revertFitness = NGPU->genomes[TDC->ID].fitness < NGPU->genomes[TDC->ID].prev_fitness;
 	// Revert an unfit genome
 	if (revertFitness)
-		NGPU->genomes[TDC.ID].fitness = NGPU->genomes[TDC.ID].prev_fitness;
+		NGPU->genomes[TDC->ID].fitness = NGPU->genomes[TDC->ID].prev_fitness;
 	else:
-		NGPU->genomes[TDC.ID].prev_fitness = NGPU->genomes[TDC.ID].fitness;
+		NGPU->genomes[TDC->ID].prev_fitness = NGPU->genomes[TDC->ID].fitness;
 	
 	for (int i = nSI; i <= nEI; i++) {
 		if (revertFitness)
