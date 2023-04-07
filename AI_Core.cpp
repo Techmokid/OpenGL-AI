@@ -1057,14 +1057,14 @@ void TrainGenome_MTwTDC(ThreadDataContainer* TDC) {
 	// Revert an unfit genome
 	if (revertFitness)
 		NGPU->genomes[TDC->ID].fitness = NGPU->genomes[TDC->ID].prev_fitness;
-	else:
+	else
 		NGPU->genomes[TDC->ID].prev_fitness = NGPU->genomes[TDC->ID].fitness;
 	
 	for (int i = nSI; i <= nEI; i++) {
 		if (revertFitness)
 			NGPU->nodes[i].nB = NGPU->nodes[i].pNB;
 			//NGPU->nodes[i].pO = -99999;
-		else:
+		else
 			NGPU->nodes[i].pNB = NGPU->nodes[i].nB;
 			//NGPU->nodes[i].pO = -99999;
 		NGPU->nodes[i].nB += GetRandomFloat(-TRAINING_SPEED_TO_ACCURACY_RATIO, TRAINING_SPEED_TO_ACCURACY_RATIO);
@@ -1074,13 +1074,13 @@ void TrainGenome_MTwTDC(ThreadDataContainer* TDC) {
 		for (int i = wSI; i <= wEI; i++) {
 			if (revertFitness)
 				NGPU->connections[i].Weight = NGPU->connections[i].Prev_Weight;
-			else:
+			else
 				NGPU->connections[i].Prev_Weight = NGPU->connections[i].Weight;
 			NGPU->connections[i].Weight += GetRandomFloat(-TRAINING_SPEED_TO_ACCURACY_RATIO, TRAINING_SPEED_TO_ACCURACY_RATIO);
 		}
 	}
 		
-	threadCompletionStatus = true;
+	TDC->threadCompletionStatus = true;
 }
 
 void TrainNetwork() {
