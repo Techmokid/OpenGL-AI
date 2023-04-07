@@ -1020,5 +1020,30 @@ float GetNodeOutput(Node_GPU N) {
 }
 
 void TrainNetwork() {
+	#ifdef Use_GPU
+	// Run GPU code here. WIP
 	
+	#error GPU code incomplete. Please undefine "Use_GPU" to continue compiling
+	#else
+	for (int i = 0; i < NGPU->genomes.size(); i++) {
+		//NGPU->genomes[i].;
+		
+	}
+	for (int i = 0; i < NGPU->nodes.size(); i++) {
+		
+	}
+	for (int i = 0; i < NGPU->connections.size(); i++) {
+		
+	}
+	#endif
 }
+
+
+
+
+
+
+
+
+
+
