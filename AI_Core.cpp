@@ -1045,9 +1045,9 @@ float GetNodeOutput(Node_GPU N) {
 
 float GetRandomFloat(float min, float max) {
 	float random = ((float) rand()) / (float) RAND_MAX;
-    float diff = b - a;
+    float diff = max - min;
     float r = random * diff;
-    return a + r;
+    return min + r;
 }
 
 void TrainGenome_MTwTDC(ThreadDataContainer* TDC) {
