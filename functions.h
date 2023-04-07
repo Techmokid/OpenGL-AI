@@ -120,10 +120,15 @@ void SaveNetworkGenomes_MTwTDC		(ThreadDataContainer* TDC);
 void SaveNetworkNodes_MTwTDC			(ThreadDataContainer* TDC);
 void SaveNetworkConnections_MTwTDC(ThreadDataContainer* TDC);
 Network_GPU* GetNetworkPointer();
+
 std::vector<std::vector<float>> GetNetworkOutput(std::vector<float> inputs);
 void GetGenomeOutput_MTwTDC(ThreadDataContainer* TDC);
 float GetNodeOutput(int x);
 float GetNodeOutput(Node_GPU N);
+float GetRandomFloat(float min, float max);
+void TrainGenome_MTwTDC(ThreadDataContainer* TDC);
+void TrainNetwork();
+
 // Socket.cpp
 int StartSocket(int port);
 bool OpenSocket();

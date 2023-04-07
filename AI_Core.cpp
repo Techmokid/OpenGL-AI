@@ -2,19 +2,20 @@
 #include <vector>
 #include <filesystem>
 
+#define PI 3.14159265358979323846264338
+#define e  2.71828182845904523536028747
 //#define Use_GPU
 
 int numberOfIndexesPerThread = 10000;
-
 const int numberOfAvailableActivationFunctions = 17;
-
-#define PI 3.14159265358979323846264338
-#define e  2.71828182845904523536028747
 
 // Node activation hyperparameters
 #define HYPERPARAMETER_P_ReLU 0.01
 #define HYPERPARAMETER_K_SOFTPLUS 1
 #define HYPERPARAMETER_A_ELU 1 			//A must be >= 0
+
+// Training parameters
+#define TRAINING_SPEED_TO_ACCURACY_RATIO 0.001
 
 // Variable declarations
 Network_GPU* NGPU = new Network_GPU();
@@ -1019,21 +1020,96 @@ float GetNodeOutput(Node_GPU N) {
 	return nodeOutput;
 }
 
+float GetRandomFloat(float min, float max) {
+	float random = ((float) rand()) / (float) RAND_MAX;
+    float diff = b - a;
+    float r = random * diff;
+    return a + r;
+}
+
+void TrainGenome_MTwTDC(ThreadDataContainer* TDC) {
+	int nSI = NGPU->genomes[TDC.ID].Nodes_Start_Index;
+	int nEI = NGPU->genomes[TDC.ID].Nodes_End_Index;
+	bool revertFitness = NGPU->genomes[TDC.ID].fitness < NGPU->genomes[TDC.ID].prev_fitness;
+	// Revert an unfit genome
+	if (revertFitness)
+		NGPU->genomes[TDC.ID].fitness = NGPU->genomes[TDC.ID].prev_fitness;
+	else:
+		NGPU->genomes[TDC.ID].prev_fitness = NGPU->genomes[TDC.ID].fitness;
+	
+	for (int i = nSI; i <= nEI; i++) {
+		if (revertFitness)
+			NGPU->nodes[i].nB = NGPU->nodes[i].pNB;
+			//NGPU->nodes[i].pO = -99999;
+		else:
+			NGPU->nodes[i].pNB = NGPU->nodes[i].nB;
+			//NGPU->nodes[i].pO = -99999;
+		NGPU->nodes[i].nB += GetRandomFloat(-TRAINING_SPEED_TO_ACCURACY_RATIO, TRAINING_SPEED_TO_ACCURACY_RATIO);
+		
+		int wSI = NGPU->nodes[i].wSI;
+		int wEI = NGPU->nodes[i].wEI;
+		for (int i = wSI; i <= wEI; i++) {
+			if (revertFitness)
+				NGPU->connections[i].Weight = NGPU->connections[i].Prev_Weight;
+			else:
+				NGPU->connections[i].Prev_Weight = NGPU->connections[i].Weight;
+			NGPU->connections[i].Weight += GetRandomFloat(-TRAINING_SPEED_TO_ACCURACY_RATIO, TRAINING_SPEED_TO_ACCURACY_RATIO);
+		}
+	}
+		
+	threadCompletionStatus = true;
+}
+
 void TrainNetwork() {
 	#ifdef Use_GPU
 	// Run GPU code here. WIP
 	
 	#error GPU code incomplete. Please undefine "Use_GPU" to continue compiling
 	#else
-	for (int i = 0; i < NGPU->genomes.size(); i++) {
-		//NGPU->genomes[i].;
-		
+	
+	// Run CPU code here. WIP
+	std::vector<ThreadDataContainer*> TDC_List;
+	bool run = true;
+	bool genomesComplete = false;
+	int currentThreadCount = 0;
+	int genomeIndex = 0;
+	while(run) {
+		while(currentThreadCount < maxThreadCount) {
+			if (genomeIndex >= NGPU->genomes.size()) { run = false; break; }
+			
+			ThreadDataContainer* TDC_Genome = new ThreadDataContainer();
+			TDC_Genome->ID = genomeIndex;
+			
+			if (TDC_Genome->ID >= NGPU->genomes.size()) {
+				printFormatted("Save","Error", "Node indexing error while retreiving network output!");
+				quit();
+			}
+			
+			TDC_List.push_back(TDC_Genome);
+			
+			std::thread genomeThread(TrainGenome_MTwTDC, TDC_Genome);
+			genomeThread.detach();
+			genomeIndex++;
+			currentThreadCount++;
+		}
+		if (run) {
+			for (int x = 0; x < TDC_List.size(); x++) {
+				if (TDC_List[x]->threadCompletionStatus) {
+					TDC_List.erase(TDC_List.begin() + x);
+					currentThreadCount--;
+					x--;
+				}
+			}
+		}
 	}
-	for (int i = 0; i < NGPU->nodes.size(); i++) {
-		
-	}
-	for (int i = 0; i < NGPU->connections.size(); i++) {
-		
+	while(TDC_List.size() > 0) {
+		for (int x = 0; x < TDC_List.size(); x++) {
+			if (TDC_List[x]->threadCompletionStatus) {
+				TDC_List.erase(TDC_List.begin() + x);
+				currentThreadCount--;
+				x--;
+			}
+		}
 	}
 	#endif
 }
