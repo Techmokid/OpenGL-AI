@@ -858,7 +858,7 @@ bool SaveFileExists(std::string dir) {
 	if (std::filesystem::is_directory(dir) &&
 		std::filesystem::is_directory(netSaveDir) &&
 		std::filesystem::is_directory(netBackupDir) &&
-		std::filesystem::is_file(netStatusFile)
+		std::filesystem::exists(netStatusFile)
 	) {
 		return true;
 	}
