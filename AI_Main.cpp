@@ -1,17 +1,25 @@
+/*
 //Custom code setup
 #include "functions.h"
 #include <iostream>
 
-#define quit() 	waitForUserInput();return 0;
-#define end() 		waitForUserInput();return 0;
-#define stop() 	waitForUserInput();return 0;
+// Multiple variants of saying "Stop program" so I don't have to think which I used
+#define quit() 			waitForUserInput();return 0;
+#define end() 			waitForUserInput();return 0;
+#define stop() 			waitForUserInput();return 0;
 #define quitProgram() 	waitForUserInput();return 0;
 #define endProgram() 	waitForUserInput();return 0;
 #define stopProgram() 	waitForUserInput();return 0;
 
+// The port to use if using an internal server
 #define PORT 3490
+
+// Where to physically save the network
+#ifdef _WIN32
+#define NEURAL_NETWORK_SAVE_LOCATION "%USERPROFILE%/Desktop/AI Network"
+#else
 #define NEURAL_NETWORK_SAVE_LOCATION "/home/andrey/Desktop/AI Network"
-//#define NEURAL_NETWORK_SAVE_LOCATION "%USERPROFILE%/Desktop/AI Network"
+#endif
 
 GLuint CSH_GetNetworkOutput = -1;
 GLuint CSH_TrainingNetwork = -1;
@@ -47,3 +55,4 @@ int main() {
 	print("Press any key to quit");
 	endProgram();
 }
+*/

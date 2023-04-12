@@ -2,10 +2,6 @@
 #include <vector>
 #include <filesystem>
 
-#define PI 3.14159265358979323846264338
-#define e  2.71828182845904523536028747
-//#define Use_GPU
-
 int numberOfIndexesPerThread = 10000;
 const int numberOfAvailableActivationFunctions = 17;
 
@@ -15,7 +11,14 @@ const int numberOfAvailableActivationFunctions = 17;
 #define HYPERPARAMETER_A_ELU 1 			//A must be >= 0
 
 // Training parameters
+//#define Use_GPU
 #define TRAINING_SPEED_TO_ACCURACY_RATIO 0.001
+
+// Math constants because I'm too lazy to learn the math.h file
+#define PI 3.14159265358979323846264338
+#define e  2.71828182845904523536028747
+
+//----------------------------------------------------------------------------------------------------------
 
 // Variable declarations
 Network_GPU* NGPU = new Network_GPU();
