@@ -2,14 +2,13 @@
 
 gnome-terminal -- sh -c '
 #!/bin/sh
-echo "Getting Update Info"
+echo "Updating core libraries"
 sudo apt update
-
-echo "\n\nUpgrading System"
 sudo apt upgrade -y
-
-echo "\n\nUpgrading Distributions"
 sudo apt dist-upgrade -y
+
+echo "\n\nUpgrading OS"
+sudo do-release-upgrade -d
 
 echo "\n\nCompleted OS Updates!"
 
