@@ -8,6 +8,11 @@ int iProtocol = IPPROTO_TCP;
 int boundToPort = -1;
 std::string clientResponse = "";
 
+SOCKET sock = INVALID_SOCKET;
+SOCKET clientSock = INVALID_SOCKET;
+
+bool isConnectedToClient() { return (boundToPort!=-1)&&(clientSock!=INVALID_SOCKET) ; }
+
 #define bzero(b,len) (memset((b), '\0', (len)), (void) 0)
 
 #ifdef _WIN32
@@ -20,9 +25,6 @@ WSADATA wsaData = {0};
 int iResult;
 char recvbuf[DEFAULT_BUFLEN];
 int recvbuflen = DEFAULT_BUFLEN;
-
-SOCKET sock = INVALID_SOCKET;
-SOCKET clientSock = INVALID_SOCKET;
 
 sockaddr_in service;
 
@@ -119,19 +121,26 @@ bool AcceptClient() {
 }
 
 std::string GetClientResponse() {
-	if (clientSock == INVALID_SOCKET) { printFormatted("SERVER","ERROR","Client socket not initialized"); return ""; }
-	
-	iResult = recv(clientSock, recvbuf, recvbuflen, 0);
-	while(clientResponse.find("\n") != std::string::npos) {
-		while(iResult == 0) {
-			if (iResult < 0){ print("Error receiving data from client. Trying again"); }
-			clientResponse += recv(clientSock, recvbuf, recvbuflen, 0);
+	if (clientSock == -1) { printFormatted("SERVER","ERROR","Server socket not initialized"); return "INTERNAL ERROR"; }
+	if (boundToPort == -1) { printFormatted("SERVER","ERROR","Server socket not bound to port"); return "INTERNAL ERROR"; }
+
+	char recvBuff[DEFAULT_BUFLEN] = {0};
+	std::string clientResponse;
+	long timer = time(NULL);
+	while(time(NULL) - timer < 5) {
+		int bytesRead = recv(clientSock, recvBuff, DEFAULT_BUFLEN, 0);
+		if (bytesRead > 0) {
+			clientResponse += std::string(recvBuff, bytesRead);
+		}
+		if (clientResponse.find("\n") != std::string::npos) {
+			std::string result = clientResponse.substr(0, clientResponse.find("\n"));
+			clientResponse = clientResponse.substr(clientResponse.find("\n") + 1, clientResponse.length() - 1);
+
+			return result;
 		}
 	}
-	
-	std::string result = clientResponse.substr(0,clientResponse.find("\n"));
-	clientResponse = clientResponse.substr(clientResponse.find("\n"),clientResponse.length() - 1);
-	return std::string(result);
+
+	return "";
 }
 
 bool SendToClient(std::string dataToSend) {
@@ -236,8 +245,6 @@ bool CloseSocket(int i) {
 	if (result) { sock = -1; boundToPort = -1; }
 	return result;
 }
-
-
 
 bool SendToClient(std::string dataToSend) {
 	if (clientSock == -1) { printFormatted("SERVER","ERROR","Server socket not initialized"); return false; }

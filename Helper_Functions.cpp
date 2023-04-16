@@ -195,3 +195,37 @@ std::string RemoveSpecificCharacter(std::string x, char delim) {
 	}
 	return result;
 }
+
+#ifdef _WIN32
+std::string expandEnvironmentVariables(const std::string& inputPath) {
+    char output[MAX_PATH];
+    ExpandEnvironmentStringsA(inputPath.c_str(), output, MAX_PATH);
+    return std::string(output);
+}
+#else
+std::string expandEnvironmentVariables(const std::string& inputPath) {
+    std::string output;
+    size_t i = 0;
+    while (i < inputPath.length()) {
+        if (inputPath[i] == '$') {
+            std::string var;
+            i++;
+            while (i < inputPath.length() && inputPath[i] != '/') {
+                var += inputPath[i];
+                i++;
+            }
+            const char* value = std::getenv(var.c_str());
+            if (value == nullptr) {
+                std::cerr << "Environment variable " << var << " is not set.\n";
+                exit(EXIT_FAILURE);
+            }
+            output += value;
+        }
+        else {
+            output += inputPath[i];
+            i++;
+        }
+    }
+    return output;
+}
+#endif

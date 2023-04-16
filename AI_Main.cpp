@@ -1,4 +1,3 @@
-/*
 //Custom code setup
 #include "functions.h"
 #include <iostream>
@@ -16,9 +15,9 @@
 
 // Where to physically save the network
 #ifdef _WIN32
-#define NEURAL_NETWORK_SAVE_LOCATION "%USERPROFILE%/Desktop/AI Network"
+#define NEURAL_NETWORK_SAVE_LOCATION expandEnvironmentVariables("%USERPROFILE%/Desktop/AI Network")
 #else
-#define NEURAL_NETWORK_SAVE_LOCATION "/home/andrey/Desktop/AI Network"
+#define NEURAL_NETWORK_SAVE_LOCATION expandEnvironmentVariables("$HOME/Desktop/AI Network")
 #endif
 
 GLuint CSH_GetNetworkOutput = -1;
@@ -48,11 +47,11 @@ int main() {
 	StartWindow();
 	printFormatted("Main", "Success", "OpenGL operational and ready");
 	printFormatted("Main", "Success", "Shaders compiled");
+	printFormatted("Main", "Log", "Set save location to: " + NEURAL_NETWORK_SAVE_LOCATION);
 	
-	CreateNewLayeredNetwork(10000, 365, 150, 3, 2);
+	//CreateNewLayeredNetwork(10000, 365, 150, 3, 2);
+	CreateNewLayeredNetwork(1, 3, 5, 3, 2);
 	SaveNeuralNetwork(NEURAL_NETWORK_SAVE_LOCATION);
 	
-	print("Press any key to quit");
 	endProgram();
 }
-*/

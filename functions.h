@@ -52,6 +52,7 @@ std::string stringToUpper(std::string in);
 std::vector<std::string> SplitString(std::string inputVal, char delimiter);
 std::string ASCII_To_Numeric(std::string x);
 std::string RemoveSpecificCharacter(std::string x, char delim);
+std::string expandEnvironmentVariables(const std::string& inputPath);
 
 // AI_Core.cpp
 struct Genome_GPU {
@@ -130,6 +131,7 @@ void TrainGenome_MTwTDC(ThreadDataContainer* TDC);
 void TrainNetwork();
 
 // Socket.cpp
+bool isConnectedToClient();
 int StartSocket(int port);
 bool OpenSocket();
 bool CloseSocket();

@@ -1,4 +1,4 @@
-import socket
+import socket,time
 
 HOST = "localhost"#"192.168.1.12"  # The server's hostname or IP address
 PORT = 3490  # The port used by the server

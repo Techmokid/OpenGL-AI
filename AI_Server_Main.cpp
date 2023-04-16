@@ -1,4 +1,4 @@
-
+/*
 //Custom code setup
 #include "functions.h"
 #include <iostream>
@@ -61,8 +61,9 @@ int main() {
 		quitProgram();
 	}
 	
-	while(true) {
+	while(isConnectedToClient()) {
 		std::string msgRaw = GetClientResponse();
+		//std::string msgRaw = "Generate New Network: genomes=1, outputs=2, inputs=5, hiddenLayers=3,nodesPerLayer=5";
 		
 		try {
 			if (msgRaw.length() > 0) {
@@ -155,6 +156,9 @@ int main() {
 				}
 			} else {
 				printFormatted("MAIN", "Log", "Client Timeout");
+				CloseClientSocket();
+				printFormatted("MAIN","Success","Closed the client socket");
+				endProgram();
 			}
 		} catch (const std::exception& e) {
 			printFormatted("MAIN", "Log", "Error while parsing client response");
@@ -165,6 +169,6 @@ int main() {
 	// Finally shut down the server	
 	CloseClientSocket();
 	printFormatted("MAIN","Success","Closed the client socket");
-	print("Press any key to quit");
 	endProgram();
 }
+*/
