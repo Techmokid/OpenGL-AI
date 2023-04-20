@@ -138,29 +138,62 @@ void printFormatted(std::string module, std::string status, std::string msg) {
 }
 
 std::string TimeFormatter(double x) {
+	int digits = 2;
+	int mult = std::pow(10,digits);
+	
 	if (x >= 7 * 24 * 60 * 60 * 1000) {
-		return std::to_string((int)std::floor(x/(7*1000*60*60*24))) + " weeks";
+		return std::to_string(std::floor(x*mult/(7*1000*60*60*24))/mult) + " weeks";
 	} else if (x >= 24 * 60 * 60 * 1000) {
-		return std::to_string((int)std::floor(x/(1000*60*60*24))) + " days";
+		return std::to_string(std::floor(x*mult/(1000*60*60*24))/mult) + " days";
 	} else if (x >= 60 * 60 * 1000) {
-		return std::to_string((int)std::floor(x/(1000*60*60))) + " hours";
+		return std::to_string(std::floor(x*mult/(1000*60*60))/mult) + " hours";
 	} else if (x >= 60 * 1000) {
-		return std::to_string((int)std::floor(x/(1000*60))) + " minutes";
+		return std::to_string(std::floor(x*mult/(1000*60))/mult) + " minutes";
 	} else if (x >= 1000) {
-		return std::to_string((int)std::floor(x/1000)) + " seconds";
+		return std::to_string(std::floor(x*mult/1000)/mult) + " seconds";
 	} else if (x >= 1) {
-		return std::to_string((int)std::floor(x)) + " milliseconds";
+		return std::to_string(std::floor(x*mult)/mult) + " milliseconds";
 	} else if (x >= 1/1000) {
-		return std::to_string((int)std::floor(x*1000)) + " microseconds";
+		return std::to_string(std::floor(x*mult*1000)/mult) + " microseconds";
 	} else if (x >= 1/(1000*1000)) {
-		return std::to_string((int)std::floor(x*1000*1000)) + " nanoseconds";
+		return std::to_string(std::floor(x*mult*1000*1000)/mult) + " nanoseconds";
 	} else if (x >= 1/(1000*1000*1000)) {
-		return std::to_string((int)std::floor(x*1000*1000*1000)) + " picoseconds";
+		return std::to_string(std::floor(x*mult*1000*1000*1000)/mult) + " picoseconds";
 	} else if (x <= 1/(1000*1000*1000)) {
 		return "Time too small for formatting";
 	} else {
 		return "Time too large for formatting";
 	}
+}
+
+std::string DataSizeFormatter(unsigned long long int x) {
+	int digits = 2;
+	int mult = std::pow(10,digits);
+	unsigned long long int MB_CALC = 1000*1000;
+	unsigned long long int GB_CALC = 1000*1000*1000;
+	
+	if (x < 0) {
+		printFormatted("Data Format", "Error", "Cannot format a negative memory size? Was given: " + std::to_string(x));
+		quit();
+	} else if (x < 8) {
+		return std::to_string(x) + " b";
+	}
+	
+	x /= 8;
+	if (x < 1000) {
+		return std::to_string(x) + " B";
+	} else if (x < MB_CALC) {
+		return std::to_string(x/1000) + " KB";
+	} else if (x < GB_CALC) {
+		return std::to_string(x/MB_CALC) + " MB";
+	} else if (x < GB_CALC*1000) {
+		return std::to_string(x/GB_CALC) + " GB";
+	} else {
+		printFormatted("Data Format", "Error", "Data size too large. Size given: " + std::to_string(x/GB_CALC) + " GB");
+		quit();
+	}
+	
+	return "";
 }
 
 std::vector<std::string> SplitString(std::string inputVal, char delimiter) {

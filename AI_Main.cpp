@@ -15,7 +15,8 @@
 
 // Where to physically save the network
 #ifdef _WIN32
-#define NEURAL_NETWORK_SAVE_LOCATION expandEnvironmentVariables("%USERPROFILE%/Desktop/AI Network")
+//#define NEURAL_NETWORK_SAVE_LOCATION expandEnvironmentVariables("%USERPROFILE%/Desktop/AI Network")
+#define NEURAL_NETWORK_SAVE_LOCATION expandEnvironmentVariables("F:/AI Network")
 #else
 #define NEURAL_NETWORK_SAVE_LOCATION expandEnvironmentVariables("$HOME/Desktop/AI Network")
 #endif
@@ -24,9 +25,6 @@ GLuint CSH_GetNetworkOutput = -1;
 GLuint CSH_TrainingNetwork = -1;
 
 int main() {
-	// This is how to change the terminal title. I have no clue how this works, but StackOverflow does!
-	// PS1='\[\e]0;Neural Server\a\]${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
-	
 	// Set up the terminal with basic starting information
 	ClearConsole();
 	
@@ -49,9 +47,55 @@ int main() {
 	printFormatted("Main", "Success", "Shaders compiled");
 	printFormatted("Main", "Log", "Set save location to: " + NEURAL_NETWORK_SAVE_LOCATION);
 	
-	//CreateNewLayeredNetwork(10000, 365, 150, 3, 2);
-	CreateNewLayeredNetwork(1, 3, 5, 3, 2);
-	SaveNeuralNetwork(NEURAL_NETWORK_SAVE_LOCATION);
+	CreateNewLayeredNetwork(100, 365, 100, 3, 2);
+	//CreateNewLayeredNetwork(8704, 365, 150, 5, 2);
+	//SaveNeuralNetwork(NEURAL_NETWORK_SAVE_LOCATION);
 	
-	endProgram();
+	Network_GPU* NGPU = GetNetworkPointer();
+	
+	std::vector<float> neuralInputs;
+	std::vector<std::vector<float>> neuralWallets;
+	for (int i = 0; i < 365; i++) {
+		neuralInputs.push_back(GetAndUpdateFakeMarketPrice());
+		neuralWallets.push_back(std::vector<float>());
+	}
+	
+	while(true) {
+		// Training loop
+		float worstFitness = 0;
+		float averageFitness = 0;
+		float bestFitness = 0;
+		
+		neuralInputs.push_back(GetAndUpdateFakeMarketPrice());
+		neuralInputs.erase(neuralInputs.begin());
+		std::vector<std::vector<float>> networkOutputs = GetNetworkOutput(neuralInputs);
+		std::vector<float> networkFitnesses;
+		for (int i = 0; i < NGPU->genomes.size(); i++) {
+			float genomeFitness = getRandomFloat();
+			
+			
+			
+			
+			
+			
+			averageFitness += genomeFitness;
+			networkFitnesses.push_back(genomeFitness);
+			
+			worstFitness = std::min(genomeFitness, worstFitness);
+			bestFitness =  std::max(genomeFitness, bestFitness);
+		}
+		averageFitness /= NGPU->genomes.size();
+		
+		SetNetworkFitnesses(networkFitnesses);
+		TrainNetwork();
+		printFormatted("Main", "Log", "Epoch: " + std::to_string(getCurrentEpoch()));
+		printFormatted("Main", "Log", "Worst Fitness: " + std::to_string(worstFitness));
+		printFormatted("Main", "Log", "Average Fitness: " + std::to_string(averageFitness));
+		printFormatted("Main", "Log", "Best Fitness: " + std::to_string(bestFitness));
+		print();
+		
+		//if (getCurrentEpoch() % 10 == 0)
+		//	SaveNeuralNetwork(NEURAL_NETWORK_SAVE_LOCATION);
+		
+	}
 }

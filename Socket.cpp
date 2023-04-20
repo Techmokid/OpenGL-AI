@@ -287,17 +287,3 @@ std::string GetClientResponse() {
 }
 
 #endif
-
-
-
-
-
-
-
-
-
-
-
-
-
-

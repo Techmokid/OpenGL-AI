@@ -180,22 +180,3 @@ void ShutDownOpenGL() {
   
   glfwTerminate();
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

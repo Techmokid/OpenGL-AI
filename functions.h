@@ -45,6 +45,7 @@ void printInfo(std::string module, std::string msg);
 void printDebug(std::string module, std::string msg);
 void SetConsoleColor(int colour);
 std::string TimeFormatter(double x);
+std::string DataSizeFormatter(unsigned long long int x);
 void waitForUserInput();
 std::string stringToLower(std::string in);
 std::string stringToLowerCapitalized(std::string in);
@@ -62,6 +63,7 @@ struct Genome_GPU {
 	double prev_fitness = std::numeric_limits<int>::min();
 	int Nodes_Start_Index = -1;
 	int Nodes_End_Index = -1;
+	int FailedNetworkIterations = 0;
 };
 		
 struct Node_GPU {
@@ -100,6 +102,8 @@ struct ThreadDataContainer {
 	int EndIndex;
 };
 
+int getCurrentEpoch();
+Network_GPU GetNetwork();
 void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer, int hiddenLayerCount, int outputNodes);
 void quit();
 
@@ -117,8 +121,8 @@ float getRandomFloat(float HI, float LO);
 void LoadNetworkGenomes_MTwTDC(ThreadDataContainer* TDC);
 void LoadNetworkNodes_MTwTDC(ThreadDataContainer* TDC);
 void LoadNetworkConnections_MTwTDC(ThreadDataContainer* TDC);
-void SaveNetworkGenomes_MTwTDC		(ThreadDataContainer* TDC);
-void SaveNetworkNodes_MTwTDC			(ThreadDataContainer* TDC);
+void SaveNetworkGenomes_MTwTDC(ThreadDataContainer* TDC);
+void SaveNetworkNodes_MTwTDC(ThreadDataContainer* TDC);
 void SaveNetworkConnections_MTwTDC(ThreadDataContainer* TDC);
 Network_GPU* GetNetworkPointer();
 
@@ -129,6 +133,7 @@ float GetNodeOutput(Node_GPU N);
 float GetRandomFloat(float min, float max);
 void TrainGenome_MTwTDC(ThreadDataContainer* TDC);
 void TrainNetwork();
+void SetNetworkFitnesses(std::vector<float> fitnesses);
 
 // Socket.cpp
 bool isConnectedToClient();
@@ -159,3 +164,9 @@ GLuint StartShaderProgram(GLuint computeShader, std::vector<GLuint*> ssbo);
 GLuint InitializeShader(std::string shaderPath);
 void checkShaderCompileStatus(GLuint shader);
 void ShutDownOpenGL();
+
+//FakeMarket.cpp
+void UpdateFakeMarket();
+float GetFakeMarketPrice();
+std::vector<float> GetFakeMarketHistory();
+float GetAndUpdateFakeMarketPrice();
