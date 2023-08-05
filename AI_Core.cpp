@@ -3,24 +3,7 @@
 #include <filesystem>
 
 int numberOfIndexesPerThread = 10000;
-const int numberOfAvailableActivationFunctions = 17;
-
-// Node activation hyperparameters
-#define HYPERPARAMETER_P_ReLU 0.01
-#define HYPERPARAMETER_K_SOFTPLUS 1
-#define HYPERPARAMETER_A_ELU 1 			//A must be >= 0
-
-// Training parameters
-//#define Use_GPU
-#define TRAINING_SPEED_TO_ACCURACY_RATIO 0.001
-#define MAX_FAILED_ITERATIONS 100
-#define GENOME_SURVIVAL_PERCENTAGE 5
-
-// Math constants because I'm too lazy to learn the math.h file
-#define PI 3.14159265358979323846264338
-#define e  2.71828182845904523536028747
-
-//----------------------------------------------------------------------------------------------------------
+int numberOfAvailableActivationFunctions = 17;
 
 // Variable declarations
 Network_GPU* NGPU = new Network_GPU();
@@ -30,13 +13,13 @@ std::string saveDirectory = "";
 
 int _genomeCount = 0, _inputCount = 0, _nodesPerLayer = 0, _hiddenLayerCount = 0, _outputNodes = 0, epoch = 0;
 
-//Variable declaration for training config. Load from disk
-
-// Function declarations
-
 Network_GPU* GetNetworkPointer() { return NGPU; }
-
-int getCurrentEpoch() { return epoch; }
+int GetGenomeCount() {            return _genomeCount; }
+int GetGenomeInputCount() {       return _inputCount; }
+int GetGenomeNodesPerLayer() {    return _nodesPerLayer; }
+int GetGenomeHiddenLayerCount() { return _hiddenLayerCount; }
+int GetGenomeOutputCount() {      return _outputNodes; }
+int getCurrentEpoch() {           return epoch; }
 
 bool initiailizedRandomNumberGenerator = false;
 float getRandomFloat() { return getRandomFloat(0,1); }
@@ -224,12 +207,18 @@ void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer,
 	printFormatted("Neural", "Success", "Neural Network generated");
 }
 
-void quit() {
-	print();
-	print();
-	print("Press enter to close the program");
-	std::cin.get();
-	exit(1);
+void SaveNeuralNetworkNonBlocking(std::string dir, int* status) {
+	saveDirectory = dir + "/";
+	SaveNeuralNetworkNonBlocking(status);
+}
+void SaveNeuralNetworkNonBlocking(int* status) {
+	std::thread t(SaveNeuralNetworkHandler, status);
+	t.detach();
+}
+
+void SaveNeuralNetworkHandler(int* status) {
+	SaveNeuralNetwork();
+	*status = 2;
 }
 
 void SaveNeuralNetwork(std::string dir) { saveDirectory = dir + "/"; SaveNeuralNetwork(); }
@@ -382,7 +371,7 @@ void SaveNeuralNetworkInternal(std::string dir) {
 	std::vector<ThreadDataContainer*> TDC_List;
 	bool run = true;
 	int genomeIndex = 0;
-	int maxThreadCount = std::thread::hardware_concurrency();
+	int maxThreadCount = std::thread::hardware_concurrency()/2;
 	int currentThreadCount = 0;
 			
 	printFormatted("Save","Debug", "Genome File Count: " + std::to_string(ceil((float)NGPU->genomes.size()/(float)numberOfIndexesPerThread)));
@@ -585,17 +574,6 @@ void saveFileRepair() {
 	printFormatted("File Repair","Success","Repaired save directory!");
 }
 
-void SetNetworkFitnesses(std::vector<float> fitnesses) {
-	if (fitnesses.size() != NGPU->genomes.size()) {
-		printFormatted("Internal","Error", "Could not apply network fitness values as the number of values is not the same as the number of genomes");
-		quit();
-	}
-	
-	for (int i = 0; i < NGPU->genomes.size(); i++) {
-		NGPU->genomes[i].fitness = fitnesses[i];
-	}
-}
-
 void LoadNetworkGPU(std::string dir) { saveDirectory = dir + "/"; LoadNetworkGPU(); }
 void LoadNetworkGPU() {
 	print();
@@ -710,7 +688,7 @@ void LoadNetworkGPU() {
 	std::vector<ThreadDataContainer*> TDC_List;
 	bool run = true;
 	int genomeIndex = 0;
-	int maxThreadCount = std::thread::hardware_concurrency();
+	int maxThreadCount = std::thread::hardware_concurrency()/2;
 	int currentThreadCount = 0;
 	while(run) {
 		while(currentThreadCount < maxThreadCount) {
@@ -905,9 +883,19 @@ bool SaveFileExists(std::string dir) {
 	return false;
 }
 
-std::vector<std::vector<float>> GetNetworkOutput(std::vector<float> inputs) {
-	epoch++;
+void SetNetworkFitnesses(std::vector<float> fitnesses) {
+	if (fitnesses.size() != NGPU->genomes.size()) {
+		printFormatted("Internal","Error", "Could not apply network fitness values as the number of values is not the same as the number of genomes");
+		quit();
+	}
 	
+	for (int i = 0; i < NGPU->genomes.size(); i++) {
+		NGPU->genomes[i].fitness = fitnesses[i];
+		//#error GPU implimentation of SetNetworkFitnesses incomplete
+	}
+}
+
+std::vector<std::vector<float>> GetNetworkOutput(std::vector<float> inputs) {
 	if (_inputCount != inputs.size()) {
 		printFormatted("Internal","ERROR","Could not set network inputs. Incorrect quantity of data");
 		quit();
@@ -919,7 +907,6 @@ std::vector<std::vector<float>> GetNetworkOutput(std::vector<float> inputs) {
 		}
 	}
 	
-	#ifdef Use_GPU
 	// Run GPU code here. WIP
 	int outputsCount = 0;
 	for(int i = 0; i < NGPU->nodes.size(); i++) {
@@ -940,146 +927,15 @@ std::vector<std::vector<float>> GetNetworkOutput(std::vector<float> inputs) {
 	
 	double outputsArray[outputsCount];
 	
-	#error GPU code incomplete. Please undefine "Use_GPU" to continue compiling
-	#else
-	// Run CPU code here. WIP
-	std::vector<ThreadDataContainer*> TDC_List;
-	bool run = true;
-	bool nodesComplete = false;
-	int currentThreadCount = 0;
-	int genomeIndex = 0;
+	// Get the data from the GPU here
 	
-	while(run) {
-		while(currentThreadCount < maxThreadCount) {
-			if (genomeIndex >= NGPU->genomes.size()) { run = false; break; }
-			
-			ThreadDataContainer* TDC_Node = new ThreadDataContainer();
-			TDC_Node->ID = genomeIndex;
-			
-			if (TDC_Node->ID >= NGPU->genomes.size()) {
-				printFormatted("Save","Error", "Node indexing error while retreiving network output!");
-				quit();
-			}
-			
-			TDC_List.push_back(TDC_Node);
-			
-			std::thread genomeThread(GetGenomeOutput_MTwTDC, TDC_Node);
-			genomeThread.detach();
-			
-			currentThreadCount++;
-			genomeIndex++;
-		}
-		if (run) {
-			for (int x = 0; x < TDC_List.size(); x++) {
-				if (TDC_List[x]->threadCompletionStatus) {
-					TDC_List.erase(TDC_List.begin() + x);
-					currentThreadCount--;
-					x--;
-				}
-			}
-		}
-	}
-	while(TDC_List.size() > 0) {
-		for (int x = 0; x < TDC_List.size(); x++) {
-			if (TDC_List[x]->threadCompletionStatus) {
-				TDC_List.erase(TDC_List.begin() + x);
-				currentThreadCount--;
-				x--;
-			}
-		}
-	}
-	#endif
+	//
+	//
+	//
+	
+	// Now that we have the GPU data, we have to check if there are any genomes that need to be reset
 	
 	return *NetworkOutputs;
-}
-
-void GetGenomeOutput_MTwTDC(ThreadDataContainer* TDC) {
-	int nodesPerGenome = _inputCount + _nodesPerLayer*_hiddenLayerCount + _outputNodes;
-	int genomeStart = _genomeCount*nodesPerGenome;
-	int outputsStart = (TDC->ID + 1)*nodesPerGenome - _outputNodes - 1;
-	
-	//*NetworkOutputs
-	for (int i = 0; i < _outputNodes; i++) {
-		NetworkOutputs->at(TDC->ID).at(i) = GetNodeOutput(NGPU->nodes[outputsStart + i]);
-	}
-	
-	TDC->threadCompletionStatus = true;
-	return;
-}
-
-float GetNodeOutput(Node_GPU N) {
-	if (NGPU->nodes[N.ID].nII)
-		return NGPU->nodes[N.ID].nIV;
-	if (NGPU->nodes[N.ID].pO != -99999)
-		return NGPU->nodes[N.ID].pO;
-	
-	int result = 0;
-	for (int i = NGPU->nodes[N.ID].wSI; i <= NGPU->nodes[N.ID].wEI; i++) {
-		result += NGPU->connections[i].Weight * GetNodeOutput(0);//NGPU->nodes[NGPU->connections[i].NodePos]);
-	}
-	
-	float nodeOutput = 0;
-	switch (N.nTT) {
-		case -1: //Disable Node
-			break;
-		case 0:  //Step
-			nodeOutput = (int)result>=0;
-			break;
-		case 1:  //Sine
-			nodeOutput = std::sin(result);
-			break;
-		case 2:  //Modded Sine
-			nodeOutput = result * std::sin(result);
-			break;
-		case 3:  //Cosine
-			nodeOutput = std::cos(result);
-			break;
-		case 4:  //Modded Cosine
-			nodeOutput = result * std::cos(result);
-			break;
-		case 5:  //Sigmoid
-			nodeOutput = 1/(1 + std::pow(e, -result));
-			break;
-		case 6:  //SiLU
-			nodeOutput = result * 1/(1 + std::pow(e, -result));
-			break;
-		case 7:  //ReLU
-			nodeOutput = result<=0?0:result;
-			break;
-		case 8:  //Leaky ReLU
-			nodeOutput = result<=0?0.01*result:result;
-			break;
-		case 9:  //Parametric ReLU
-			nodeOutput = result<=0?HYPERPARAMETER_P_ReLU*result:result;
-			break;
-		case 10: //Softplus
-			nodeOutput = std::log(1 + std::pow(e,result));
-			break;
-		case 11: //Modified Softplus
-			nodeOutput = result * std::log(1 + std::pow(e,result));
-			break;
-		case 12: //Hyperparameterized Softplus
-			nodeOutput = std::log(1 + std::pow(e,HYPERPARAMETER_K_SOFTPLUS*result))/HYPERPARAMETER_K_SOFTPLUS;
-			break;
-		case 13: //SReLU
-			nodeOutput = std::max(-HYPERPARAMETER_A_ELU, result);
-			break;
-		case 14: //ELU
-			nodeOutput = result<=0?HYPERPARAMETER_A_ELU*(std::pow(e,result) - 1):result;
-			break;
-		case 15: //Mish
-			nodeOutput = result*std::tanh(std::log(1 + std::pow(e,result)));
-			break;
-		case 16: //Metallic Means
-			nodeOutput = (result + std::sqrt(std::pow(result,2) + 4))/2;
-			break;
-		default: //Default Node Response
-			nodeOutput = result;
-			break;
-	}
-	
-	NGPU->nodes[N.ID].pO = nodeOutput;
-	return nodeOutput;
 }
 
 float GetRandomFloat(float min, float max) {
@@ -1093,148 +949,3 @@ float GetRandomFloat(float min, float max) {
     float r = random * diff;
     return min + r;
 }
-
-void TrainGenome_MTwTDC(ThreadDataContainer* TDC) {
-	int nSI = NGPU->genomes[TDC->ID].Nodes_Start_Index;
-	int nEI = NGPU->genomes[TDC->ID].Nodes_End_Index;
-	bool revertFitness = NGPU->genomes[TDC->ID].fitness < NGPU->genomes[TDC->ID].prev_fitness;
-	if (revertFitness)
-		NGPU->genomes[TDC->ID].FailedNetworkIterations++;
-	else
-		NGPU->genomes[TDC->ID].FailedNetworkIterations=0;
-	
-	bool resetGenome = NGPU->genomes[TDC->ID].FailedNetworkIterations > MAX_FAILED_ITERATIONS;
-	
-	int numberOfGenomesAboveThisGenome = 0;
-	for (int i = 0; i < NGPU->genomes.size(); i++) {
-		// Here is where we check to see if our genome is performing in the top 5% of genomes
-		// If we are in the top 5%, then DO NOT reset the genome.
-		if (
-			(NGPU->genomes[i].fitness > NGPU->genomes[TDC->ID].fitness) ||
-			(NGPU->genomes[i].fitness > NGPU->genomes[TDC->ID].prev_fitness) ||
-			(NGPU->genomes[i].prev_fitness > NGPU->genomes[TDC->ID].fitness) ||
-			(NGPU->genomes[i].prev_fitness > NGPU->genomes[TDC->ID].prev_fitness)
-		) {
-			numberOfGenomesAboveThisGenome++;
-		}
-	}
-	
-	float genomePerformancePercentage = 100 - 100*numberOfGenomesAboveThisGenome/NGPU->genomes.size();
-	if (genomePerformancePercentage < GENOME_SURVIVAL_PERCENTAGE) {
-		resetGenome = false;
-		NGPU->genomes[TDC->ID].FailedNetworkIterations = 0;
-	}
-	
-	// Revert an unfit genome
-	if (!resetGenome) {
-		if (revertFitness)
-			NGPU->genomes[TDC->ID].fitness = NGPU->genomes[TDC->ID].prev_fitness;
-		else
-			NGPU->genomes[TDC->ID].prev_fitness = NGPU->genomes[TDC->ID].fitness;
-	} else {
-		NGPU->genomes[TDC->ID].fitness = std::numeric_limits<int>::min();
-		NGPU->genomes[TDC->ID].prev_fitness = std::numeric_limits<int>::min();
-	}
-	
-	for (int i = nSI; i <= nEI; i++) {
-		int wSI = NGPU->nodes[i].wSI;
-		int wEI = NGPU->nodes[i].wEI;
-		
-		if (!resetGenome) {
-			if (revertFitness)
-				NGPU->nodes[i].nB = NGPU->nodes[i].pNB;
-				//NGPU->nodes[i].pO = -99999;
-			else
-				NGPU->nodes[i].pNB = NGPU->nodes[i].nB;
-				//NGPU->nodes[i].pO = -99999;
-			NGPU->nodes[i].nB += GetRandomFloat(-TRAINING_SPEED_TO_ACCURACY_RATIO, TRAINING_SPEED_TO_ACCURACY_RATIO);
-		} else {
-			NGPU->nodes[i].nTT = rand() % (numberOfAvailableActivationFunctions+1) - 1;
-			NGPU->nodes[i].nB = getRandomFloat();
-			NGPU->nodes[i].pNB = NGPU->nodes[i].nB;
-			NGPU->nodes[i].nIV = 0;
-			NGPU->nodes[i].pO = -99999;
-		}
-		
-		for (int i = wSI; i <= wEI; i++) {
-			if (!resetGenome) {
-				if (revertFitness)
-					NGPU->connections[i].Weight = NGPU->connections[i].Prev_Weight;
-				else
-					NGPU->connections[i].Prev_Weight = NGPU->connections[i].Weight;
-				NGPU->connections[i].Weight += GetRandomFloat(-TRAINING_SPEED_TO_ACCURACY_RATIO, TRAINING_SPEED_TO_ACCURACY_RATIO);
-			} else {
-				NGPU->connections[i].Weight = getRandomFloat();
-				NGPU->connections[i].Prev_Weight = NGPU->connections[i].Weight;
-			}
-		}
-	}
-		
-	TDC->threadCompletionStatus = true;
-}
-
-void TrainNetwork() {
-	epoch++;
-	
-	#ifdef Use_GPU
-	// Run GPU code here. WIP
-	
-	#error GPU code incomplete. Please undefine "Use_GPU" to continue compiling
-	#else
-	
-	// Run CPU code here. WIP
-	std::vector<ThreadDataContainer*> TDC_List;
-	bool run = true;
-	bool genomesComplete = false;
-	int currentThreadCount = 0;
-	int genomeIndex = 0;
-	while(run) {
-		while(currentThreadCount < maxThreadCount) {
-			if (genomeIndex >= NGPU->genomes.size()) { run = false; break; }
-			
-			ThreadDataContainer* TDC_Genome = new ThreadDataContainer();
-			TDC_Genome->ID = genomeIndex;
-			
-			if (TDC_Genome->ID >= NGPU->genomes.size()) {
-				printFormatted("Save","Error", "Node indexing error while retreiving network output!");
-				quit();
-			}
-			
-			TDC_List.push_back(TDC_Genome);
-			
-			std::thread genomeThread(TrainGenome_MTwTDC, TDC_Genome);
-			genomeThread.detach();
-			genomeIndex++;
-			currentThreadCount++;
-		}
-		if (run) {
-			for (int x = 0; x < TDC_List.size(); x++) {
-				if (TDC_List[x]->threadCompletionStatus) {
-					TDC_List.erase(TDC_List.begin() + x);
-					currentThreadCount--;
-					x--;
-				}
-			}
-		}
-	}
-	while(TDC_List.size() > 0) {
-		for (int x = 0; x < TDC_List.size(); x++) {
-			if (TDC_List[x]->threadCompletionStatus) {
-				TDC_List.erase(TDC_List.begin() + x);
-				currentThreadCount--;
-				x--;
-			}
-		}
-	}
-	#endif
-}
-
-
-
-
-
-
-
-
-
-

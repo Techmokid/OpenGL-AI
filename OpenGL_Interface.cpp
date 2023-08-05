@@ -16,6 +16,12 @@ std::string GetShaderCode(std::string shaderPath) {
   // Get the compute shader from disk
   std::ifstream myfile;
   myfile.open(shaderPath);
+  
+  if (myfile.fail()) {
+	  printFormatted("OpenGL", "Error", "OpenGL file could not retreive filedata from file that does not exist: " + shaderPath);
+	  quit();
+  }
+  
   std::string computeShaderSourceString;
   
   char c;
@@ -103,6 +109,7 @@ GLuint CompileShader(std::string computeShaderCode) {
   std::strcpy(cstr, computeShaderCode.c_str());
   return CompileShader(cstr);
 }
+
 GLuint CompileShader(const char* computeShaderSource) {
   GLuint computeShader = glCreateShader(GL_COMPUTE_SHADER);
   glShaderSource(computeShader, 1, &computeShaderSource, NULL);
@@ -134,6 +141,13 @@ GLuint StartShaderProgram(GLuint computeShader) {
 
 GLuint InitializeShader(std::string shaderPath) {
   std::string computeShaderCode = GetShaderCode(shaderPath);
+  std::string computeShaderCodeCopy = computeShaderCode;
+  computeShaderCodeCopy = RemoveSpecificCharacter(computeShaderCodeCopy,' ');
+  computeShaderCodeCopy = RemoveSpecificCharacter(computeShaderCodeCopy,'\t');
+  computeShaderCodeCopy = RemoveSpecificCharacter(computeShaderCodeCopy,'\n');
+  computeShaderCodeCopy = RemoveSpecificCharacter(computeShaderCodeCopy,'\r');
+  if (computeShaderCodeCopy.length() == 0)
+	  printFormatted("OpenGL", "Warning", "Compute shader is empty: " + shaderPath);
   
   //const char* versionStr = (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
   //std::cout << "GLSL version supported by the current context: " << versionStr << std::endl;
@@ -143,9 +157,9 @@ GLuint InitializeShader(std::string shaderPath) {
   std::strcpy(cstr, computeShaderCode.c_str());
   
   GLuint computeHandle = CompileShader(cstr);
+  
   StartShaderProgram(computeHandle);
   
-  //std::cout << computeShaderCode;
   return computeHandle;
 }
 
@@ -156,8 +170,8 @@ void checkShaderCompileStatus(GLuint shader) {
     char log[1024];
     GLsizei length;
     glGetShaderInfoLog(shader, sizeof(log), &length, log);
-    std::cerr << "Shader compilation failed: " << log << std::endl;
-	exit(1);
+    printFormatted("OpenGL", "Error", "Shader compilation failed: " + std::string(log));
+	quit();
   }
 }
 

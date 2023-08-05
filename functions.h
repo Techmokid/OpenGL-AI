@@ -54,13 +54,15 @@ std::vector<std::string> SplitString(std::string inputVal, char delimiter);
 std::string ASCII_To_Numeric(std::string x);
 std::string RemoveSpecificCharacter(std::string x, char delim);
 std::string expandEnvironmentVariables(const std::string& inputPath);
+void quit();
+void delay(unsigned int t);
 
 // AI_Core.cpp
 struct Genome_GPU {
 	Genome_GPU() { }
 	int ID = -1;
-	double fitness = std::numeric_limits<int>::min();
-	double prev_fitness = std::numeric_limits<int>::min();
+	float fitness = std::numeric_limits<int>::min();
+	float prev_fitness = std::numeric_limits<int>::min();
 	int Nodes_Start_Index = -1;
 	int Nodes_End_Index = -1;
 	int FailedNetworkIterations = 0;
@@ -71,13 +73,13 @@ struct Node_GPU {
 	int ID = -1;			//Identification code		// The ID of this node
 			
 	int nTT = 0;		//Node trigger typeof		// 0 is step, 1 is sigmoid
-	double nB = 0;		//Node bias
-	double pNB = 0;		//Previous node bias
+	float nB = 0;		//Node bias
+	float pNB = 0;		//Previous node bias
 			
 	bool nII = false; 	//node Is Input				// Is the node is an input or not
 	bool nIO = false; 	//node Is Output			// Is the node is an output or not
-	double nIV = 0;			//node Input Value			// If the node is an input, what have we entered
-	double pO = -99999;	//precalculated Output		// This variable just allows for quicker genome output computing
+	float nIV = 0;			//node Input Value			// If the node is an input, what have we entered
+	float pO = -99999;	//precalculated Output		// This variable just allows for quicker genome output computing
 			
 	int wSI = 0; 		//weights Start Index		// This is the position in the weights array where the start of this nodes connections are held
 	int wEI = 0;			//weights End Index			// This is the position in the weights array where the end of this nodes connections are held
@@ -85,8 +87,8 @@ struct Node_GPU {
 		
 struct NodeConnection_GPU {
 	int NodePos;
-	double Weight;
-	double Prev_Weight;
+	float Weight;
+	float Prev_Weight;
 };
 		
 struct Network_GPU {
@@ -102,14 +104,22 @@ struct ThreadDataContainer {
 	int EndIndex;
 };
 
+Network_GPU* GetNetworkPointer();
+int GetGenomeCount();
+int GetGenomeInputCount();
+int GetGenomeNodesPerLayer();
+int GetGenomeHiddenLayerCount();
+int GetGenomeOutputCount();
 int getCurrentEpoch();
-Network_GPU GetNetwork();
+
 void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer, int hiddenLayerCount, int outputNodes);
-void quit();
 
 void LoadNetworkGPU(std::string dir);
 void LoadNetworkGPU();
 
+void SaveNeuralNetworkNonBlocking(std::string dir, int* status);
+void SaveNeuralNetworkNonBlocking(int* status);
+void SaveNeuralNetworkHandler(int* status);
 void SaveNeuralNetwork();
 void SaveNeuralNetwork(std::string dir);
 void SaveNeuralNetworkInternal(std::string dir);
@@ -164,6 +174,44 @@ GLuint StartShaderProgram(GLuint computeShader, std::vector<GLuint*> ssbo);
 GLuint InitializeShader(std::string shaderPath);
 void checkShaderCompileStatus(GLuint shader);
 void ShutDownOpenGL();
+
+template<typename T>
+void Set_SSBO_Buffer(std::vector<T> &obj, GLuint ssbo, int buffer_index) {
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, obj.size() * sizeof(T), obj.data(), GL_STATIC_DRAW);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, buffer_index, ssbo);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+}
+
+template<typename T>
+void Set_SSBO_Buffer(T &obj, GLuint ssbo, int buffer_index) {
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(T), &obj, GL_STATIC_DRAW);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, buffer_index, ssbo);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+}
+
+template<typename T>
+void Set_SSBO_Buffer(T obj, GLuint ssbo, int buffer_index) {
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(T), &obj, GL_STATIC_DRAW);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, buffer_index, ssbo);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+}
+
+template<typename T>
+void Get_SSBO_Buffer(std::vector<T> &obj, GLuint ssbo) {
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+    glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, obj.size() * sizeof(T), obj.data());
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+}
+
+template<typename T>
+void Get_SSBO_Buffer(T &obj, GLuint ssbo) {
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+    glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(T), obj.data());
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+}
 
 //FakeMarket.cpp
 void UpdateFakeMarket();

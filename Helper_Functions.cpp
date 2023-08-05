@@ -262,3 +262,16 @@ std::string expandEnvironmentVariables(const std::string& inputPath) {
     return output;
 }
 #endif
+
+void quit() {
+	print();
+	print();
+	print("Press enter to close the program");
+	std::cin.get();
+	exit(1);
+}
+
+void delay(unsigned int t) {
+	std::chrono::system_clock::time_point waitUntil = std::chrono::system_clock::now() + std::chrono::seconds(t);
+	std::this_thread::sleep_until(waitUntil);
+}
