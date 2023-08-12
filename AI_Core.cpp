@@ -96,6 +96,14 @@ void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer,
 	NGPU->nodes.clear();
 	NGPU->nodes.resize(totalNodeCountPerGenome * genomeCount);
 	
+	size_t totalSize = 	sizeof(Genome_GPU) * NGPU->genomes.capacity() +
+						sizeof(Node_GPU) * NGPU->nodes.capacity() +
+						sizeof(NodeConnection_GPU) * NGPU->connections.capacity() +
+						sizeof(Network_GPU);
+	printFormatted("Neural", "Success", "Allocated " + DataSizeFormatter(totalSize) + " for Network: ");
+	print();
+	printFormatted("Neural", "Log", "Configuring New Neural Network");
+	
 	//WIP
 	for (int i = 0; i < NGPU->nodes.size(); i++) {
 		NGPU->nodes[i].ID = i;

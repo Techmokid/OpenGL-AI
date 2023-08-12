@@ -76,18 +76,18 @@ int main() {
 	
 	//Apply the SSBO
 	printFormatted("OpenGL", "Log", "Applying Shader SSBOs");
-	GLuint SSBOs[8];
-	glGenBuffers(8, SSBOs);
+	GLuint SSBOs[9];
+	glGenBuffers(9, SSBOs);
 	Set_SSBO_Buffer(NGPU->genomes,     SSBOs[0] ,0);								// Set the neural genomes
 	Set_SSBO_Buffer(NGPU->nodes,       SSBOs[1] ,1);								// Set the neural nodes
 	Set_SSBO_Buffer(NGPU->connections, SSBOs[2] ,2);								// Set the neural connections
 	Set_SSBO_Buffer(std::vector<float>(GetGenomeInputCount(),  0), SSBOs[3] ,3);	// Set the input array
 	Set_SSBO_Buffer(std::vector<float>(GetGenomeOutputCount(), 0), SSBOs[4] ,4);	// Set the output array
 	Set_SSBO_Buffer(0, SSBOs[5] ,5);												// Set the epoch counter to epoch 0
-	Set_SSBO_Buffer(0, SSBOs[6] ,6);												// Set the ResetGenomeIDStart to 0
-	Set_SSBO_Buffer(0, SSBOs[7] ,7);												// Set the GenomeResetCount to 0
+	Set_SSBO_Buffer(10, SSBOs[6],6);												// Set the percentage threshold of suvival for poor performing genomes
+	Set_SSBO_Buffer(true, SSBOs[7] ,7);												// Set the neural networks to do training
 	printFormatted("OpenGL", "Success", "Shader SSBOs Applied");
-	
+	return 0;
 	
 	
 	// Everything above this statement works perfectly.
@@ -109,9 +109,11 @@ int main() {
 		
 		neuralInputs.push_back(GetAndUpdateFakeMarketPrice());
 		neuralInputs.erase(neuralInputs.begin());
+		Edit_SSBO_Buffer(neuralInputs, SSBOs[3]);
+		
 		//std::vector<std::vector<float>> networkOutputs = GetNetworkOutput(neuralInputs);
 		std::vector<float> networkFitnesses;
-		for (int i = 0; i < NGPU->genomes.size(); i++) {
+		for (int i = 0; i < NGPU->genomes.size(); i++)  {
 			float genomeFitness = getRandomFloat();
 			
 			

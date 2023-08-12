@@ -58,11 +58,10 @@ layout(std430, binding = 2) buffer neuralNetwork2 { NodeConnection_GPU cArr[]; }
 layout(std430, binding = 3) buffer neuralNetwork3 { float inputArray[];        };
 layout(std430, binding = 4) buffer neuralNetwork4 { float outputArray[];       };
 layout(std430, binding = 5) buffer neuralNetwork5 { int epoch;                 };
-	
-	// Is there a genome ready to be reset? This saves tremendous CPU processing time and GPU/CPU communications where not necessary
-	// Increment GenomeResetCount by one for each genome to be reset. GenomeResetIDStart tells the CPU later where to start looking for the genome in the array
-layout(std430, binding = 6) buffer neuralNetwork6 { uint GenomeResetIDStart;   };
-layout(std430, binding = 7) buffer neuralNetwork7 { uint GenomeResetCount;     };
+layout(std430, binding = 6) buffer neuralNetwork6 { int genomeSurvivalPerc;    };
+
+// Do we want the network to actually train, or just provide output values? If pretrained, set this to false
+layout(std430, binding = 7) buffer neuralNetwork7 { bool doTraining;           };
 
 // Generate a random number, given an input seed and the current epoch
 float random(int genomeID) {
@@ -72,7 +71,7 @@ float random(int genomeID) {
 
 void main() {
 	uint ID = gl_GlobalInvocationID.x;
-	epoch++;
+	if (doTraining) { epoch++; }
 	
 	int numOutputs = 0;
 	int outputNodeIndex = 0;
@@ -81,26 +80,30 @@ void main() {
 	
 	// Did the neural network perform better or worse than last iteration? Ignore if this is the first epoch
 	bool revertToPrev = (epoch != 1) && (gArr[ID].fitness < gArr[ID].prev_fitness);
-	if (revertToPrev) {
-		gArr[ID].FailedNetworkIterations++;
-		
-		// Now we decide if it performed TOO badly. If so, reset the genome entirely.
-		if (gArr[ID].FailedNetworkIterations > MAX_FAILED_ITERATIONS) {
-			for (int nodeIndex = nodesStart; nodeIndex <= nodesEnd; nodeIndex++) {
-				if (GenomeResetIDStart > ID) { GenomeResetIDStart = ID; }
-				GenomeResetCount++;
-				
-				if (nArr[nodeIndex].nIO) {
-					outputArray[numOutputs*ID + outputNodeIndex] = OUTPUT_ERROR_VALUE;
-					outputNodeIndex++;
+	if (doTraining) {
+		if (revertToPrev) {
+			gArr[ID].FailedNetworkIterations++;
+			
+			// Now we decide if it performed TOO badly. If so, reset the genome entirely.
+			if (gArr[ID].FailedNetworkIterations > MAX_FAILED_ITERATIONS) {
+				for (int nodeIndex = nodesStart; nodeIndex <= nodesEnd; nodeIndex++) {
+					// HERE WE HAVE TO ITERATE THROUGH AND DECIDE IF WE ARE THE AMONG THE BEST PERFORMING 10 OR SO. W.I.P
+					
+					
+					if (nArr[nodeIndex].nIO) {
+						outputArray[numOutputs*ID + outputNodeIndex] = OUTPUT_ERROR_VALUE;
+						outputNodeIndex++;
+					}
 				}
+				return;
 			}
-			return;
+			
+			gArr[ID].fitness = gArr[ID].prev_fitness;
+		} else {
+			gArr[ID].FailedNetworkIterations = 0;
 		}
-		
-		gArr[ID].fitness = gArr[ID].prev_fitness;
 	} else {
-		gArr[ID].FailedNetworkIterations = 0;
+		revertToPrev = false;
 	}
 	
 	// If required, revert back to a better working version of the genome

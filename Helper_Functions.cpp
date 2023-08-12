@@ -175,11 +175,8 @@ std::string DataSizeFormatter(unsigned long long int x) {
 	if (x < 0) {
 		printFormatted("Data Format", "Error", "Cannot format a negative memory size? Was given: " + std::to_string(x));
 		quit();
-	} else if (x < 8) {
-		return std::to_string(x) + " b";
 	}
 	
-	x /= 8;
 	if (x < 1000) {
 		return std::to_string(x) + " B";
 	} else if (x < MB_CALC) {

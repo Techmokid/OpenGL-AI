@@ -213,6 +213,27 @@ void Get_SSBO_Buffer(T &obj, GLuint ssbo) {
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
 
+template<typename T>
+void Edit_SSBO_Buffer(std::vector<T> &obj, GLuint ssbo) {
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+    glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, obj.size() * sizeof(T), obj.data());
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+}
+
+template<typename T>
+void Edit_SSBO_Buffer(T &obj, GLuint ssbo) {
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+    glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, obj.size() * sizeof(T), obj.data());
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+}
+
+template<typename T>
+void Edit_SSBO_Buffer(T obj, GLuint ssbo) {
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+    glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(T), &obj);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+}
+
 //FakeMarket.cpp
 void UpdateFakeMarket();
 float GetFakeMarketPrice();
