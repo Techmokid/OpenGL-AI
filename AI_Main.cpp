@@ -87,18 +87,6 @@ int main() {
 	Set_SSBO_Buffer(10, SSBOs[6],6);												// Set the percentage threshold of suvival for poor performing genomes
 	Set_SSBO_Buffer(true, SSBOs[7] ,7);												// Set the neural networks to do training
 	printFormatted("OpenGL", "Success", "Shader SSBOs Applied");
-	return 0;
-	
-	
-	// Everything above this statement works perfectly.
-	// --------------------------------------------------------------------------------------------------------------------------
-	// --------------------------------------------------------------------------------------------------------------------------
-	// --------------------------------------------------------------------------------------------------------------------------
-	// --------------------------------------------------------------------------------------------------------------------------
-	// --------------------------------------------------------------------------------------------------------------------------
-	// Everything below this statement may need to be rewritten entirely
-	
-	
 	
 	bool already = false;
 	while(true) {
@@ -111,8 +99,34 @@ int main() {
 		neuralInputs.erase(neuralInputs.begin());
 		Edit_SSBO_Buffer(neuralInputs, SSBOs[3]);
 		
-		//std::vector<std::vector<float>> networkOutputs = GetNetworkOutput(neuralInputs);
+		// Dispatch the compute shader here
+		glDispatchCompute(GPU_AVAILABLE_CORE_COUNT, 0, 0);
+		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		// Everything above this statement works perfectly.
+		// --------------------------------------------------------------------------------------------------------------------------
+		// --------------------------------------------------------------------------------------------------------------------------
+		// --------------------------------------------------------------------------------------------------------------------------
+		// --------------------------------------------------------------------------------------------------------------------------
+		// --------------------------------------------------------------------------------------------------------------------------
+		// Everything below this statement may need to be rewritten entirely
+		
+		
+		// Now we retrieve the output of the GPU
+		std::vector<std::vector<float>> networkOutputs = GetNetworkOutput(SSBOs[4]);
 		std::vector<float> networkFitnesses;
+		
 		for (int i = 0; i < NGPU->genomes.size(); i++)  {
 			float genomeFitness = getRandomFloat();
 			

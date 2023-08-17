@@ -903,47 +903,10 @@ void SetNetworkFitnesses(std::vector<float> fitnesses) {
 	}
 }
 
-std::vector<std::vector<float>> GetNetworkOutput(std::vector<float> inputs) {
-	if (_inputCount != inputs.size()) {
-		printFormatted("Internal","ERROR","Could not set network inputs. Incorrect quantity of data");
-		quit();
-	}
+std::vector<std::vector<float>> GetNetworkOutput(GLuint location) {
+	std::vector<float> rawGPUOutput;
+	Get_SSBO_Buffer(rawGPUOutput,location);
 	
-	for (int g = 0; g < _genomeCount; g++) {
-		for (int n = 0; n < _inputCount; n++) {
-			NGPU->nodes[NGPU->genomes[g].Nodes_Start_Index + n].nIV = inputs[n];
-		}
-	}
-	
-	// Run GPU code here. WIP
-	int outputsCount = 0;
-	for(int i = 0; i < NGPU->nodes.size(); i++) {
-		if (NGPU->nodes[i].nII && NGPU->nodes[i].nIO)
-			printFormatted("Internal","ERROR","Could not get network output. Network detected duplicate input/output node");
-		if (NGPU->nodes[i].nIO)
-			outputsCount++;
-	}
-	
-	outputsCount *= NGPU->genomes.size();
-	
-	Genome_GPU 				 genomeArray		[NGPU->genomes.size()];
-	Node_GPU 					 nodeArray			[NGPU->nodes.size()];
-	NodeConnection_GPU connectionArray[NGPU->connections.size()];
-	std::copy(NGPU->genomes.begin(),     NGPU->genomes.end(),     genomeArray);
-	std::copy(NGPU->nodes.begin(),  NGPU->nodes.end(),       nodeArray);
-	std::copy(NGPU->connections.begin(), NGPU->connections.end(), connectionArray);
-	
-	double outputsArray[outputsCount];
-	
-	// Get the data from the GPU here
-	
-	//
-	//
-	//
-	
-	// Now that we have the GPU data, we have to check if there are any genomes that need to be reset
-	
-	return *NetworkOutputs;
 }
 
 float GetRandomFloat(float min, float max) {

@@ -58,7 +58,7 @@ layout(std430, binding = 2) buffer neuralNetwork2 { NodeConnection_GPU cArr[]; }
 layout(std430, binding = 3) buffer neuralNetwork3 { float inputArray[];        };
 layout(std430, binding = 4) buffer neuralNetwork4 { float outputArray[];       };
 layout(std430, binding = 5) buffer neuralNetwork5 { int epoch;                 };
-layout(std430, binding = 6) buffer neuralNetwork6 { int genomeSurvivalPerc;    };
+layout(std430, binding = 6) buffer neuralNetwork6 { float genomeSurvivalPerc;  };
 
 // Do we want the network to actually train, or just provide output values? If pretrained, set this to false
 layout(std430, binding = 7) buffer neuralNetwork7 { bool doTraining;           };
@@ -86,16 +86,58 @@ void main() {
 			
 			// Now we decide if it performed TOO badly. If so, reset the genome entirely.
 			if (gArr[ID].FailedNetworkIterations > MAX_FAILED_ITERATIONS) {
-				for (int nodeIndex = nodesStart; nodeIndex <= nodesEnd; nodeIndex++) {
-					// HERE WE HAVE TO ITERATE THROUGH AND DECIDE IF WE ARE THE AMONG THE BEST PERFORMING 10 OR SO. W.I.P
+				int betterGenomeCount  = 0;
+				int bestGenomeIndex1st = 0;
+				int bestGenomeIndex2nd = 0;
+				int bestGenomeIndex3rd = 0;
+				for (int g = 0; g < gArr.size(); g++) {
+					if (gArr[g].prevFitness > gArr[ID].prevFitness) { betterGenomeCount++; }
 					
-					
-					if (nArr[nodeIndex].nIO) {
-						outputArray[numOutputs*ID + outputNodeIndex] = OUTPUT_ERROR_VALUE;
-						outputNodeIndex++;
+					if (gArr[g].prevFitness > gArr[bestGenomeIndex3rd].prevFitness) { bestGenomeIndex3rd = g; }
+					if (gArr[g].prevFitness > gArr[bestGenomeIndex2nd].prevFitness) {
+						bestGenomeIndex3rd = bestGenomeIndex2nd;
+						bestGenomeIndex2nd = g;
+					}
+					if (gArr[g].prevFitness > gArr[bestGenomeIndex1st].prevFitness) {
+						bestGenomeIndex2nd = bestGenomeIndex1st;
+						bestGenomeIndex1st = g;
 					}
 				}
-				return;
+				
+				if (betterGenomeCount/gArr.size() < genomeSurvivalPerc) {
+					// We have performed too poorly and must be either reset entirely or genetically mutated with the best performing genomes
+					bool randomize = random(ID) > 0.0;
+					for (int n = gArr[ID].nodesStart; n <= gArr[ID].nodesEnd; n++) {
+						for (int c = nArr[n].wSI; c <= nArr[n].wEI; c++) {
+							float selectedWeight = 0;
+							float r = random(4.651*ID * n + 83.162*c/n);
+							selectedWeight = r;
+							
+							if (!randomize) {
+								int nIndex = n - gArr[ID].nodesStart;
+								int cIndex = c - nArr[n].wSI;
+								if (r > 0.5) {
+									nIndex += gArr[bestGenomeIndex1st].nodesStart;
+									selectedWeight = cArr[nArr[nIndex].wSI + cIndex].Prev_Weight;
+								} else if (r > 0) {
+									nIndex += gArr[bestGenomeIndex2nd].nodesStart;
+									selectedWeight = cArr[nArr[nIndex].wSI + cIndex].Prev_Weight;
+								} else if (r > -0.5) {
+									nIndex += gArr[bestGenomeIndex3rd].nodesStart;
+									selectedWeight = cArr[nArr[nIndex].wSI + cIndex].Prev_Weight;
+								} else {
+									selectedWeight = 4.651*ID*n + 83.162*c/n
+								}
+							}
+							
+							cArr[c].Prev_Weight = selectedWeight;
+							cArr[c].Weight = cArr[c].Prev_Weight;
+						}
+					}
+						
+					gArr[ID].fitness = 0;
+					gArr[ID].prev_fitness = 0;
+				}
 			}
 			
 			gArr[ID].fitness = gArr[ID].prev_fitness;
