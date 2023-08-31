@@ -1,6 +1,5 @@
 #include "functions.h"
 #include <vector>
-#include <filesystem>
 
 int numberOfIndexesPerThread = 10000;
 int numberOfAvailableActivationFunctions = 17;
@@ -907,6 +906,15 @@ std::vector<std::vector<float>> GetNetworkOutput(GLuint location) {
 	std::vector<float> rawGPUOutput;
 	Get_SSBO_Buffer(rawGPUOutput,location);
 	
+	int outputsPerGenome = _outputNodes;
+	std::vector<std::vector<float>> results(_genomeCount);
+	for (int i = 0; i < _genomeCount; i++) {
+		results[i] = std::vector<float>(outputsPerGenome);
+		for (int z = 0; z < outputsPerGenome; z++) {
+			results[i][z] = rawGPUOutput[z + i*outputsPerGenome];
+		}
+	}
+	return results;
 }
 
 float GetRandomFloat(float min, float max) {

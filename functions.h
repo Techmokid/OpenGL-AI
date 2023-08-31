@@ -11,6 +11,7 @@
 #include <stdexcept>	// Required for error handling
 #include <thread>			// Required to allow for CPU multithreading
 #include <fstream>
+#include <filesystem>
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
@@ -56,6 +57,7 @@ std::string RemoveSpecificCharacter(std::string x, char delim);
 std::string expandEnvironmentVariables(const std::string& inputPath);
 void quit();
 void delay(unsigned int t);
+void SetWallpaper(std::string path);
 
 // AI_Core.cpp
 struct Genome_GPU {
@@ -136,7 +138,7 @@ void SaveNetworkNodes_MTwTDC(ThreadDataContainer* TDC);
 void SaveNetworkConnections_MTwTDC(ThreadDataContainer* TDC);
 Network_GPU* GetNetworkPointer();
 
-std::vector<std::vector<float>> GetNetworkOutput(std::vector<float> inputs);
+std::vector<std::vector<float>> GetNetworkOutput(GLuint location);
 void GetGenomeOutput_MTwTDC(ThreadDataContainer* TDC);
 float GetNodeOutput(int x);
 float GetNodeOutput(Node_GPU N);
