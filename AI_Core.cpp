@@ -6,11 +6,15 @@ int numberOfAvailableActivationFunctions = 17;
 
 // Variable declarations
 Network_GPU* NGPU = new Network_GPU();
+Network_GPU* NGPU_Copy = new Network_GPU();
+
 std::vector<std::vector<float>>* NetworkOutputs = new std::vector<std::vector<float>>();
 int maxThreadCount = 4;
 std::string saveDirectory = "";
 
 int _genomeCount = 0, _inputCount = 0, _nodesPerLayer = 0, _hiddenLayerCount = 0, _outputNodes = 0, epoch = 0;
+bool* savingInProgress = new bool(false);
+
 
 Network_GPU* GetNetworkPointer() { return NGPU; }
 int GetGenomeCount() {            return _genomeCount; }
@@ -286,7 +290,7 @@ void SaveNetworkGenomes_MTwTDC(ThreadDataContainer* TDC) {
 	Genome_GPU G[TDC->EndIndex - TDC->ID + 1];
 	
 	for(int i = TDC->ID; i <= TDC->EndIndex; i++) {
-		G[i - TDC->ID] = NGPU->genomes[i];
+		G[i - TDC->ID] = NGPU_Copy->genomes[i];
 	}
 	
 	std::string filepath = TDC->path + "Genomes/Genome Data " + std::to_string(TDC->ID) + ".csv";
@@ -311,7 +315,7 @@ void SaveNetworkGenomes_MTwTDC(ThreadDataContainer* TDC) {
 void SaveNetworkNodes_MTwTDC(ThreadDataContainer* TDC) {
 	Node_GPU N[TDC->EndIndex - TDC->ID + 1];
 	for(int i = TDC->ID; i <= TDC->EndIndex; i++) {
-		N[i - TDC->ID] = NGPU->nodes[i];
+		N[i - TDC->ID] = NGPU_Copy->nodes[i];
 	}
 	
 	std::string filepath = TDC->path + "Nodes/Node Data " + std::to_string(TDC->ID) + ".csv";
@@ -340,7 +344,7 @@ void SaveNetworkNodes_MTwTDC(ThreadDataContainer* TDC) {
 void SaveNetworkConnections_MTwTDC(ThreadDataContainer* TDC) {
 	NodeConnection_GPU C[TDC->EndIndex - TDC->ID + 1];
 	for(int i = TDC->ID; i <= TDC->EndIndex; i++) {
-		C[i - TDC->ID] = NGPU->connections[i];
+		C[i - TDC->ID] = NGPU_Copy->connections[i];
 	}
 	
 	std::string filepath = TDC->path + "Node Connections/Connection Data " + std::to_string(TDC->ID) + ".csv";
@@ -381,9 +385,9 @@ void SaveNeuralNetworkInternal(std::string dir) {
 	int maxThreadCount = std::thread::hardware_concurrency()/2;
 	int currentThreadCount = 0;
 			
-	printFormatted("Save","Debug", "Genome File Count: " + std::to_string(ceil((float)NGPU->genomes.size()/(float)numberOfIndexesPerThread)));
-	printFormatted("Save","Debug", "Node File Count: " + std::to_string(ceil((float)NGPU->nodes.size()/(float)numberOfIndexesPerThread)));
-	printFormatted("Save","Debug", "Node Connections File Count: " + std::to_string(ceil((float)NGPU->connections.size()/(float)numberOfIndexesPerThread)));
+	printFormatted("Save","Debug", "Genome File Count: " + std::to_string(ceil((float)NGPU_Copy->genomes.size()/(float)numberOfIndexesPerThread)));
+	printFormatted("Save","Debug", "Node File Count: " + std::to_string(ceil((float)NGPU_Copy->nodes.size()/(float)numberOfIndexesPerThread)));
+	printFormatted("Save","Debug", "Node Connections File Count: " + std::to_string(ceil((float)NGPU_Copy->connections.size()/(float)numberOfIndexesPerThread)));
 	printFormatted("Save","Debug", "Index Count per CPU Thread: " + std::to_string(numberOfIndexesPerThread));	
 	
 	//Now we actually start saving the AI to disk
@@ -391,13 +395,13 @@ void SaveNeuralNetworkInternal(std::string dir) {
 	bool nodesComplete = false;
 	while(run) {
 		while(currentThreadCount < maxThreadCount) {
-			if (genomeIndex >= NGPU->connections.size()) { run = false; break; }
+			if (genomeIndex >= NGPU_Copy->connections.size()) { run = false; break; }
 			
 			ThreadDataContainer* TDC_Connection = new ThreadDataContainer();
 			TDC_Connection->ID = genomeIndex;
-			TDC_Connection->EndIndex = genomeIndex + std::min(numberOfIndexesPerThread - 1, (int)NGPU->connections.size() - genomeIndex - 1);
+			TDC_Connection->EndIndex = genomeIndex + std::min(numberOfIndexesPerThread - 1, (int)NGPU_Copy->connections.size() - genomeIndex - 1);
 			
-			if (TDC_Connection->EndIndex >= NGPU->connections.size()) {
+			if (TDC_Connection->EndIndex >= NGPU_Copy->connections.size()) {
 				printFormatted("Save","Error", "Connection indexing error!");
 				quit();
 			}
@@ -410,13 +414,13 @@ void SaveNeuralNetworkInternal(std::string dir) {
 			
 			currentThreadCount++;
 			
-			if (genomeIndex < NGPU->nodes.size()) {
+			if (genomeIndex < NGPU_Copy->nodes.size()) {
 				ThreadDataContainer* TDC_Node = new ThreadDataContainer();
 				TDC_Node->ID = genomeIndex;
-				TDC_Node->EndIndex = genomeIndex + std::min(numberOfIndexesPerThread - 1,(int)NGPU->nodes.size()-genomeIndex-1);
+				TDC_Node->EndIndex = genomeIndex + std::min(numberOfIndexesPerThread - 1,(int)NGPU_Copy->nodes.size()-genomeIndex-1);
 				TDC_Node->path = dir;
 				
-				if (TDC_Node->EndIndex >= NGPU->nodes.size()) {
+				if (TDC_Node->EndIndex >= NGPU_Copy->nodes.size()) {
 					printFormatted("Save","Error","Node indexing error!");
 					quit();
 				}
@@ -433,13 +437,13 @@ void SaveNeuralNetworkInternal(std::string dir) {
 				}
 			}
 			
-			if (genomeIndex < NGPU->genomes.size()) {
+			if (genomeIndex < NGPU_Copy->genomes.size()) {
 				ThreadDataContainer* TDC_Genome = new ThreadDataContainer();
 				TDC_Genome->ID = genomeIndex;
-				TDC_Genome->EndIndex = genomeIndex + std::min(numberOfIndexesPerThread - 1,(int)(NGPU->genomes.size())-genomeIndex-1);
+				TDC_Genome->EndIndex = genomeIndex + std::min(numberOfIndexesPerThread - 1,(int)(NGPU_Copy->genomes.size())-genomeIndex-1);
 				TDC_Genome->path = dir;
 				
-				if (TDC_Genome->EndIndex >= NGPU->genomes.size()) {
+				if (TDC_Genome->EndIndex >= NGPU_Copy->genomes.size()) {
 					printFormatted("Save","Error","Genome indexing error!");
 					quit();
 				}
@@ -903,6 +907,18 @@ void SetNetworkFitnesses(std::vector<float> fitnesses) {
 }
 
 std::vector<std::vector<float>> GetNetworkOutput(GLuint location) {
+	if (!*savingInProgress) {
+		*savingInProgress = true;
+		
+		NGPU_Copy = new Network_GPU();
+		NGPU_Copy->genomes =     NGPU->genomes.copy();
+		NGPU_Copy->nodes =       NGPU->nodes.copy();
+		NGPU_Copy->connections = NGPU->connections.copy();
+		
+		//Here we want to start up the multithreaded CPU saving process
+		SaveNeuralNetworkNonBlocking(&savingInProgress);
+	}
+	
 	std::vector<float> rawGPUOutput;
 	Get_SSBO_Buffer(rawGPUOutput,location);
 	

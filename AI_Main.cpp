@@ -23,6 +23,8 @@
 
 #define GPU_AVAILABLE_CORE_COUNT 8704
 
+#define STOCK_TAX_PERC = 0.1
+
 GLuint CSH_RunAndTrainNetwork = -1;
 
 // 0 - Not saving. GPU has nothing to do
@@ -60,10 +62,8 @@ int main() {
 	Network_GPU* NGPU = GetNetworkPointer();
 	
 	std::vector<float> neuralInputs;
-	std::vector<std::vector<float>> neuralWallets;
 	for (int i = 0; i < 365; i++) {
 		neuralInputs.push_back(GetAndUpdateFakeMarketPrice());
-		neuralWallets.push_back(std::vector<float>());
 	}
 	
 	//Starting computation window
@@ -88,6 +88,10 @@ int main() {
 	Set_SSBO_Buffer(true, SSBOs[7] ,7);												// Set the neural networks to do training
 	printFormatted("OpenGL", "Success", "Shader SSBOs Applied");
 	
+	std::vector<float> neuralWallets;
+	std::vector<int> neuralStocks;
+	for (int i = 0; i < NGPU->genomes.size(); i++) { neuralWallets.push_back(10000); neuralStocks.push_back(0); }
+	
 	bool already = false;
 	while(true) {
 		// Training loop
@@ -103,17 +107,6 @@ int main() {
 		glDispatchCompute(GPU_AVAILABLE_CORE_COUNT, 0, 0);
 		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
 		// Everything above this statement works perfectly.
 		// --------------------------------------------------------------------------------------------------------------------------
 		// --------------------------------------------------------------------------------------------------------------------------
@@ -122,19 +115,36 @@ int main() {
 		// --------------------------------------------------------------------------------------------------------------------------
 		// Everything below this statement may need to be rewritten entirely
 		
-		
 		// Now we retrieve the output of the GPU
 		std::vector<std::vector<float>> networkOutputs = GetNetworkOutput(SSBOs[4]);
 		std::vector<float> networkFitnesses;
 		
+		float currentMarketValue = neuralInputs[neuralInputs.size() - 1];
+		
 		for (int i = 0; i < NGPU->genomes.size(); i++)  {
-			float genomeFitness = getRandomFloat();
+			if ((networkOutputs[i*2] > 0) && (networkOutputs[i*2 + 1] <= 0)) {
+				// Buy a stock
+				
+				//float NUM_STOCKS_AFFORDABLE = (float)floor(neuralWallets[i]/currentMarketValue);
+				//neuralWallets[i] -= NUM_STOCKS_AFFORDABLE*currentMarketValue;
+				//neuralStocks[i] += NUM_STOCKS_AFFORDABLE*currentMarketValue;
+				
+				if (currentMarketValue <= neuralWallets[i]) {
+					neuralWallets[i] -= currentMarketValue;
+					neuralStocks[i] += 1;
+				}
+			} else if ((networkOutputs[i*2] <= 0) && (networkOutputs[i*2 + 1] > 0)) {
+				// Sell a stock
+				
+				//neuralWallets[i] += currentMarketValue*neuralStocks[i];
+				//neuralStocks[i] -= 0;
+				if (neuralStocks[i] > 0) {
+					neuralStocks[i] -= 1;
+					neuralWallets[i] += currentMarketValue * (1 - STOCK_TAX_PERC);
+				}
+			}
 			
-			
-			
-			
-			
-			
+			float genomeFitness = neuralWallets[i] + neuralStocks[i]*currentMarketValue;
 			averageFitness += genomeFitness;
 			networkFitnesses.push_back(genomeFitness);
 			
