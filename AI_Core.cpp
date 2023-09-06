@@ -218,18 +218,18 @@ void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer,
 	printFormatted("Neural", "Success", "Neural Network generated");
 }
 
-void SaveNeuralNetworkNonBlocking(std::string dir, int* status) {
+void SaveNeuralNetworkNonBlocking(std::string dir, bool* status) {
 	saveDirectory = dir + "/";
 	SaveNeuralNetworkNonBlocking(status);
 }
-void SaveNeuralNetworkNonBlocking(int* status) {
+void SaveNeuralNetworkNonBlocking(bool* status) {
 	std::thread t(SaveNeuralNetworkHandler, status);
 	t.detach();
 }
 
-void SaveNeuralNetworkHandler(int* status) {
+void SaveNeuralNetworkHandler(bool* status) {
 	SaveNeuralNetwork();
-	*status = 2;
+	*status = false;
 }
 
 void SaveNeuralNetwork(std::string dir) { saveDirectory = dir + "/"; SaveNeuralNetwork(); }
