@@ -23,7 +23,7 @@
 
 #define GPU_AVAILABLE_CORE_COUNT 8704
 
-#define STOCK_TAX_PERC = 0.1
+#define STOCK_TAX_PERC 0.1
 
 GLuint CSH_RunAndTrainNetwork = -1;
 
@@ -122,7 +122,7 @@ int main() {
 		float currentMarketValue = neuralInputs[neuralInputs.size() - 1];
 		
 		for (int i = 0; i < NGPU->genomes.size(); i++)  {
-			if ((networkOutputs[i*2] > 0) && (networkOutputs[i*2 + 1] <= 0)) {
+			if ((networkOutputs[i][0] > 0) && (networkOutputs[i][1] <= 0)) {
 				// Buy a stock
 				
 				//float NUM_STOCKS_AFFORDABLE = (float)floor(neuralWallets[i]/currentMarketValue);
@@ -133,7 +133,7 @@ int main() {
 					neuralWallets[i] -= currentMarketValue;
 					neuralStocks[i] += 1;
 				}
-			} else if ((networkOutputs[i*2] <= 0) && (networkOutputs[i*2 + 1] > 0)) {
+			} else if ((networkOutputs[i][0] <= 0) && (networkOutputs[i][1] > 0)) {
 				// Sell a stock
 				
 				//neuralWallets[i] += currentMarketValue*neuralStocks[i];
@@ -160,17 +160,5 @@ int main() {
 		printFormatted("Main", "Log", "Average Fitness: " + std::to_string(averageFitness));
 		printFormatted("Main", "Log", "Best Fitness: " + std::to_string(bestFitness));
 		print();
-		
-		if (savingProcessStatus == 0) {
-			already = false;
-			savingProcessStatus = 1;
-			SaveNeuralNetworkNonBlocking(NEURAL_NETWORK_SAVE_LOCATION, &savingProcessStatus);
-		} else if ((savingProcessStatus == 2) && (already == false)) {
-			already = true;
-			printFormatted("Main","Debug","Saving process completed");
-			while(true);
-		} else if (savingProcessStatus == 3) {
-			
-		}
 	}
 }
