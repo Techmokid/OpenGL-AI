@@ -119,9 +119,9 @@ void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer,
 void LoadNetworkGPU(std::string dir);
 void LoadNetworkGPU();
 
-void SaveNeuralNetworkNonBlocking(std::string dir, int* status);
-void SaveNeuralNetworkNonBlocking(int* status);
-void SaveNeuralNetworkHandler(int* status);
+void SaveNeuralNetworkNonBlocking(std::string dir, bool* status);
+void SaveNeuralNetworkNonBlocking(bool* status);
+void SaveNeuralNetworkHandler(bool* status);
 void SaveNeuralNetwork();
 void SaveNeuralNetwork(std::string dir);
 void SaveNeuralNetworkInternal(std::string dir);

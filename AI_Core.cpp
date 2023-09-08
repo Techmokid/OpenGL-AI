@@ -911,12 +911,12 @@ std::vector<std::vector<float>> GetNetworkOutput(GLuint location) {
 		*savingInProgress = true;
 		
 		NGPU_Copy = new Network_GPU();
-		NGPU_Copy->genomes =     NGPU->genomes.copy();
-		NGPU_Copy->nodes =       NGPU->nodes.copy();
-		NGPU_Copy->connections = NGPU->connections.copy();
+		NGPU_Copy->genomes =     NGPU->genomes;
+		NGPU_Copy->nodes =       NGPU->nodes;
+		NGPU_Copy->connections = NGPU->connections;
 		
 		//Here we want to start up the multithreaded CPU saving process
-		SaveNeuralNetworkNonBlocking(&savingInProgress);
+		SaveNeuralNetworkNonBlocking(savingInProgress);
 	}
 	
 	std::vector<float> rawGPUOutput;
