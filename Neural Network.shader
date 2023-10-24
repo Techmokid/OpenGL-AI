@@ -1,3 +1,7 @@
+
+// TO IMPLIMENT - Include the activation functions as part of the learning process
+
+// Using any version other than 430 causes OpenGL compile error due to used OpenGL version
 #version 430
 
 // Training Variable Constants
@@ -19,7 +23,7 @@ const float OUTPUT_ERROR_VALUE = -999999;
 struct Genome_GPU {
 	int ID;							// The genome index/ID
 	float fitness;					// How good the genome has performed
-	float prev_fitness;			// How good the genome previously performed
+	float prev_fitness;				// How good the genome previously performed
 	int Nodes_Start_Index;			// The start of the genome in the nodes array
 	int Nodes_End_Index;			// The end of the genome in the nodes array
 	int FailedNetworkIterations;	// The number of times the genome has failed to improve
@@ -57,21 +61,23 @@ layout(std430, binding = 2) buffer neuralNetwork2 { NodeConnection_GPU cArr[]; }
 // Dynamic variables that will be shared between the GPU and CPU overtime
 layout(std430, binding = 3) buffer neuralNetwork3 { float inputArray[];        };
 layout(std430, binding = 4) buffer neuralNetwork4 { float outputArray[];       };
-layout(std430, binding = 5) buffer neuralNetwork5 { int epoch;                 };
+layout(std430, binding = 5) buffer neuralNetwork5 { int epoch;                 };  // Need to manually change on the CPU each iteration
 layout(std430, binding = 6) buffer neuralNetwork6 { float genomeSurvivalPerc;  };
 
 // Do we want the network to actually train, or just provide output values? If pretrained, set this to false
 layout(std430, binding = 7) buffer neuralNetwork7 { bool doTraining;           };
 
 // Generate a random number, given an input seed and the current epoch
+// These values are predetermined from online, I have no idea how it works, I just know it does
+// DO NOT CHANGE THESE VALUES OR REPETITION IS LIKELY, WILL BECOME NOT AS RANDOM
 float random(int genomeID) {
     vec3 seed = vec3(float(genomeID), float(epoch), 42.0);
     return 2.0 * fract(sin(dot(seed, vec3(12.9898, 78.233, 37.719))) * 43758.5453) - 1.0;
 }
 
 void main() {
+	// Get global ID
 	uint ID = gl_GlobalInvocationID.x;
-	if (doTraining) { epoch++; }
 	
 	int numOutputs = 0;
 	int outputNodeIndex = 0;
@@ -91,14 +97,14 @@ void main() {
 				int bestGenomeIndex2nd = 0;
 				int bestGenomeIndex3rd = 0;
 				for (int g = 0; g < gArr.size(); g++) {
-					if (gArr[g].prevFitness > gArr[ID].prevFitness) { betterGenomeCount++; }
+					if (gArr[g].prev_fitness > gArr[ID].prev_fitness) { betterGenomeCount++; }
 					
-					if (gArr[g].prevFitness > gArr[bestGenomeIndex3rd].prevFitness) { bestGenomeIndex3rd = g; }
-					if (gArr[g].prevFitness > gArr[bestGenomeIndex2nd].prevFitness) {
+					if (gArr[g].prev_fitness > gArr[bestGenomeIndex3rd].prev_fitness) { bestGenomeIndex3rd = g; }
+					if (gArr[g].prev_fitness > gArr[bestGenomeIndex2nd].prev_fitness) {
 						bestGenomeIndex3rd = bestGenomeIndex2nd;
 						bestGenomeIndex2nd = g;
 					}
-					if (gArr[g].prevFitness > gArr[bestGenomeIndex1st].prevFitness) {
+					if (gArr[g].prev_fitness > gArr[bestGenomeIndex1st].prev_fitness) {
 						bestGenomeIndex2nd = bestGenomeIndex1st;
 						bestGenomeIndex1st = g;
 					}
@@ -144,31 +150,48 @@ void main() {
 		} else {
 			gArr[ID].FailedNetworkIterations = 0;
 		}
+		
+		gArr[ID].prev_fitness = gArr[ID].fitness;
 	} else {
 		revertToPrev = false;
 	}
 	
 	// If required, revert back to a better working version of the genome
-	float largestWeight;
+	float largestWeight = OUTPUT_ERROR_VALUE;
 	for (int nI = nodesStart; nI <= nodesEnd; nI++) {
 		for (int nC = nArr[nI].wSI; nC <= nArr[nI].wEI; nC++) {
 			if (revertToPrev) { cArr[nC].Weight = cArr[nC].Prev_Weight; }
 			
 			cArr[nC].Weight += random(nC);
+			
+			if (abs(cArr[nC].Weight) > largestWeight) { largestWeight = abs(cArr[nC].Weight); }
 		}
+		
+		if (revertToPrev) { nArr[nI].nB = nArr[nI].pNB; }
+		
+		nArr[nI].nB += random(nI);
 	
 		// I wish there was a way to store the result of this for the next iteration so that we don't recalculate every epoch.
-		// Not a big deal as it takes such an insignificant amount of time, but still.....
+		// Not a big deal as it takes such an insignificant amount of time, but still...
 		if (nArr[nI].nIO) { numOutputs++; }
 	}
 	
 	// Normalize the weights
-	for (int nI = nodesStart; nI <= nodesEnd; nI++) {
-		for (int nC = nArr[nI].wSI; nC <= nArr[nI].wEI; nC++) {
-			cArr[nC].Weight = cArr[nC].Weight / abs(largestWeight);
+	if (largestWeight != 0) {
+		for (int nI = nodesStart; nI <= nodesEnd; nI++) {
+			for (int nC = nArr[nI].wSI; nC <= nArr[nI].wEI; nC++) {
+				cArr[nC].Weight = cArr[nC].Weight / largestWeight;
+			}
 		}
 	}
 	
+	
+	//----------------------------------------------------------------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------------------------------------------------------------------------------
+	
+	
+	// Now that we have reverted and analyzed all of the network, we can finally get the networks new output
 	// Here we want to get the neural networks output given it's inputs by computing all of the nodes from start to finish
 	// For each node we compute it's output. Due to the way the CPU gives us the nodes in structured order, we know that we can just iterate directly through without needing to precompute a previous node
 	// For more complex neural geometries that aren't in the standard node-layers structure, I may need to rethink this approach later. Not important for now though
@@ -180,10 +203,11 @@ void main() {
 				nArr[nodeIndex].pO += cArr[connectionIndex].Weight * nArr[cArr[connectionIndex].NodePos].pO;
 			}
 			
+			nArr[nodeIndex].pO += nArr[nodeIndex].nB;
 			// Now that we have added up the weighted inputs for this node, we run it's activation function
 			nArr[nodeIndex].pO = 0;
 			switch (nArr[nodeIndex].nTT) {
-			case -1: //Disable Node
+			case -1: //Disable Node. This disables the node entirely, and is for decreasing memory requirements later
 				break;
 			case 0:  //Step
 				nArr[nodeIndex].pO = nArr[nodeIndex].pO >= 0.0 ? 1 : 0;

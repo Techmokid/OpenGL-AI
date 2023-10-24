@@ -120,8 +120,8 @@ void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer,
 		NGPU->nodes[i].nII = i < startOfGenome + inputNodes;
 		NGPU->nodes[i].nIO = i >= startOfGenome + inputNodes + nodesPerLayer*hiddenLayerCount;
 				
-		//NGPU.nodes[i].nIV = 0;
-		//NGPU.nodes[i].pO = -99999;
+		NGPU->nodes[i].nIV = 0;
+		NGPU->nodes[i].pO = -99999;
 		NGPU->nodes[i].wSI = tempWeightsCount;
 		
 		int startOfNonInputs = startOfGenome + inputNodes;
