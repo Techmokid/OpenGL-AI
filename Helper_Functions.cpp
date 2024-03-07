@@ -274,6 +274,7 @@ void delay(unsigned int t) {
 }
 
 void SetWallpaper(std::string path) {
+	#ifdef OS_GUI_PRESENT
 	if(!std::filesystem::exists(path)) {
 		std::cout << "Wallpaper path does not exist!";
 		return;
@@ -291,4 +292,5 @@ void SetWallpaper(std::string path) {
         std::cout << "Wallpaper not set\n";
         std::cout << "SPI returned " << result << '\n';
     }
+	#endif
 }

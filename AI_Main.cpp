@@ -1,4 +1,10 @@
 //Custom code setup
+#ifdef __WIN32
+#warning "WINDOWS COMPILATION DETECTED"
+#else
+#warning "LINUX COMPILATION DETECTED"
+#endif
+
 #include "functions.h"
 #include <iostream>
 

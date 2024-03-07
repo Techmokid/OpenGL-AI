@@ -8,10 +8,7 @@ int iProtocol = IPPROTO_TCP;
 int boundToPort = -1;
 std::string clientResponse = "";
 
-SOCKET sock = INVALID_SOCKET;
-SOCKET clientSock = INVALID_SOCKET;
 
-bool isConnectedToClient() { return (boundToPort!=-1)&&(clientSock!=INVALID_SOCKET) ; }
 
 #define bzero(b,len) (memset((b), '\0', (len)), (void) 0)
 
@@ -20,6 +17,11 @@ bool isConnectedToClient() { return (boundToPort!=-1)&&(clientSock!=INVALID_SOCK
 
 //This is a stripped down version of the code found at:
 //https://learn.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-socket
+
+SOCKET sock = INVALID_SOCKET;
+SOCKET clientSock = INVALID_SOCKET;
+
+bool isConnectedToClient() { return (boundToPort!=-1)&&(clientSock!=INVALID_SOCKET) ; }
 
 WSADATA wsaData = {0};
 int iResult;

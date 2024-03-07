@@ -1,7 +1,5 @@
 #!/bin/sh
 
-gnome-terminal -- sh -c '
-#!/bin/sh
 echo "Updating core libraries"
 sudo apt update
 sudo apt upgrade -y
@@ -25,4 +23,4 @@ sudo apt autoremove -y
 echo "\nRebooting now..."
 
 reboot
-'
+
