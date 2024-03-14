@@ -48,11 +48,14 @@ void print(long unsigned int x) { std::cout << x << std::endl; }
 void print(std::string x) { std::cout << x << std::endl; }
 
 void waitForUserInput () {
-	#ifdef __WIN32
-	std::system("pause");
-	#else
-	std::system("read ans");
-	#endif
+	//#ifdef __WIN32
+	//std::system("pause");
+	//#else
+	//std::system("read ans");
+	//#endif
+	
+	std::string temp;
+	std::getline(std::cin, temp);
 }
 
 std::string stringToLower(std::string in) {
