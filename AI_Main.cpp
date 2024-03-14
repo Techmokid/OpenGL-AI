@@ -60,7 +60,7 @@ int main() {
 	printFormatted("Main", "Success", "Shaders compiled");
 	printFormatted("Main", "Log", "Set save location to: " + NEURAL_NETWORK_SAVE_LOCATION);
 	
-	CreateNewLayeredNetwork(GPU_AVAILABLE_CORE_COUNT, 365, 100, 2, 2);
+	CreateNewLayeredNetwork(GPU_AVAILABLE_CORE_COUNT, 365, 150, 5, 2);
 	SaveNeuralNetwork(NEURAL_NETWORK_SAVE_LOCATION);
 	
 	Network_GPU* NGPU = GetNetworkPointer();
