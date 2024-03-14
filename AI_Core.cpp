@@ -260,7 +260,7 @@ void SaveNeuralNetwork() {
 	std::string netSaveDir = saveDirectory + "Network Save Orig/";
 	std::string netBackupDir = saveDirectory + "Network Save Backup/";
 	std::string netStatusFileDir = saveDirectory + "saveStatus.txt";
-	print(saveDirectory);
+	
 	if (!std::filesystem::is_directory(saveDirectory)) {
 		std::filesystem::create_directories(saveDirectory);
 	}
