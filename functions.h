@@ -1,6 +1,8 @@
 #ifndef COMPILER_FUNCTIONS_LIST    // To make sure you don't declare the function more than once by including the header multiple times.
 #define COMPILER_FUNCTIONS_LIST
 
+//#define OS_GUI_PRESENT
+
 #include <iostream>		// Required for User I/O operations
 #include <string.h>
 #include <cstring>

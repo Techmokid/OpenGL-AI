@@ -1,29 +1,31 @@
 #include "functions.h"
 #include <vector>
 
+// Internal User Variables
+int maxThreadCount = 4;
 int numberOfIndexesPerThread = 10000;
 int numberOfAvailableActivationFunctions = 17;
+std::string saveDirectory = "";
 
-// Variable declarations
+// Network Variables
 Network_GPU* NGPU = new Network_GPU();
 Network_GPU* NGPU_Copy = new Network_GPU();
 
 std::vector<std::vector<float>>* NetworkOutputs = new std::vector<std::vector<float>>();
-int maxThreadCount = 4;
-std::string saveDirectory = "";
 
 int _genomeCount = 0, _inputCount = 0, _nodesPerLayer = 0, _hiddenLayerCount = 0, _outputNodes = 0, epoch = 0;
 bool* savingInProgress = new bool(false);
 
+// Network Function Declarations
+Network_GPU* GetNetworkPointer() { return NGPU; 			 }
+int GetGenomeCount() 			 { return _genomeCount; 	 }
+int GetGenomeInputCount() 		 { return _inputCount; 	 	 }
+int GetGenomeNodesPerLayer() 	 { return _nodesPerLayer; 	 }
+int GetGenomeHiddenLayerCount()  { return _hiddenLayerCount; }
+int GetGenomeOutputCount() 	 	 { return _outputNodes; 	 }
+int getCurrentEpoch() 			 { return epoch; 			 }
 
-Network_GPU* GetNetworkPointer() { return NGPU; }
-int GetGenomeCount() {            return _genomeCount; }
-int GetGenomeInputCount() {       return _inputCount; }
-int GetGenomeNodesPerLayer() {    return _nodesPerLayer; }
-int GetGenomeHiddenLayerCount() { return _hiddenLayerCount; }
-int GetGenomeOutputCount() {      return _outputNodes; }
-int getCurrentEpoch() {           return epoch; }
-
+// Random Number System
 bool initiailizedRandomNumberGenerator = false;
 float getRandomFloat() { return getRandomFloat(0,1); }
 float getRandomFloat(float HI, float LO) {
@@ -35,6 +37,19 @@ float getRandomFloat(float HI, float LO) {
 	return LO + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(HI-LO)));
 }
 
+float GetRandomFloat(float min, float max) {
+	if (!initiailizedRandomNumberGenerator) {
+		srand((unsigned)time(NULL));
+		initiailizedRandomNumberGenerator = true;
+	}
+	
+	float random = ((float) rand()) / (float) RAND_MAX;
+    float diff = max - min;
+    float r = random * diff;
+    return min + r;
+}
+
+// Network Generator
 void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer, int hiddenLayerCount, int outputNodes) {
 	print();
 	printFormatted("Neural", "Log", "Generating new layered neural network");
@@ -218,6 +233,7 @@ void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer,
 	printFormatted("Neural", "Success", "Neural Network generated");
 }
 
+// Save Network
 void SaveNeuralNetworkNonBlocking(std::string dir, bool* status) {
 	saveDirectory = dir + "/";
 	SaveNeuralNetworkNonBlocking(status);
@@ -245,11 +261,12 @@ void SaveNeuralNetwork() {
 	std::string netBackupDir = saveDirectory + "Network Save Backup/";
 	std::string netStatusFileDir = saveDirectory + "saveStatus.txt";
 	
-	if (! std::filesystem::is_directory(saveDirectory)) {
+	if (!std::filesystem::is_directory(saveDirectory)) {
 		std::filesystem::create_directories(saveDirectory);
 	}
 	
 	//Save the original copy
+	printFormatted("Save","Log","Saving Primary Copy");
 	std::fstream netStatusFile;
 	netStatusFile.open(netStatusFileDir, std::fstream::out | std::fstream::trunc);
 	netStatusFile << "1";
@@ -311,8 +328,7 @@ void SaveNetworkGenomes_MTwTDC(ThreadDataContainer* TDC) {
 	TDC->threadCompletionStatus = true;
 }
 
-// W.I.P WIP
-void SaveNetworkNodes_MTwTDC(ThreadDataContainer* TDC) {
+void SaveNetworkNodes_MTwTDC(ThreadDataContainer* TDC) { // W.I.P WIP
 	Node_GPU N[TDC->EndIndex - TDC->ID + 1];
 	for(int i = TDC->ID; i <= TDC->EndIndex; i++) {
 		N[i - TDC->ID] = NGPU_Copy->nodes[i];
@@ -340,8 +356,7 @@ void SaveNetworkNodes_MTwTDC(ThreadDataContainer* TDC) {
 	TDC->threadCompletionStatus = true;
 }
 
-// W.I.P WIP
-void SaveNetworkConnections_MTwTDC(ThreadDataContainer* TDC) {
+void SaveNetworkConnections_MTwTDC(ThreadDataContainer* TDC) { // W.I.P WIP
 	NodeConnection_GPU C[TDC->EndIndex - TDC->ID + 1];
 	for(int i = TDC->ID; i <= TDC->EndIndex; i++) {
 		C[i - TDC->ID] = NGPU_Copy->connections[i];
@@ -585,6 +600,7 @@ void saveFileRepair() {
 	printFormatted("File Repair","Success","Repaired save directory!");
 }
 
+// Load Network
 void LoadNetworkGPU(std::string dir) { saveDirectory = dir + "/"; LoadNetworkGPU(); }
 void LoadNetworkGPU() {
 	print();
@@ -894,6 +910,7 @@ bool SaveFileExists(std::string dir) {
 	return false;
 }
 
+// Network Modification and Analysis
 void SetNetworkFitnesses(std::vector<float> fitnesses) {
 	if (fitnesses.size() != NGPU->genomes.size()) {
 		printFormatted("Internal","Error", "Could not apply network fitness values as the number of values is not the same as the number of genomes");
@@ -931,16 +948,4 @@ std::vector<std::vector<float>> GetNetworkOutput(GLuint location) {
 		}
 	}
 	return results;
-}
-
-float GetRandomFloat(float min, float max) {
-	if (!initiailizedRandomNumberGenerator) {
-		srand((unsigned)time(NULL));
-		initiailizedRandomNumberGenerator = true;
-	}
-	
-	float random = ((float) rand()) / (float) RAND_MAX;
-    float diff = max - min;
-    float r = random * diff;
-    return min + r;
 }

@@ -57,6 +57,7 @@ layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 layout(std430, binding = 0) buffer neuralNetwork0 { Genome_GPU gArr[];         };
 layout(std430, binding = 1) buffer neuralNetwork1 { Node_GPU nArr[];           };
 layout(std430, binding = 2) buffer neuralNetwork2 { NodeConnection_GPU cArr[]; };
+layout(std430, binding = 8) buffer neuralNetwork8 { uint gArrSize; };
 
 // Dynamic variables that will be shared between the GPU and CPU overtime
 layout(std430, binding = 3) buffer neuralNetwork3 { float inputArray[];        };
@@ -96,7 +97,7 @@ void main() {
 				int bestGenomeIndex1st = 0;
 				int bestGenomeIndex2nd = 0;
 				int bestGenomeIndex3rd = 0;
-				for (int g = 0; g < gArr.size(); g++) {
+				for (int g = 0; g < int(gArrSize); g++) {
 					if (gArr[g].prev_fitness > gArr[ID].prev_fitness) { betterGenomeCount++; }
 					
 					if (gArr[g].prev_fitness > gArr[bestGenomeIndex3rd].prev_fitness) { bestGenomeIndex3rd = g; }
@@ -110,29 +111,29 @@ void main() {
 					}
 				}
 				
-				if (betterGenomeCount/gArr.size() < genomeSurvivalPerc) {
+				if (betterGenomeCount/float(gArrSize) < genomeSurvivalPerc) {
 					// We have performed too poorly and must be either reset entirely or genetically mutated with the best performing genomes
-					bool randomize = random(ID) > 0.0;
-					for (int n = gArr[ID].nodesStart; n <= gArr[ID].nodesEnd; n++) {
+					bool randomize = random(int(ID)) > 0.0;
+					for (int n = gArr[ID].Nodes_Start_Index; n <= gArr[ID].Nodes_End_Index; n++) {
 						for (int c = nArr[n].wSI; c <= nArr[n].wEI; c++) {
 							float selectedWeight = 0;
-							float r = random(4.651*ID * n + 83.162*c/n);
+							float r = random(int(4.651*ID * n + 83.162*c/n));
 							selectedWeight = r;
 							
 							if (!randomize) {
-								int nIndex = n - gArr[ID].nodesStart;
+								int nIndex = n - gArr[ID].Nodes_Start_Index;
 								int cIndex = c - nArr[n].wSI;
 								if (r > 0.5) {
-									nIndex += gArr[bestGenomeIndex1st].nodesStart;
+									nIndex += gArr[bestGenomeIndex1st].Nodes_Start_Index;
 									selectedWeight = cArr[nArr[nIndex].wSI + cIndex].Prev_Weight;
 								} else if (r > 0) {
-									nIndex += gArr[bestGenomeIndex2nd].nodesStart;
+									nIndex += gArr[bestGenomeIndex2nd].Nodes_Start_Index;
 									selectedWeight = cArr[nArr[nIndex].wSI + cIndex].Prev_Weight;
 								} else if (r > -0.5) {
-									nIndex += gArr[bestGenomeIndex3rd].nodesStart;
+									nIndex += gArr[bestGenomeIndex3rd].Nodes_Start_Index;
 									selectedWeight = cArr[nArr[nIndex].wSI + cIndex].Prev_Weight;
 								} else {
-									selectedWeight = 4.651*ID*n + 83.162*c/n
+									selectedWeight = 4.651*ID*n + 83.162*c/n;
 								}
 							}
 							
@@ -140,7 +141,7 @@ void main() {
 							cArr[c].Weight = cArr[c].Prev_Weight;
 						}
 					}
-						
+					
 					gArr[ID].fitness = 0;
 					gArr[ID].prev_fitness = 0;
 				}

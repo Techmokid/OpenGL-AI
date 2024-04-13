@@ -1,25 +1,29 @@
 //Custom code setup
+#ifdef __WIN32
+#warning "WINDOWS COMPILATION DETECTED"
+#else
+#warning "LINUX COMPILATION DETECTED"
+#endif
+
 #include "functions.h"
 #include <iostream>
 
 // Multiple variants of saying "Stop program" so I don't have to think which I used
-#define quit() 			waitForUserInput();return 0;
-#define end() 			waitForUserInput();return 0;
-#define stop() 			waitForUserInput();return 0;
-#define quitProgram() 	waitForUserInput();return 0;
-#define endProgram() 	waitForUserInput();return 0;
-#define stopProgram() 	waitForUserInput();return 0;
+#define quit() 			waitForUserInput();print("\n\nGoodbye!\n\n\n");exit(EXIT_SUCCESS);
+#define end() 			waitForUserInput();print("\n\nGoodbye!\n\n\n");exit(EXIT_SUCCESS);
+#define stop() 			waitForUserInput();print("\n\nGoodbye!\n\n\n");exit(EXIT_SUCCESS);
+#define quitProgram() 	waitForUserInput();print("\n\nGoodbye!\n\n\n");exit(EXIT_SUCCESS);
+#define endProgram() 	waitForUserInput();print("\n\nGoodbye!\n\n\n");exit(EXIT_SUCCESS);
+#define stopProgram() 	waitForUserInput();print("\n\nGoodbye!\n\n\n");exit(EXIT_SUCCESS);
 
 // The port to use if using an internal server
 #define PORT 3490
 
 // Where to physically save the network
-#ifdef _WIN32
 //#define NEURAL_NETWORK_SAVE_LOCATION expandEnvironmentVariables("%USERPROFILE%/Desktop/AI Network")
-#define NEURAL_NETWORK_SAVE_LOCATION expandEnvironmentVariables("F:/AI Network")
-#else
-#define NEURAL_NETWORK_SAVE_LOCATION expandEnvironmentVariables("$HOME/Desktop/AI Network")
-#endif
+//#define NEURAL_NETWORK_SAVE_LOCATION expandEnvironmentVariables("F:/AI Network")
+//#define NEURAL_NETWORK_SAVE_LOCATION expandEnvironmentVariables("$HOME/Desktop/AI Network")
+#define NEURAL_NETWORK_SAVE_LOCATION expandEnvironmentVariables("/mnt/c/AI Network")
 
 #define GPU_AVAILABLE_CORE_COUNT 8704
 
@@ -42,7 +46,7 @@ int main() {
 	printFormatted("Info", "Warning", "This is a warning that a function is having troubles");
 	printFormatted("Info", "Error",   "This indicates something went very wrong");
 	printFormatted("Info", "Success", "This indicates that a function completed!");
-			
+	
 	print(); print();
 	print("---------------------------------------------------------------------");
 	print(); print();
@@ -57,7 +61,7 @@ int main() {
 	printFormatted("Main", "Log", "Set save location to: " + NEURAL_NETWORK_SAVE_LOCATION);
 	
 	CreateNewLayeredNetwork(GPU_AVAILABLE_CORE_COUNT, 365, 150, 5, 2);
-	//SaveNeuralNetwork(NEURAL_NETWORK_SAVE_LOCATION);
+	SaveNeuralNetwork(NEURAL_NETWORK_SAVE_LOCATION);
 	
 	Network_GPU* NGPU = GetNetworkPointer();
 	
@@ -67,7 +71,7 @@ int main() {
 	}
 	
 	//Starting computation window
-	StartWindow();
+	//StartWindow();
 	
 	//Initialize the shader
 	printFormatted("OpenGL", "Log", "Initializing Shader");
@@ -86,13 +90,13 @@ int main() {
 	Set_SSBO_Buffer(0, SSBOs[5] ,5);												// Set the epoch counter to epoch 0
 	Set_SSBO_Buffer(10, SSBOs[6],6);												// Set the percentage threshold of suvival for poor performing genomes
 	Set_SSBO_Buffer(true, SSBOs[7] ,7);												// Set the neural networks to do training
+	Set_SSBO_Buffer(NGPU->genomes.size(), SSBOs[8] ,8);
 	printFormatted("OpenGL", "Success", "Shader SSBOs Applied");
 	
 	std::vector<float> neuralWallets;
 	std::vector<int> neuralStocks;
 	for (int i = 0; i < NGPU->genomes.size(); i++) { neuralWallets.push_back(10000); neuralStocks.push_back(0); }
-	
-	bool already = false;
+	bool already = false; 
 	while(true) {
 		// Training loop
 		float worstFitness = 0;

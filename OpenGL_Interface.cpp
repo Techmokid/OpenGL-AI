@@ -75,7 +75,6 @@ static void error_callback(int error, const char* description) {
 void StartWindow() {
   srand((unsigned)time(NULL));
 
-  glfwInit();
   if (!glfwInit()) {
     printFormatted("OpenGL","Error","glfwInit() failed to start");
     quit();

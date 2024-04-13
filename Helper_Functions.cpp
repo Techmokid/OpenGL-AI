@@ -48,11 +48,14 @@ void print(long unsigned int x) { std::cout << x << std::endl; }
 void print(std::string x) { std::cout << x << std::endl; }
 
 void waitForUserInput () {
-	#ifdef __WIN32
-	std::system("pause");
-	#else
-	std::system("read ans");
-	#endif
+	//#ifdef __WIN32
+	//std::system("pause");
+	//#else
+	//std::system("read ans");
+	//#endif
+	
+	std::string temp;
+	std::getline(std::cin, temp);
 }
 
 std::string stringToLower(std::string in) {
@@ -274,6 +277,7 @@ void delay(unsigned int t) {
 }
 
 void SetWallpaper(std::string path) {
+	#ifdef OS_GUI_PRESENT
 	if(!std::filesystem::exists(path)) {
 		std::cout << "Wallpaper path does not exist!";
 		return;
@@ -291,4 +295,5 @@ void SetWallpaper(std::string path) {
         std::cout << "Wallpaper not set\n";
         std::cout << "SPI returned " << result << '\n';
     }
+	#endif
 }
