@@ -7,6 +7,7 @@ sudo apt dist-upgrade -y
 
 echo "\n\nUpgrading OS"
 sudo do-release-upgrade -d
+sudo apt full-upgrade -y
 
 echo "\n\nCompleted OS Updates!"
 
