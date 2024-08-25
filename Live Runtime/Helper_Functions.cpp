@@ -99,7 +99,8 @@ void printFormatted(std::string module, std::string status, std::string msg) {
 	 if (stringToLowerCapitalized(status) == "Debug") { return; }
 	 #endif
 	 
-   module = stringToLowerCapitalized(module);
+   module = stringToLowerCapitalized(module).substr(0,printFormattingModuleLength);
+   
 
    std::cout << "[" + module + "]";
    for (int i = 0; i <	printFormattingModuleLength - module.length(); i++) { std::cout << " "; }

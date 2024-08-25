@@ -1,4 +1,5 @@
 @echo off
+echo Starting compilation...
 
 g++ *.cpp -lopengl32 -lpthread -lfreeglut -lglfw3 -lglu32 -lfreeGLUT -lglew32 -lws2_32 -lgdi32 -std=c++17 -fconcepts -o AI_Server_Win64.exe
 
