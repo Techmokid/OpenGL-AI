@@ -76,7 +76,7 @@ struct Node_GPU {
 	Node_GPU() { }
 	int ID = -1;			//Identification code		// The ID of this node
 			
-	int nTT = 0;		//Node trigger typeof		// 0 is step, 1 is sigmoid
+	int nTT = 0;		//Node trigger typeof		// -1 is disabled node, 0 -> 16 is different activation functions
 	float nB = 0;		//Node bias
 	float pNB = 0;		//Previous node bias
 			
@@ -243,3 +243,6 @@ void UpdateFakeMarket();
 float GetFakeMarketPrice();
 std::vector<float> GetFakeMarketHistory();
 float GetAndUpdateFakeMarketPrice();
+
+//NetworkAnomolyTests.cpp
+void RunTests();

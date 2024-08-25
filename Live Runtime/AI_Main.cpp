@@ -21,9 +21,9 @@
 
 // Where to physically save the network
 //#define NEURAL_NETWORK_SAVE_LOCATION expandEnvironmentVariables("%USERPROFILE%/Desktop/AI Network")
-//#define NEURAL_NETWORK_SAVE_LOCATION expandEnvironmentVariables("F:/AI Network")
+#define NEURAL_NETWORK_SAVE_LOCATION expandEnvironmentVariables("F:/AI Network")
 //#define NEURAL_NETWORK_SAVE_LOCATION expandEnvironmentVariables("$HOME/Desktop/AI Network")
-#define NEURAL_NETWORK_SAVE_LOCATION expandEnvironmentVariables("/mnt/c/AI Network")
+//#define NEURAL_NETWORK_SAVE_LOCATION expandEnvironmentVariables("/mnt/c/AI Network")
 
 #define GPU_AVAILABLE_CORE_COUNT 8704
 
@@ -52,13 +52,18 @@ int main() {
 	print(); print();
 			
 	printFormatted("Main", "Debug", "Good morning user! Let's get started shall we?");
-	printFormatted("Main", "Debug", "Let me boot the server up for you!");
+	printFormatted("Main", "Debug", "Let me boot the networks up for you!");
 	print();
 	
 	StartWindow();
 	printFormatted("Main", "Success", "OpenGL operational and ready");
 	printFormatted("Main", "Success", "Shaders compiled");
 	printFormatted("Main", "Log", "Set save location to: " + NEURAL_NETWORK_SAVE_LOCATION);
+	
+	printFormatted("Main", "Log", "Starting neural architecture anomoly tests");
+	RunTests();
+	printFormatted("Main", "Success", "No anomolies detected");
+	quit();
 	
 	CreateNewLayeredNetwork(GPU_AVAILABLE_CORE_COUNT, 365, 150, 5, 2);
 	SaveNeuralNetwork(NEURAL_NETWORK_SAVE_LOCATION);
