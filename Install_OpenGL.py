@@ -155,3 +155,8 @@ elif os.name == "posix":
         print(f"An error occurred during installation: {e}")
 else:
     raise Exception("Unknown OS")
+
+print()
+print()
+print()
+input("Press enter to close")
