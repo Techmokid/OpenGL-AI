@@ -21,7 +21,7 @@
 
 // Where to physically save the network
 //#define NEURAL_NETWORK_SAVE_LOCATION expandEnvironmentVariables("%USERPROFILE%/Desktop/AI Network")
-#define NEURAL_NETWORK_SAVE_LOCATION expandEnvironmentVariables("F:/AI Network")
+#define NEURAL_NETWORK_SAVE_LOCATION expandEnvironmentVariables("D:/AI Network")
 //#define NEURAL_NETWORK_SAVE_LOCATION expandEnvironmentVariables("$HOME/Desktop/AI Network")
 //#define NEURAL_NETWORK_SAVE_LOCATION expandEnvironmentVariables("/mnt/c/AI Network")
 
@@ -58,14 +58,16 @@ int main() {
 	StartWindow();
 	printFormatted("Main", "Success", "OpenGL operational and ready");
 	printFormatted("Main", "Success", "Shaders compiled");
-	printFormatted("Main", "Log", "Set save location to: " + NEURAL_NETWORK_SAVE_LOCATION);
 	
-	printFormatted("Main", "Log", "Starting neural architecture anomoly tests");
+	printFormatted("Main", "Log", "Checking for neural network architecture anomolies");
 	RunTests();
-	printFormatted("Main", "Success", "No anomolies detected");
-	quit();
+	printFormatted("Main", "Success", "No network anomolies detected");
 	
+	
+	printFormatted("Main", "Log", "Set network save location to: " + NEURAL_NETWORK_SAVE_LOCATION);
 	CreateNewLayeredNetwork(GPU_AVAILABLE_CORE_COUNT, 365, 150, 5, 2);
+	
+	printFormatted("Main", "Log", "Set network save location to: " + NEURAL_NETWORK_SAVE_LOCATION);
 	SaveNeuralNetwork(NEURAL_NETWORK_SAVE_LOCATION);
 	
 	Network_GPU* NGPU = GetNetworkPointer();
@@ -97,6 +99,7 @@ int main() {
 	Set_SSBO_Buffer(true, SSBOs[7] ,7);												// Set the neural networks to do training
 	Set_SSBO_Buffer(NGPU->genomes.size(), SSBOs[8] ,8);
 	printFormatted("OpenGL", "Success", "Shader SSBOs Applied");
+	quit();
 	
 	std::vector<float> neuralWallets;
 	std::vector<int> neuralStocks;

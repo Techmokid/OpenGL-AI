@@ -40,6 +40,7 @@ void print(float x);
 void print(double x);
 void print(long unsigned int x);
 void print(std::string x);
+void SilenceConsoleOutput(bool silence);
 void printFormatted(std::string module, std::string status, std::string msg);
 void printSuccess(std::string module, std::string msg);
 void printError(std::string module, std::string msg);
@@ -99,6 +100,14 @@ struct Network_GPU {
 	std::vector<Genome_GPU> genomes;
 	std::vector<Node_GPU> nodes;
 	std::vector<NodeConnection_GPU> connections;
+	
+    Network_GPU clone() const {
+        Network_GPU clonedNetwork = Network_GPU(); // Uses the copy constructor
+		clonedNetwork.genomes = this->genomes;
+        clonedNetwork.nodes = this->nodes;
+        clonedNetwork.connections = this->connections;
+		return clonedNetwork;
+    }
 };
 
 struct ThreadDataContainer {
@@ -108,7 +117,9 @@ struct ThreadDataContainer {
 	int EndIndex;
 };
 
+void ForceNetworkCopyMatching();
 Network_GPU* GetNetworkPointer();
+
 int GetGenomeCount();
 int GetGenomeInputCount();
 int GetGenomeNodesPerLayer();

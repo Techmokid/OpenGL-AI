@@ -17,13 +17,14 @@ int _genomeCount = 0, _inputCount = 0, _nodesPerLayer = 0, _hiddenLayerCount = 0
 bool* savingInProgress = new bool(false);
 
 // Network Function Declarations
-Network_GPU* GetNetworkPointer() { return NGPU; 			 }
-int GetGenomeCount() 			 { return _genomeCount; 	 }
-int GetGenomeInputCount() 		 { return _inputCount; 	 	 }
-int GetGenomeNodesPerLayer() 	 { return _nodesPerLayer; 	 }
-int GetGenomeHiddenLayerCount()  { return _hiddenLayerCount; }
-int GetGenomeOutputCount() 	 	 { return _outputNodes; 	 }
-int getCurrentEpoch() 			 { return epoch; 			 }
+void ForceNetworkCopyMatching()  { NGPU_Copy = new Network_GPU(NGPU->clone()); }
+Network_GPU* GetNetworkPointer() { return NGPU; 			   }
+int GetGenomeCount() 			 { return _genomeCount; 	   }
+int GetGenomeInputCount() 		 { return _inputCount; 	 	   }
+int GetGenomeNodesPerLayer() 	 { return _nodesPerLayer; 	   }
+int GetGenomeHiddenLayerCount()  { return _hiddenLayerCount;   }
+int GetGenomeOutputCount() 	 	 { return _outputNodes; 	   }
+int getCurrentEpoch() 			 { return epoch; 			   }
 
 // Random Number System
 bool initiailizedRandomNumberGenerator = false;
@@ -122,7 +123,6 @@ void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer,
 	print();
 	printFormatted("Neural", "Log", "Configuring New Neural Network");
 	
-	//WIP
 	for (int i = 0; i < NGPU->nodes.size(); i++) {
 		NGPU->nodes[i].ID = i;
 		//NGPU->nodes[i].nTT = 1;	//Node trigger type. 0 for step, 1 for sigmoid
@@ -328,7 +328,7 @@ void SaveNetworkGenomes_MTwTDC(ThreadDataContainer* TDC) {
 	TDC->threadCompletionStatus = true;
 }
 
-void SaveNetworkNodes_MTwTDC(ThreadDataContainer* TDC) { // W.I.P WIP
+void SaveNetworkNodes_MTwTDC(ThreadDataContainer* TDC) {
 	Node_GPU N[TDC->EndIndex - TDC->ID + 1];
 	for(int i = TDC->ID; i <= TDC->EndIndex; i++) {
 		N[i - TDC->ID] = NGPU_Copy->nodes[i];
@@ -356,7 +356,7 @@ void SaveNetworkNodes_MTwTDC(ThreadDataContainer* TDC) { // W.I.P WIP
 	TDC->threadCompletionStatus = true;
 }
 
-void SaveNetworkConnections_MTwTDC(ThreadDataContainer* TDC) { // W.I.P WIP
+void SaveNetworkConnections_MTwTDC(ThreadDataContainer* TDC) {
 	NodeConnection_GPU C[TDC->EndIndex - TDC->ID + 1];
 	for(int i = TDC->ID; i <= TDC->EndIndex; i++) {
 		C[i - TDC->ID] = NGPU_Copy->connections[i];
@@ -385,6 +385,10 @@ void SaveNeuralNetworkInternal(std::string dir) {
 		quit();
 	}
 	
+	if (epoch == 0) {
+		ForceNetworkCopyMatching();
+	}
+	
 	auto start = std::chrono::high_resolution_clock::now();
 	
 	std::filesystem::remove_all(dir + "Genomes/");
@@ -397,12 +401,20 @@ void SaveNeuralNetworkInternal(std::string dir) {
 	std::vector<ThreadDataContainer*> TDC_List;
 	bool run = true;
 	int genomeIndex = 0;
-	int maxThreadCount = std::thread::hardware_concurrency()/2;
+	int maxThreadCount = std::thread::hardware_concurrency();
 	int currentThreadCount = 0;
-			
-	printFormatted("Save","Debug", "Genome File Count: " + std::to_string(ceil((float)NGPU_Copy->genomes.size()/(float)numberOfIndexesPerThread)));
-	printFormatted("Save","Debug", "Node File Count: " + std::to_string(ceil((float)NGPU_Copy->nodes.size()/(float)numberOfIndexesPerThread)));
-	printFormatted("Save","Debug", "Node Connections File Count: " + std::to_string(ceil((float)NGPU_Copy->connections.size()/(float)numberOfIndexesPerThread)));
+	
+	//std::to_string(
+	//	ceil(
+	//		(float)NGPU_Copy->genomes.size()    /    (float)numberOfIndexesPerThread
+	//	)
+	//)
+	
+	printFormatted("Save","Debug", "Genomes size: " + std::to_string(NGPU->genomes.size()));
+	printFormatted("Save","Debug", "Max thread count: " + std::to_string(maxThreadCount));
+	printFormatted("Save","Debug", "Genome File Count: " + std::to_string(int(ceil((float)NGPU_Copy->genomes.size()/(float)numberOfIndexesPerThread))));
+	printFormatted("Save","Debug", "Node File Count: " + std::to_string(int(ceil((float)NGPU_Copy->nodes.size()/(float)numberOfIndexesPerThread))));
+	printFormatted("Save","Debug", "Node Connections File Count: " + std::to_string(int(ceil((float)NGPU_Copy->connections.size()/(float)numberOfIndexesPerThread))));
 	printFormatted("Save","Debug", "Index Count per CPU Thread: " + std::to_string(numberOfIndexesPerThread));	
 	
 	//Now we actually start saving the AI to disk

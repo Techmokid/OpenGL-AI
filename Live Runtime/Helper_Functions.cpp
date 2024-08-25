@@ -32,6 +32,8 @@
 #define gray			"\033[90m"
 #endif
 
+bool silentConsole = false;
+
 void ClearConsole() {
 	#ifdef __WIN32
 	std::system("cls");
@@ -40,12 +42,12 @@ void ClearConsole() {
 	#endif
 }
 
-void print() { std::cout << std::endl; }
-void print(int x) { std::cout << x << std::endl; }
-void print(float x) { std::cout << x << std::endl; }
-void print(double x) { std::cout << x << std::endl; }
-void print(long unsigned int x) { std::cout << x << std::endl; }
-void print(std::string x) { std::cout << x << std::endl; }
+void print()                    { if (!silentConsole) { std::cout << std::endl;      } }
+void print(int x)               { if (!silentConsole) { std::cout << x << std::endl; } }
+void print(float x)             { if (!silentConsole) { std::cout << x << std::endl; } }
+void print(double x)            { if (!silentConsole) { std::cout << x << std::endl; } }
+void print(long unsigned int x) { if (!silentConsole) { std::cout << x << std::endl; } }
+void print(std::string x)       { if (!silentConsole) { std::cout << x << std::endl; } }
 
 void waitForUserInput () {
 	//#ifdef __WIN32
@@ -89,15 +91,18 @@ void SetConsoleColor(int colour) {
 void SetConsoleColor(std::string colour) { std::cout << colour; }
 #endif
 
+void SilenceConsoleOutput(bool silence) { silentConsole = silence; }
 void printSuccess(std::string module, std::string msg) { printFormatted(module, "success", msg); }
 void printError(std::string module,   std::string msg) { printFormatted(module, "error", msg); }
 void printLog(std::string module,     std::string msg) { printFormatted(module, "log", msg); }
 void printInfo(std::string module,    std::string msg) { printFormatted(module, "info", msg); }
 void printDebug(std::string module,   std::string msg) { printFormatted(module, "debug", msg); }
 void printFormatted(std::string module, std::string status, std::string msg) {
+	if (silentConsole) { return; }
+	
    #ifndef PRINT_DEBUGGING_MSG
 	 if (stringToLowerCapitalized(status) == "Debug") { return; }
-	 #endif
+   #endif
 	 
    module = stringToLowerCapitalized(module).substr(0,printFormattingModuleLength);
    
