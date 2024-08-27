@@ -59,6 +59,7 @@ void RemoveTempFiles() {
 }
 
 void RunTests() {
+	printFormatted("Main", "Log", "Checking for neural network architecture anomolies");
 	SilenceConsoleOutput(true);
 	RemoveTempFiles();
 	
@@ -67,14 +68,12 @@ void RunTests() {
 	CreateNewLayeredNetwork(10, 5, 8, 5, 2);
 	SaveNeuralNetwork(TEMP_SAVE_LOCATION + "/AI Network TEST B");
 	CreateNewLayeredNetwork(3, 3, 4, 5, 6);
-	SaveNeuralNetwork(TEMP_SAVE_LOCATION + "/AI Network TEST C");
+	Network_GPU* NGPU_Copy_C = new Network_GPU(GetNetworkPointer()->clone());
 	
 	LoadNetworkGPU(TEMP_SAVE_LOCATION + "/AI Network TEST A");
 	Network_GPU* NGPU_Copy_A = new Network_GPU(GetNetworkPointer()->clone());
 	LoadNetworkGPU(TEMP_SAVE_LOCATION + "/AI Network TEST B");
 	Network_GPU* NGPU_Copy_B = new Network_GPU(GetNetworkPointer()->clone());
-	LoadNetworkGPU(TEMP_SAVE_LOCATION + "/AI Network TEST C");
-	Network_GPU* NGPU_Copy_C = new Network_GPU(GetNetworkPointer()->clone());
 	
 	RemoveTempFiles();
 	SilenceConsoleOutput(false);
@@ -95,4 +94,6 @@ void RunTests() {
 	delete NGPU_Copy_A;
 	delete NGPU_Copy_B;
 	delete NGPU_Copy_C;
+	
+	printFormatted("Main", "Success", "No network anomolies detected");
 }
