@@ -59,7 +59,7 @@ int main() {
 	printFormatted("Main", "Success", "OpenGL operational and ready");
 	printFormatted("Main", "Success", "Shaders compiled");
 	
-	//RunTests();
+	RunTests();
 	
 	printFormatted("Main", "Log", "Set network save location to: " + NEURAL_NETWORK_SAVE_LOCATION);
 	CreateNewLayeredNetwork(GPU_AVAILABLE_CORE_COUNT, 365, 100, 6, 2);
@@ -75,7 +75,7 @@ int main() {
 	}
 	
 	//Starting computation window
-	//StartWindow();
+	StartWindow();
 	
 	//Initialize the shader
 	printFormatted("OpenGL", "Log", "Initializing Shader");

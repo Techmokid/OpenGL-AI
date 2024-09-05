@@ -859,12 +859,13 @@ void LoadNetworkNodes_MTwTDC(ThreadDataContainer* TDC) {
 		NGPU->nodes[ID].ID = ID;
 		NGPU->nodes[ID].nTT =	std::stoi(loadData[1]);
 		NGPU->nodes[ID].nB =	std::stof(loadData[2]);
-		NGPU->nodes[ID].nII = std::stoi(loadData[3]);
-		NGPU->nodes[ID].nIO =	std::stoi(loadData[4]);
-		NGPU->nodes[ID].nIV =	std::stof(loadData[5]);
-		NGPU->nodes[ID].pO = 	std::stof(loadData[6]);
-		NGPU->nodes[ID].wSI =	std::stoi(loadData[7]);
-		NGPU->nodes[ID].wEI =	std::stoi(loadData[8]);
+		NGPU->nodes[ID].pNB =	std::stof(loadData[3]);
+		NGPU->nodes[ID].nII =   std::stoi(loadData[4]);
+		NGPU->nodes[ID].nIO =	std::stoi(loadData[5]);
+		NGPU->nodes[ID].nIV =	std::stof(loadData[6]);
+		NGPU->nodes[ID].pO = 	std::stof(loadData[7]);
+		NGPU->nodes[ID].wSI =	std::stoi(loadData[8]);
+		NGPU->nodes[ID].wEI =	std::stoi(loadData[9]);
 		
 		std::getline(myfile,line);
 	}

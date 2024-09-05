@@ -35,6 +35,7 @@
 // Helper_Functions.cpp
 void ClearConsole();
 void print();
+//void print(auto x);
 void print(int x);
 void print(float x);
 void print(double x);
