@@ -160,6 +160,7 @@ float GetRandomFloat(float min, float max);
 void TrainGenome_MTwTDC(ThreadDataContainer* TDC);
 void TrainNetwork();
 void SetNetworkFitnesses(std::vector<float> fitnesses);
+std::vector<std::vector<float>> GetNetworkOutput(GLuint x);
 
 // Socket.cpp
 bool isConnectedToClient();
@@ -179,14 +180,21 @@ std::string GetClientResponse();
 bool SendToClient(std::string dataToSend);
 #endif
 
+//FakeMarket.cpp
+void UpdateFakeMarket();
+float GetFakeMarketPrice();
+std::vector<float> GetFakeMarketHistory();
+float GetAndUpdateFakeMarketPrice();
+
+//NetworkAnomolyTests.cpp
+void RunTests();
+
 //OpenGL_Interface.cpp
 std::string GetShaderCode(std::string shaderPath);
-static void error_callback(int error, const char* description);
 void StartWindow();
 GLuint CompileShader(std::string computeShaderCode);
 GLuint CompileShader(const char* computeShaderSource);
 GLuint StartShaderProgram(GLuint computeShader);
-GLuint StartShaderProgram(GLuint computeShader, std::vector<GLuint*> ssbo);
 GLuint InitializeShader(std::string shaderPath);
 void checkShaderCompileStatus(GLuint shader);
 void ShutDownOpenGL();
@@ -198,7 +206,6 @@ void Set_SSBO_Buffer(std::vector<T> &obj, GLuint ssbo, int buffer_index) {
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, buffer_index, ssbo);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
-
 template<typename T>
 void Set_SSBO_Buffer(T &obj, GLuint ssbo, int buffer_index) {
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
@@ -206,7 +213,6 @@ void Set_SSBO_Buffer(T &obj, GLuint ssbo, int buffer_index) {
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, buffer_index, ssbo);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
-
 template<typename T>
 void Set_SSBO_Buffer(T obj, GLuint ssbo, int buffer_index) {
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
@@ -214,47 +220,33 @@ void Set_SSBO_Buffer(T obj, GLuint ssbo, int buffer_index) {
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, buffer_index, ssbo);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
-
 template<typename T>
 void Get_SSBO_Buffer(std::vector<T> &obj, GLuint ssbo) {
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
     glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, obj.size() * sizeof(T), obj.data());
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
-
 template<typename T>
 void Get_SSBO_Buffer(T &obj, GLuint ssbo) {
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
     glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(T), obj.data());
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
-
 template<typename T>
 void Edit_SSBO_Buffer(std::vector<T> &obj, GLuint ssbo) {
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
     glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, obj.size() * sizeof(T), obj.data());
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
-
 template<typename T>
 void Edit_SSBO_Buffer(T &obj, GLuint ssbo) {
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
     glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, obj.size() * sizeof(T), obj.data());
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
-
 template<typename T>
 void Edit_SSBO_Buffer(T obj, GLuint ssbo) {
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
     glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(T), &obj);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
-
-//FakeMarket.cpp
-void UpdateFakeMarket();
-float GetFakeMarketPrice();
-std::vector<float> GetFakeMarketHistory();
-float GetAndUpdateFakeMarketPrice();
-
-//NetworkAnomolyTests.cpp
-void RunTests();
