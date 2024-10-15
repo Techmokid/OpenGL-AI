@@ -1,10 +1,22 @@
 import os
-import git
 import time
-import schedule
+import sys
 import logging
 from datetime import datetime
-import sys
+
+def restart_script():
+    logging.info("Restarting the script...")
+    print("Restarting the script...")
+    time.sleep(3)
+    os.execv(sys.executable, [sys.executable] + sys.argv)
+
+try:
+    import git
+    import schedule
+except:
+    import Installers.Install_Py_Libs
+    restart_script()
+
 
 # Define the path to your local repository (current directory)
 REPO_PATH = "."
@@ -49,12 +61,6 @@ def trim_log_file():
                 f.truncate()
         logging.info(f"Log file trimmed to stay below {MAX_LOG_SIZE / 1024}KB.")
         print(f"Log file trimmed to stay below {MAX_LOG_SIZE / 1024}KB.")
-
-def restart_script():
-    logging.info("Restarting the script...")
-    print("Restarting the script...")
-    time.sleep(3)
-    os.execv(sys.executable, [sys.executable] + sys.argv)
     
 def check_for_updates():
     try:
