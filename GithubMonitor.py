@@ -21,15 +21,19 @@ logging.basicConfig(
 
 def log_startup():
     logging.info("Git Monitor Script started.")
+    print("Git Monitor Script started.")
 
 def log_shutdown():
     logging.info("Git Monitor Script stopped.")
+    print("Git Monitor Script stopped.")
 
 def log_error(error_message):
     logging.error(f"Error occurred: {error_message}")
+    print(f"Error occurred: {error_message}")
 
 def log_change_detected():
     logging.info("Change detected in the remote repository. Repository updated.")
+    print("Change detected in the remote repository. Repository updated.")
 
 def trim_log_file():
     """Ensure the log file doesn't exceed MAX_LOG_SIZE by trimming older content."""
@@ -43,6 +47,7 @@ def trim_log_file():
                 f.writelines(lines)
                 f.truncate()
         logging.info(f"Log file trimmed to stay below {MAX_LOG_SIZE / 1024}KB.")
+        print(f"Log file trimmed to stay below {MAX_LOG_SIZE / 1024}KB.")
 
 def check_for_updates():
     try:
@@ -53,6 +58,7 @@ def check_for_updates():
 
         if current_branch.name != BRANCH:
             logging.info(f"Currently on branch {current_branch.name}, switching to {BRANCH}.")
+            print(f"Currently on branch {current_branch.name}, switching to {BRANCH}.")
             repo.git.checkout(BRANCH)
 
         # Fetch the latest updates from the remote
@@ -69,6 +75,7 @@ def check_for_updates():
             origin.pull(BRANCH)
         else:
             logging.info("No new changes found.")
+            print("No new changes found.")
         
     except Exception as e:
         log_error(str(e))
