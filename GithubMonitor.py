@@ -4,6 +4,7 @@ import time
 import schedule
 import logging
 from datetime import datetime
+import sys
 
 # Define the path to your local repository (current directory)
 REPO_PATH = "."
@@ -49,6 +50,12 @@ def trim_log_file():
         logging.info(f"Log file trimmed to stay below {MAX_LOG_SIZE / 1024}KB.")
         print(f"Log file trimmed to stay below {MAX_LOG_SIZE / 1024}KB.")
 
+def restart_script():
+    logging.info("Restarting the script...")
+    print("Restarting the script...")
+    time.sleep(3)
+    os.execv(sys.executable, [sys.executable] + sys.argv)
+    
 def check_for_updates():
     try:
         # Access the local repository
@@ -73,6 +80,7 @@ def check_for_updates():
         if local_commit != remote_commit:
             log_change_detected()
             origin.pull(BRANCH)
+            restart_script()
         else:
             logging.info("No new changes found.")
             print("No new changes found.")
