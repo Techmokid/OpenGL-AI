@@ -20,3 +20,4 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     sendMsg(s,"Generate New Network: genomes=1, outputs=2, inputs=5, hiddenLayers=3,nodesPerLayer=5")
     while(True):
         print(s.recv(1024).decode("utf-8"))
+ 
