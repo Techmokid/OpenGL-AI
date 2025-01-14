@@ -2,9 +2,9 @@
 #include <vector>
 
 // Internal User Variables
-int maxThreadCount = 4;
-int numberOfIndexesPerThread = 10000;
-int numberOfAvailableActivationFunctions = 17;
+uint64_t maxThreadCount = 4;
+uint64_t numberOfIndexesPerThread = 10000;
+uint64_t numberOfAvailableActivationFunctions = 17;
 std::string saveDirectory = "";
 
 // Network Variables
@@ -13,18 +13,18 @@ Network_GPU* NGPU_Copy = new Network_GPU();
 
 std::vector<std::vector<float>>* NetworkOutputs = new std::vector<std::vector<float>>();
 
-int _genomeCount = 0, _inputCount = 0, _nodesPerLayer = 0, _hiddenLayerCount = 0, _outputNodes = 0, epoch = 0;
+uint64_t _genomeCount = 0, _inputCount = 0, _nodesPerLayer = 0, _hiddenLayerCount = 0, _outputNodes = 0, epoch = 0;
 bool* savingInProgress = new bool(false);
 
 // Network Function Declarations
 void ForceNetworkCopyMatching()  { NGPU_Copy = new Network_GPU(NGPU->clone()); }
 Network_GPU* GetNetworkPointer() { return NGPU; 			   }
-int GetGenomeCount() 			 { return _genomeCount; 	   }
-int GetGenomeInputCount() 		 { return _inputCount; 	 	   }
-int GetGenomeNodesPerLayer() 	 { return _nodesPerLayer; 	   }
-int GetGenomeHiddenLayerCount()  { return _hiddenLayerCount;   }
-int GetGenomeOutputCount() 	 	 { return _outputNodes; 	   }
-int getCurrentEpoch() 			 { return epoch; 			   }
+uint64_t GetGenomeCount() 			 { return _genomeCount; 	   }
+uint64_t GetGenomeInputCount() 		 { return _inputCount; 	 	   }
+uint64_t GetGenomeNodesPerLayer() 	 { return _nodesPerLayer; 	   }
+uint64_t GetGenomeHiddenLayerCount()  { return _hiddenLayerCount;   }
+uint64_t GetGenomeOutputCount() 	 	 { return _outputNodes; 	   }
+uint64_t getCurrentEpoch() 			 { return epoch; 			   }
 
 // Random Number System
 bool initiailizedRandomNumberGenerator = false;
@@ -51,13 +51,13 @@ float GetRandomFloat(float min, float max) {
 }
 
 // Network Generator
-void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer, int hiddenLayerCount, int outputNodes) {
+void CreateNewLayeredNetwork(uint64_t genomeCount, uint64_t inputNodes, uint64_t nodesPerLayer, uint64_t hiddenLayerCount, uint64_t outputNodes) {
 	print();
 	printFormatted("Neural", "Log", "Generating new layered neural network");
 	srand(time(NULL));
 	
-	int nodeCountPerGenome = inputNodes + nodesPerLayer*hiddenLayerCount + outputNodes;
-	int connCountPerGenome = inputNodes*nodesPerLayer + hiddenLayerCount*(hiddenLayerCount-1) + outputNodes*nodesPerLayer;
+	uint64_t nodeCountPerGenome = inputNodes + nodesPerLayer*hiddenLayerCount + outputNodes;
+	uint64_t connCountPerGenome = inputNodes*nodesPerLayer + hiddenLayerCount*(hiddenLayerCount-1) + outputNodes*nodesPerLayer;
 			
 	printFormatted("Neural","Debug","New GPU Network Data:");
 	printFormatted("Neural","Debug"," - Genome Count: " + std::to_string(genomeCount));
@@ -66,9 +66,9 @@ void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer,
 	printFormatted("Neural","Debug"," - Nodes Total: " + std::to_string(nodeCountPerGenome*genomeCount));
 	printFormatted("Neural","Debug"," - Connections Total: " + std::to_string(connCountPerGenome*genomeCount));
 	
-	unsigned long long int gRAM = genomeCount*sizeof(Genome_GPU);
-	unsigned long long int nRAM = nodeCountPerGenome*genomeCount*sizeof(Node_GPU);
-	unsigned long long int cRAM = connCountPerGenome*genomeCount*sizeof(NodeConnection_GPU);
+	uint64_t gRAM = genomeCount*sizeof(Genome_GPU);
+	uint64_t nRAM = nodeCountPerGenome*genomeCount*sizeof(Node_GPU);
+	uint64_t cRAM = connCountPerGenome*genomeCount*sizeof(NodeConnection_GPU);
 	printFormatted("Neural", "Debug", "Memory Requirements:");
 	printFormatted("Neural", "Debug", " - Genome RAM: " + DataSizeFormatter(sizeof(Genome_GPU)));
 	printFormatted("Neural", "Debug", " - Node RAM: " + DataSizeFormatter(sizeof(Node_GPU)));
@@ -80,30 +80,30 @@ void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer,
 	
 	delete NGPU;
 	NGPU = new Network_GPU();
-	int totalNodeCountPerGenome = (inputNodes + nodesPerLayer*hiddenLayerCount + outputNodes);
+	uint64_t totalNodeCountPerGenome = (inputNodes + nodesPerLayer*hiddenLayerCount + outputNodes);
 	
-	int inputConnections = inputNodes*nodesPerLayer;
-	int hiddenConnections = nodesPerLayer*nodesPerLayer*(hiddenLayerCount - 1);
-	int outputConnections = outputNodes*nodesPerLayer;
-	int totalNodeConnectionsCountPerGenome = (inputConnections + hiddenConnections + outputConnections);
+	uint64_t inputConnections = inputNodes*nodesPerLayer;
+	uint64_t hiddenConnections = nodesPerLayer*nodesPerLayer*(hiddenLayerCount - 1);
+	uint64_t outputConnections = outputNodes*nodesPerLayer;
+	uint64_t totalNodeConnectionsCountPerGenome = (inputConnections + hiddenConnections + outputConnections);
 	
 	delete NetworkOutputs;
 	NetworkOutputs = new std::vector<std::vector<float>>(genomeCount);
-	for (int g = 0; g < genomeCount; g++) {
+	for (uint64_t g = 0; g < genomeCount; g++) {
 		std::vector<float> tmp = std::vector<float>();
 		NetworkOutputs->at(g) = tmp;
 		NetworkOutputs->at(g).resize(outputNodes);
-		for (int o = 0; o < outputNodes; o++) {
+		for (uint64_t o = 0; o < outputNodes; o++) {
 			NetworkOutputs->at(g).at(o) = 0;
 		}
 	}
 	
 	NGPU->genomes.clear();
 	NGPU->genomes.resize(genomeCount);
-	for(int i = 0; i < genomeCount; i++) {
+	for(uint64_t i = 0; i < genomeCount; i++) {
 		NGPU->genomes[i].ID = i;
-		NGPU->genomes[i].fitness = std::numeric_limits<int>::min();
-		NGPU->genomes[i].prev_fitness = std::numeric_limits<int>::min();
+		NGPU->genomes[i].fitness = std::numeric_limits<uint64_t>::min();
+		NGPU->genomes[i].prev_fitness = std::numeric_limits<uint64_t>::min();
 		NGPU->genomes[i].Nodes_Start_Index = totalNodeCountPerGenome * i;
 		NGPU->genomes[i].Nodes_End_Index = totalNodeCountPerGenome * (i+1) - 1;
 	}
@@ -111,7 +111,7 @@ void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer,
 	NGPU->connections.clear();
 	NGPU->connections.resize(totalNodeConnectionsCountPerGenome * genomeCount);
 	
-	int tempWeightsCount = 0;
+	uint64_t tempWeightsCount = 0;
 	NGPU->nodes.clear();
 	NGPU->nodes.resize(totalNodeCountPerGenome * genomeCount);
 	
@@ -123,7 +123,7 @@ void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer,
 	print();
 	printFormatted("Neural", "Log", "Configuring New Neural Network");
 	
-	for (int i = 0; i < NGPU->nodes.size(); i++) {
+	for (uint64_t i = 0; i < NGPU->nodes.size(); i++) {
 		NGPU->nodes[i].ID = i;
 		//NGPU->nodes[i].nTT = 1;	//Node trigger type. 0 for step, 1 for sigmoid
 		NGPU->nodes[i].nTT = rand() % (numberOfAvailableActivationFunctions+1) - 1;
@@ -131,7 +131,7 @@ void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer,
 		NGPU->nodes[i].nB = getRandomFloat();	//Node Bias
 		NGPU->nodes[i].pNB = NGPU->nodes[i].nB;
 				
-		int startOfGenome = (int)(totalNodeCountPerGenome * floor((double)NGPU->nodes[i].ID / (double)totalNodeCountPerGenome));
+		uint64_t startOfGenome = (uint64_t)(totalNodeCountPerGenome * floor((double)NGPU->nodes[i].ID / (double)totalNodeCountPerGenome));
 		NGPU->nodes[i].nII = i < startOfGenome + inputNodes;
 		NGPU->nodes[i].nIO = i >= startOfGenome + inputNodes + nodesPerLayer*hiddenLayerCount;
 				
@@ -139,9 +139,9 @@ void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer,
 		NGPU->nodes[i].pO = -99999;
 		NGPU->nodes[i].wSI = tempWeightsCount;
 		
-		int startOfNonInputs = startOfGenome + inputNodes;
-		int startOfLastLayer = startOfGenome;
-		int currentLayer = std::floor(((i - startOfGenome) - inputNodes)/nodesPerLayer) + 1;
+		uint64_t startOfNonInputs = startOfGenome + inputNodes;
+		uint64_t startOfLastLayer = startOfGenome;
+		uint64_t currentLayer = std::floor(((i - startOfGenome) - inputNodes)/nodesPerLayer) + 1;
 		
 		if (i - startOfGenome >= inputNodes) {
 			if (i - startOfGenome < totalNodeCountPerGenome - outputNodes) {
@@ -160,8 +160,8 @@ void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer,
 			// Node is output node
 			NGPU->nodes[i].wEI = tempWeightsCount + nodesPerLayer - 1;
 			
-			for (int x = 0; x < nodesPerLayer; x++) {
-				int pos = tempWeightsCount;
+			for (uint64_t x = 0; x < nodesPerLayer; x++) {
+				uint64_t pos = tempWeightsCount;
 				NGPU->connections[pos].NodePos = startOfLastLayer + x;
 				NGPU->connections[pos].Weight = getRandomFloat();
 				NGPU->connections[pos].Prev_Weight = NGPU->connections[pos].Weight;
@@ -176,16 +176,16 @@ void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer,
 				NGPU->nodes[i].wEI = tempWeightsCount + inputNodes - 1;
 			
 			if (isSecondLayer) {
-				for (int x = 0; x < inputNodes; x++) {
-					int pos = tempWeightsCount;
+				for (uint64_t x = 0; x < inputNodes; x++) {
+					uint64_t pos = tempWeightsCount;
 					NGPU->connections[pos].NodePos = startOfGenome + x;
 					NGPU->connections[pos].Weight = getRandomFloat();
 					NGPU->connections[pos].Prev_Weight = NGPU->connections[pos].Weight;
 					tempWeightsCount++;
 				}
 			} else {
-				for (int x = 0; x < nodesPerLayer; x++) {
-					int pos = tempWeightsCount;
+				for (uint64_t x = 0; x < nodesPerLayer; x++) {
+					uint64_t pos = tempWeightsCount;
 					NGPU->connections[pos].NodePos = startOfGenome + inputNodes + x + nodesPerLayer*(currentLayer - 2);
 					NGPU->connections[pos].Weight = getRandomFloat();
 					NGPU->connections[pos].Prev_Weight = NGPU->connections[pos].Weight;
@@ -196,25 +196,25 @@ void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer,
 	}
 	
 	// Now just check to make sure the network has no circular definitions and all nodes are ID'd
-	int trimmableGenomes = 0;
-	for (int i = 0; i < NGPU->genomes.size(); i++) {
+	uint64_t trimmableGenomes = 0;
+	for (uint64_t i = 0; i < NGPU->genomes.size(); i++) {
 		if (NGPU->genomes[i].ID == -1) { trimmableGenomes++; }
-		if ((NGPU->genomes[i].Nodes_Start_Index > (int)NGPU->nodes.size() + 1) || (NGPU->genomes[i].Nodes_End_Index < 0)) {
+		if ((NGPU->genomes[i].Nodes_Start_Index > (uint64_t)NGPU->nodes.size() + 1) || (NGPU->genomes[i].Nodes_End_Index < 0)) {
 			printFormatted("Neural","Error","While creating neural net. Genome indexing failure");
 			quit();
 		}
 	}
 			
-	int trimmableNodes = 0;
-	for (int i = 0; i < NGPU->nodes.size(); i++) {
+	uint64_t trimmableNodes = 0;
+	for (uint64_t i = 0; i < NGPU->nodes.size(); i++) {
 		if (NGPU->nodes[i].ID == -1) { trimmableNodes++; }
-		if ((NGPU->nodes[i].wEI > (int)NGPU->connections.size() + 1) || (NGPU->nodes[i].wSI < 0)) {
+		if ((NGPU->nodes[i].wEI > (uint64_t)NGPU->connections.size() + 1) || (NGPU->nodes[i].wSI < 0)) {
 			printFormatted("Neural","Error","While creating neural net. Node indexing failure");
 			quit();
 		}
 	}
 	
-	for (int i = 0; i < NGPU->connections.size(); i++) {
+	for (uint64_t i = 0; i < NGPU->connections.size(); i++) {
 		if ((NGPU->connections[i].NodePos > NGPU->nodes.size()) || (NGPU->connections[i].NodePos < 0)) {
 			printFormatted("Neural","Error","While creating neural net. Connection indexing failure");
 			quit();
@@ -306,7 +306,7 @@ void SaveNeuralNetwork() {
 void SaveNetworkGenomes_MTwTDC(ThreadDataContainer* TDC) {
 	Genome_GPU G[TDC->EndIndex - TDC->ID + 1];
 	
-	for(int i = TDC->ID; i <= TDC->EndIndex; i++) {
+	for(uint64_t i = TDC->ID; i <= TDC->EndIndex; i++) {
 		G[i - TDC->ID] = NGPU_Copy->genomes[i];
 	}
 	
@@ -314,7 +314,7 @@ void SaveNetworkGenomes_MTwTDC(ThreadDataContainer* TDC) {
 	
 	std::fstream f;
 	f.open(filepath, std::fstream::out | std::fstream::trunc);
-	for (int i = 0; i < sizeof(G) / sizeof(G[0]); i++) {
+	for (uint64_t i = 0; i < sizeof(G) / sizeof(G[0]); i++) {
 		// Convert the neural genome to CSV format
 		std::string line = std::to_string(G[i].ID) + ",";
 		line += std::to_string(G[i].fitness) + ",";
@@ -330,14 +330,14 @@ void SaveNetworkGenomes_MTwTDC(ThreadDataContainer* TDC) {
 
 void SaveNetworkNodes_MTwTDC(ThreadDataContainer* TDC) {
 	Node_GPU N[TDC->EndIndex - TDC->ID + 1];
-	for(int i = TDC->ID; i <= TDC->EndIndex; i++) {
+	for(uint64_t i = TDC->ID; i <= TDC->EndIndex; i++) {
 		N[i - TDC->ID] = NGPU_Copy->nodes[i];
 	}
 	
 	std::string filepath = TDC->path + "Nodes/Node Data " + std::to_string(TDC->ID) + ".csv";
 	std::fstream f;
 	f.open(filepath, std::fstream::out | std::fstream::trunc);
-	for (int i = 0; i < sizeof(N) / sizeof(N[0]); i++) {
+	for (uint64_t i = 0; i < sizeof(N) / sizeof(N[0]); i++) {
 		// Convert the neural node to CSV format
 		std::string line = std::to_string(N[i].ID) + ",";
 		line += std::to_string(N[i].nTT) + ",";
@@ -358,14 +358,14 @@ void SaveNetworkNodes_MTwTDC(ThreadDataContainer* TDC) {
 
 void SaveNetworkConnections_MTwTDC(ThreadDataContainer* TDC) {
 	NodeConnection_GPU C[TDC->EndIndex - TDC->ID + 1];
-	for(int i = TDC->ID; i <= TDC->EndIndex; i++) {
+	for(uint64_t i = TDC->ID; i <= TDC->EndIndex; i++) {
 		C[i - TDC->ID] = NGPU_Copy->connections[i];
 	}
 	
 	std::string filepath = TDC->path + "Node Connections/Connection Data " + std::to_string(TDC->ID) + ".csv";
 	std::fstream f;
 	f.open(filepath, std::fstream::out | std::fstream::trunc);
-	for (int i = 0; i < sizeof(C) / sizeof(C[0]); i++) {
+	for (uint64_t i = 0; i < sizeof(C) / sizeof(C[0]); i++) {
 		// Convert the neural connection to CSV format
 		std::string line = std::to_string(C[i].NodePos) + ",";
 		line += std::to_string(C[i].Weight) + ",";
@@ -377,7 +377,7 @@ void SaveNetworkConnections_MTwTDC(ThreadDataContainer* TDC) {
 	TDC->threadCompletionStatus = true;
 }
 
-void SetCPUSaveThreadCount(int x) { numberOfIndexesPerThread = x; }
+void SetCPUSaveThreadCount(uint64_t x) { numberOfIndexesPerThread = x; }
 
 void SaveNeuralNetworkInternal(std::string dir) {
 	if (saveDirectory == "") {
@@ -400,9 +400,9 @@ void SaveNeuralNetworkInternal(std::string dir) {
 	
 	std::vector<ThreadDataContainer*> TDC_List;
 	bool run = true;
-	int genomeIndex = 0;
-	int maxThreadCount = std::thread::hardware_concurrency();
-	int currentThreadCount = 0;
+	uint64_t genomeIndex = 0;
+	uint64_t maxThreadCount = std::thread::hardware_concurrency();
+	uint64_t currentThreadCount = 0;
 	
 	//std::to_string(
 	//	ceil(
@@ -412,9 +412,9 @@ void SaveNeuralNetworkInternal(std::string dir) {
 	
 	printFormatted("Save","Debug", "Genomes size: " + std::to_string(NGPU->genomes.size()));
 	printFormatted("Save","Debug", "Max thread count: " + std::to_string(maxThreadCount));
-	printFormatted("Save","Debug", "Genome File Count: " + std::to_string(int(ceil((float)NGPU_Copy->genomes.size()/(float)numberOfIndexesPerThread))));
-	printFormatted("Save","Debug", "Node File Count: " + std::to_string(int(ceil((float)NGPU_Copy->nodes.size()/(float)numberOfIndexesPerThread))));
-	printFormatted("Save","Debug", "Node Connections File Count: " + std::to_string(int(ceil((float)NGPU_Copy->connections.size()/(float)numberOfIndexesPerThread))));
+	printFormatted("Save","Debug", "Genome File Count: " + std::to_string(uint64_t(ceil((float)NGPU_Copy->genomes.size()/(float)numberOfIndexesPerThread))));
+	printFormatted("Save","Debug", "Node File Count: " + std::to_string(uint64_t(ceil((float)NGPU_Copy->nodes.size()/(float)numberOfIndexesPerThread))));
+	printFormatted("Save","Debug", "Node Connections File Count: " + std::to_string(uint64_t(ceil((float)NGPU_Copy->connections.size()/(float)numberOfIndexesPerThread))));
 	printFormatted("Save","Debug", "Index Count per CPU Thread: " + std::to_string(numberOfIndexesPerThread));	
 	
 	//Now we actually start saving the AI to disk
@@ -426,7 +426,7 @@ void SaveNeuralNetworkInternal(std::string dir) {
 			
 			ThreadDataContainer* TDC_Connection = new ThreadDataContainer();
 			TDC_Connection->ID = genomeIndex;
-			TDC_Connection->EndIndex = genomeIndex + std::min(numberOfIndexesPerThread - 1, (int)NGPU_Copy->connections.size() - genomeIndex - 1);
+			TDC_Connection->EndIndex = genomeIndex + std::min(numberOfIndexesPerThread - 1, (uint64_t)NGPU_Copy->connections.size() - genomeIndex - 1);
 			
 			if (TDC_Connection->EndIndex >= NGPU_Copy->connections.size()) {
 				printFormatted("Save","Error", "Connection indexing error!");
@@ -444,7 +444,7 @@ void SaveNeuralNetworkInternal(std::string dir) {
 			if (genomeIndex < NGPU_Copy->nodes.size()) {
 				ThreadDataContainer* TDC_Node = new ThreadDataContainer();
 				TDC_Node->ID = genomeIndex;
-				TDC_Node->EndIndex = genomeIndex + std::min(numberOfIndexesPerThread - 1,(int)NGPU_Copy->nodes.size()-genomeIndex-1);
+				TDC_Node->EndIndex = genomeIndex + std::min(numberOfIndexesPerThread - 1,(uint64_t)NGPU_Copy->nodes.size()-genomeIndex-1);
 				TDC_Node->path = dir;
 				
 				if (TDC_Node->EndIndex >= NGPU_Copy->nodes.size()) {
@@ -467,7 +467,7 @@ void SaveNeuralNetworkInternal(std::string dir) {
 			if (genomeIndex < NGPU_Copy->genomes.size()) {
 				ThreadDataContainer* TDC_Genome = new ThreadDataContainer();
 				TDC_Genome->ID = genomeIndex;
-				TDC_Genome->EndIndex = genomeIndex + std::min(numberOfIndexesPerThread - 1,(int)(NGPU_Copy->genomes.size())-genomeIndex-1);
+				TDC_Genome->EndIndex = genomeIndex + std::min(numberOfIndexesPerThread - 1,(uint64_t)(NGPU_Copy->genomes.size())-genomeIndex-1);
 				TDC_Genome->path = dir;
 				
 				if (TDC_Genome->EndIndex >= NGPU_Copy->genomes.size()) {
@@ -492,7 +492,7 @@ void SaveNeuralNetworkInternal(std::string dir) {
 		
 		if (run) {
 			while (currentThreadCount >= maxThreadCount) {
-				for (int x = 0; x < TDC_List.size(); x++) {
+				for (uint64_t x = 0; x < TDC_List.size(); x++) {
 					if (TDC_List[x]->threadCompletionStatus) {
 						TDC_List.erase(TDC_List.begin() + x);
 						currentThreadCount--;
@@ -504,7 +504,7 @@ void SaveNeuralNetworkInternal(std::string dir) {
 	}
 	
 	while(TDC_List.size() > 0) {
-		for (int x = 0; x < TDC_List.size(); x++) {
+		for (uint64_t x = 0; x < TDC_List.size(); x++) {
 			if (TDC_List[x]->threadCompletionStatus) {
 				TDC_List.erase(TDC_List.begin() + x);
 				currentThreadCount--;
@@ -726,9 +726,9 @@ void LoadNetworkGPU() {
 	// Now that we have all the directories, we can start calling the multithreads to load the network
 	std::vector<ThreadDataContainer*> TDC_List;
 	bool run = true;
-	int genomeIndex = 0;
-	int maxThreadCount = std::thread::hardware_concurrency()/2;
-	int currentThreadCount = 0;
+	uint64_t genomeIndex = 0;
+	uint64_t maxThreadCount = std::thread::hardware_concurrency()/2;
+	uint64_t currentThreadCount = 0;
 	while(run) {
 		while(currentThreadCount < maxThreadCount) {
 			if (genomeIndex == connections.size()) { run = false; break; }
@@ -768,7 +768,7 @@ void LoadNetworkGPU() {
 			genomeIndex++;
 		}
 		if (run) {
-			for (int x = 0; x < TDC_List.size(); x++) {
+			for (uint64_t x = 0; x < TDC_List.size(); x++) {
 				if (TDC_List[x]->threadCompletionStatus) {
 					TDC_List.erase(TDC_List.begin() + x);
 					currentThreadCount--;
@@ -779,7 +779,7 @@ void LoadNetworkGPU() {
 	}
 	
 	while(TDC_List.size() > 0) {
-		for (int x = 0; x < TDC_List.size(); x++) {
+		for (uint64_t x = 0; x < TDC_List.size(); x++) {
 			if (TDC_List[x]->threadCompletionStatus) {
 				TDC_List.erase(TDC_List.begin() + x);
 				currentThreadCount--;
@@ -791,7 +791,7 @@ void LoadNetworkGPU() {
 	printFormatted("Load","Log","Trimming network...");
 	
 	// Trim network of undeclared objects
-	int i = NGPU->genomes.size();
+	uint64_t i = NGPU->genomes.size();
 	while(true) {
 		i--;
 		if (NGPU->genomes[i].ID == -1) {
@@ -831,7 +831,7 @@ void LoadNetworkGenomes_MTwTDC(ThreadDataContainer* TDC) {
 	while(line != "") {
 		// Use "line" to get out the data
 		std::vector<std::string> loadData = SplitString(line,',');
-		int ID = std::stoi(loadData[0]);
+		uint64_t ID = std::stoi(loadData[0]);
 		NGPU->genomes[ID].ID = 								ID;
 		NGPU->genomes[ID].fitness = 					std::stof(loadData[1]);
 		NGPU->genomes[ID].prev_fitness = 			std::stof(loadData[2]);
@@ -855,7 +855,7 @@ void LoadNetworkNodes_MTwTDC(ThreadDataContainer* TDC) {
 	while(line != "") {
 		// Use "line" to get out the data
 		std::vector<std::string> loadData = SplitString(line,',');
-		int ID = std::stoi(loadData[0]);
+		uint64_t ID = std::stoi(loadData[0]);
 		NGPU->nodes[ID].ID = ID;
 		NGPU->nodes[ID].nTT =	std::stoi(loadData[1]);
 		NGPU->nodes[ID].nB =	std::stof(loadData[2]);
@@ -879,15 +879,15 @@ void LoadNetworkConnections_MTwTDC(ThreadDataContainer* TDC) {
 	std::ifstream myfile;
 	myfile.open(TDC->path);
 	
-	int startVal = std::stoi(ASCII_To_Numeric(TDC->path));
+	uint64_t startVal = std::stoi(ASCII_To_Numeric(TDC->path));
 	
-	int i = 0;
+	uint64_t i = 0;
 	std::string line;
 	std::getline(myfile,line);
 	while(line != "") {
 		// Use "line" to get out the data
 		std::vector<std::string> loadData = SplitString(line,',');
-		int ID = startVal + i;
+		uint64_t ID = startVal + i;
 		NGPU->connections[ID].NodePos = 		std::stoi(loadData[0]);
 		NGPU->connections[ID].Weight =			std::stof(loadData[1]);
 		NGPU->connections[ID].Prev_Weight =	std::stof(loadData[2]);
@@ -930,13 +930,13 @@ void SetNetworkFitnesses(std::vector<float> fitnesses) {
 		quit();
 	}
 	
-	for (int i = 0; i < NGPU->genomes.size(); i++) {
+	for (uint64_t i = 0; i < NGPU->genomes.size(); i++) {
 		NGPU->genomes[i].fitness = fitnesses[i];
 		//#error GPU implimentation of SetNetworkFitnesses incomplete
 	}
 }
 
-std::vector<std::vector<float>> GetNetworkOutput(GLuint location) {
+std::vector<std::vector<float>> GetNetworkOutput(GLuint64 location) {
 	if (!*savingInProgress) {
 		*savingInProgress = true;
 		
@@ -952,11 +952,11 @@ std::vector<std::vector<float>> GetNetworkOutput(GLuint location) {
 	std::vector<float> rawGPUOutput;
 	Get_SSBO_Buffer(rawGPUOutput,location);
 	
-	int outputsPerGenome = _outputNodes;
+	uint64_t outputsPerGenome = _outputNodes;
 	std::vector<std::vector<float>> results(_genomeCount);
-	for (int i = 0; i < _genomeCount; i++) {
+	for (uint64_t i = 0; i < _genomeCount; i++) {
 		results[i] = std::vector<float>(outputsPerGenome);
-		for (int z = 0; z < outputsPerGenome; z++) {
+		for (uint64_t z = 0; z < outputsPerGenome; z++) {
 			results[i][z] = rawGPUOutput[z + i*outputsPerGenome];
 		}
 	}

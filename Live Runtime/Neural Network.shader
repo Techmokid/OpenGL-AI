@@ -21,18 +21,18 @@ const float e = 2.71828182845904523536028747;
 const float OUTPUT_ERROR_VALUE = -999999;
 
 struct Genome_GPU {
-	int ID;							// The genome index/ID
+	uint64_t ID;							// The genome index/ID
 	float fitness;					// How good the genome has performed
 	float prev_fitness;				// How good the genome previously performed
-	int Nodes_Start_Index;			// The start of the genome in the nodes array
-	int Nodes_End_Index;			// The end of the genome in the nodes array
-	int FailedNetworkIterations;	// The number of times the genome has failed to improve
+	uint64_t Nodes_Start_Index;			// The start of the genome in the nodes array
+	uint64_t Nodes_End_Index;			// The end of the genome in the nodes array
+	uint64_t FailedNetworkIterations;	// The number of times the genome has failed to improve
 };
 		
 struct Node_GPU {
-	int ID;		//Identification code		// The ID of this node
+	uint64_t ID;		//Identification code		// The ID of this node
 			
-	int nTT;	//Node trigger typeof
+	uint64_t nTT;	//Node trigger typeof
 	float nB;	//Node bias
 	float pNB;	//Previous node bias
 			
@@ -41,12 +41,12 @@ struct Node_GPU {
 	float nIV;	//node Input Value			// If the node is an input, what have we entered
 	float pO;	//precalculated Output		// This variable just allows for quicker genome output computing
 			
-	int wSI;	//weights Start Index		// This is the position in the weights array where the start of this nodes connections are held
-	int wEI;	//weights End Index			// This is the position in the weights array where the end of this nodes connections are held
+	uint64_t wSI;	//weights Start Index		// This is the position in the weights array where the start of this nodes connections are held
+	uint64_t wEI;	//weights End Index			// This is the position in the weights array where the end of this nodes connections are held
 };
 		
 struct NodeConnection_GPU {
-	int NodePos;		// The position in the nodes array that this connection is referencing
+	uint64_t NodePos;		// The position in the nodes array that this connection is referencing
 	float Weight;		// The weight of this connection
 	float Prev_Weight;	// The previous weight of this connection
 };
@@ -57,12 +57,12 @@ layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 layout(std430, binding = 0) buffer neuralNetwork0 { Genome_GPU gArr[];         };
 layout(std430, binding = 1) buffer neuralNetwork1 { Node_GPU nArr[];           };
 layout(std430, binding = 2) buffer neuralNetwork2 { NodeConnection_GPU cArr[]; };
-layout(std430, binding = 8) buffer neuralNetwork8 { uint gArrSize; };
+layout(std430, binding = 8) buffer neuralNetwork8 { uint64_t gArrSize; };
 
 // Dynamic variables that will be shared between the GPU and CPU overtime
 layout(std430, binding = 3) buffer neuralNetwork3 { float inputArray[];        };
 layout(std430, binding = 4) buffer neuralNetwork4 { float outputArray[];       };
-layout(std430, binding = 5) buffer neuralNetwork5 { int epoch;                 };  // Need to manually change on the CPU each iteration
+layout(std430, binding = 5) buffer neuralNetwork5 { uint64_t epoch;                 };  // Need to manually change on the CPU each iteration
 layout(std430, binding = 6) buffer neuralNetwork6 { float genomeSurvivalPerc;  };
 
 // Do we want the network to actually train, or just provide output values? If pretrained, set this to false
@@ -71,19 +71,19 @@ layout(std430, binding = 7) buffer neuralNetwork7 { bool doTraining;           }
 // Generate a random number, given an input seed and the current epoch
 // These values are predetermined from online, I have no idea how it works, I just know it does
 // DO NOT CHANGE THESE VALUES OR REPETITION IS LIKELY, WILL BECOME NOT AS RANDOM
-float random(int genomeID) {
+float random(uint64_t genomeID) {
     vec3 seed = vec3(float(genomeID), float(epoch), 42.0);
     return 2.0 * fract(sin(dot(seed, vec3(12.9898, 78.233, 37.719))) * 43758.5453) - 1.0;
 }
 
 void main() {
 	// Get global ID
-	uint ID = gl_GlobalInvocationID.x;
+	uint64_t ID = gl_GlobalInvocationID.x;
 	
-	int numOutputs = 0;
-	int outputNodeIndex = 0;
-	int nodesStart = gArr[ID].Nodes_Start_Index;
-	int nodesEnd = gArr[ID].Nodes_End_Index;
+	uint64_t numOutputs = 0;
+	uint64_t outputNodeIndex = 0;
+	uint64_t nodesStart = gArr[ID].Nodes_Start_Index;
+	uint64_t nodesEnd = gArr[ID].Nodes_End_Index;
 	
 	// Did the neural network perform better or worse than last iteration? Ignore if this is the first epoch
 	bool revertToPrev = (epoch != 1) && (gArr[ID].fitness < gArr[ID].prev_fitness);
@@ -93,11 +93,11 @@ void main() {
 			
 			// Now we decide if it performed TOO badly. If so, reset the genome entirely.
 			if (gArr[ID].FailedNetworkIterations > MAX_FAILED_ITERATIONS) {
-				int betterGenomeCount  = 0;
-				int bestGenomeIndex1st = 0;
-				int bestGenomeIndex2nd = 0;
-				int bestGenomeIndex3rd = 0;
-				for (int g = 0; g < int(gArrSize); g++) {
+				uint64_t betterGenomeCount  = 0;
+				uint64_t bestGenomeIndex1st = 0;
+				uint64_t bestGenomeIndex2nd = 0;
+				uint64_t bestGenomeIndex3rd = 0;
+				for (uint64_t g = 0; g < uint64_t(gArrSize); g++) {
 					if (gArr[g].prev_fitness > gArr[ID].prev_fitness) { betterGenomeCount++; }
 					
 					if (gArr[g].prev_fitness > gArr[bestGenomeIndex3rd].prev_fitness) { bestGenomeIndex3rd = g; }
@@ -113,16 +113,16 @@ void main() {
 				
 				if (betterGenomeCount/float(gArrSize) < genomeSurvivalPerc) {
 					// We have performed too poorly and must be either reset entirely or genetically mutated with the best performing genomes
-					bool randomize = random(int(ID)) > 0.0;
-					for (int n = gArr[ID].Nodes_Start_Index; n <= gArr[ID].Nodes_End_Index; n++) {
-						for (int c = nArr[n].wSI; c <= nArr[n].wEI; c++) {
+					bool randomize = random(uint64_t(ID)) > 0.0;
+					for (uint64_t n = gArr[ID].Nodes_Start_Index; n <= gArr[ID].Nodes_End_Index; n++) {
+						for (uint64_t c = nArr[n].wSI; c <= nArr[n].wEI; c++) {
 							float selectedWeight = 0;
-							float r = random(int(4.651*ID * n + 83.162*c/n));
+							float r = random(uint64_t(4.651*ID * n + 83.162*c/n));
 							selectedWeight = r;
 							
 							if (!randomize) {
-								int nIndex = n - gArr[ID].Nodes_Start_Index;
-								int cIndex = c - nArr[n].wSI;
+								uint64_t nIndex = n - gArr[ID].Nodes_Start_Index;
+								uint64_t cIndex = c - nArr[n].wSI;
 								if (r > 0.5) {
 									nIndex += gArr[bestGenomeIndex1st].Nodes_Start_Index;
 									selectedWeight = cArr[nArr[nIndex].wSI + cIndex].Prev_Weight;
@@ -159,8 +159,8 @@ void main() {
 	
 	// If required, revert back to a better working version of the genome
 	float largestWeight = OUTPUT_ERROR_VALUE;
-	for (int nI = nodesStart; nI <= nodesEnd; nI++) {
-		for (int nC = nArr[nI].wSI; nC <= nArr[nI].wEI; nC++) {
+	for (uint64_t nI = nodesStart; nI <= nodesEnd; nI++) {
+		for (uint64_t nC = nArr[nI].wSI; nC <= nArr[nI].wEI; nC++) {
 			if (revertToPrev) { cArr[nC].Weight = cArr[nC].Prev_Weight; }
 			
 			cArr[nC].Weight += random(nC);
@@ -179,8 +179,8 @@ void main() {
 	
 	// Normalize the weights
 	if (largestWeight != 0) {
-		for (int nI = nodesStart; nI <= nodesEnd; nI++) {
-			for (int nC = nArr[nI].wSI; nC <= nArr[nI].wEI; nC++) {
+		for (uint64_t nI = nodesStart; nI <= nodesEnd; nI++) {
+			for (uint64_t nC = nArr[nI].wSI; nC <= nArr[nI].wEI; nC++) {
 				cArr[nC].Weight = cArr[nC].Weight / largestWeight;
 			}
 		}
@@ -196,11 +196,11 @@ void main() {
 	// Here we want to get the neural networks output given it's inputs by computing all of the nodes from start to finish
 	// For each node we compute it's output. Due to the way the CPU gives us the nodes in structured order, we know that we can just iterate directly through without needing to precompute a previous node
 	// For more complex neural geometries that aren't in the standard node-layers structure, I may need to rethink this approach later. Not important for now though
-	for (int nodeIndex = nodesStart; nodeIndex <= nodesEnd; nodeIndex++) {
+	for (uint64_t nodeIndex = nodesStart; nodeIndex <= nodesEnd; nodeIndex++) {
 		if (nArr[nodeIndex].nII) {
 			nArr[nodeIndex].pO = inputArray[nodeIndex - nodesStart];
 		} else {
-			for (int connectionIndex = nArr[nodeIndex].wSI; connectionIndex <= nArr[nodeIndex].wEI; connectionIndex++) {
+			for (uint64_t connectionIndex = nArr[nodeIndex].wSI; connectionIndex <= nArr[nodeIndex].wEI; connectionIndex++) {
 				nArr[nodeIndex].pO += cArr[connectionIndex].Weight * nArr[cArr[connectionIndex].NodePos].pO;
 			}
 			

@@ -1,0 +1,5 @@
+64-bit GPU support: 	Convert all code from using "int" for indexing to using "uint64_t" in the <cstdint> library
+			This prevents the 2GB glitch, and allows for truely gargantuan lists as needed
+			OpenGL does support more than 2GB on a list, it's just the fact I've indexed ID's and positions in terms of "int" and not "uint64_t" causing the problem
+
+Shader Tidy:		Clean up the dual shader situation going on. Is it "Neural Network.shader" or "GetNetworkOutput.shader"??

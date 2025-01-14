@@ -6,12 +6,13 @@
 #include <iostream>		// Required for User I/O operations
 #include <string.h>
 #include <cstring>
-#include <chrono>			// Required for time keeping and timeout periods
+#include <cstdint>      // Required for uint64_t support
+#include <chrono>		// Required for time keeping and timeout periods
 #include <stdlib.h>		// Required to clear the console
-#include <vector>			// Required for dynamic sized arrays (Effectively lists)
-#include <math.h>			// Required for math floor function
+#include <vector>		// Required for dynamic sized arrays (Effectively lists)
+#include <math.h>		// Required for math floor function
 #include <stdexcept>	// Required for error handling
-#include <thread>			// Required to allow for CPU multithreading
+#include <thread>		// Required to allow for CPU multithreading
 #include <fstream>
 #include <filesystem>
 
@@ -39,7 +40,7 @@ void print();
 void print(int x);
 void print(float x);
 void print(double x);
-void print(long unsigned int x);
+void print(uint64_t x);
 void print(std::string x);
 void SilenceConsoleOutput(bool silence);
 void printFormatted(std::string module, std::string status, std::string msg);
@@ -50,7 +51,7 @@ void printInfo(std::string module, std::string msg);
 void printDebug(std::string module, std::string msg);
 void SetConsoleColor(int colour);
 std::string TimeFormatter(double x);
-std::string DataSizeFormatter(unsigned long long int x);
+std::string DataSizeFormatter(uint64_t x);
 void waitForUserInput();
 std::string stringToLower(std::string in);
 std::string stringToLowerCapitalized(std::string in);
@@ -60,25 +61,25 @@ std::string ASCII_To_Numeric(std::string x);
 std::string RemoveSpecificCharacter(std::string x, char delim);
 std::string expandEnvironmentVariables(const std::string& inputPath);
 void quit();
-void delay(unsigned int t);
+void delay(uint64_t t);
 void SetWallpaper(std::string path);
 
 // AI_Core.cpp
 struct Genome_GPU {
 	Genome_GPU() { }
-	int ID = -1;
-	float fitness = std::numeric_limits<int>::min();
-	float prev_fitness = std::numeric_limits<int>::min();
-	int Nodes_Start_Index = -1;
-	int Nodes_End_Index = -1;
-	int FailedNetworkIterations = 0;
+	uint64_t ID = -1;
+	float fitness = std::numeric_limits<uint64_t>::min();
+	float prev_fitness = std::numeric_limits<uint64_t>::min();
+	uint64_t Nodes_Start_Index = -1;
+	uint64_t Nodes_End_Index = -1;
+	uint64_t FailedNetworkIterations = 0;
 };
 		
 struct Node_GPU {
 	Node_GPU() { }
-	int ID = -1;			//Identification code		// The ID of this node
+	uint64_t ID = -1;			//Identification code		// The ID of this node
 			
-	int nTT = 0;		//Node trigger typeof		// -1 is disabled node, 0 -> 16 is different activation functions
+	uint64_t nTT = 0;		//Node trigger typeof		// -1 is disabled node, 0 -> 16 is different activation functions
 	float nB = 0;		//Node bias
 	float pNB = 0;		//Previous node bias
 			
@@ -87,12 +88,12 @@ struct Node_GPU {
 	float nIV = 0;			//node Input Value			// If the node is an input, what have we entered
 	float pO = -99999;	//precalculated Output		// This variable just allows for quicker genome output computing
 			
-	int wSI = 0; 		//weights Start Index		// This is the position in the weights array where the start of this nodes connections are held
-	int wEI = 0;			//weights End Index			// This is the position in the weights array where the end of this nodes connections are held
+	uint64_t wSI = 0; 		//weights Start Index		// This is the position in the weights array where the start of this nodes connections are held
+	uint64_t wEI = 0;			//weights End Index			// This is the position in the weights array where the end of this nodes connections are held
 };
 		
 struct NodeConnection_GPU {
-	int NodePos;
+	uint64_t NodePos;
 	float Weight;
 	float Prev_Weight;
 };
@@ -113,22 +114,22 @@ struct Network_GPU {
 
 struct ThreadDataContainer {
 	bool threadCompletionStatus = false;
-	int ID;
+	uint64_t ID;
 	std::string path;
-	int EndIndex;
+	uint64_t EndIndex;
 };
 
 void ForceNetworkCopyMatching();
 Network_GPU* GetNetworkPointer();
 
-int GetGenomeCount();
-int GetGenomeInputCount();
-int GetGenomeNodesPerLayer();
-int GetGenomeHiddenLayerCount();
-int GetGenomeOutputCount();
-int getCurrentEpoch();
+uint64_t GetGenomeCount();
+uint64_t GetGenomeInputCount();
+uint64_t GetGenomeNodesPerLayer();
+uint64_t GetGenomeHiddenLayerCount();
+uint64_t GetGenomeOutputCount();
+uint64_t getCurrentEpoch();
 
-void CreateNewLayeredNetwork(int genomeCount, int inputNodes, int nodesPerLayer, int hiddenLayerCount, int outputNodes);
+void CreateNewLayeredNetwork(uint64_t genomeCount, uint64_t inputNodes, uint64_t nodesPerLayer, uint64_t hiddenLayerCount, uint64_t outputNodes);
 
 void LoadNetworkGPU(std::string dir);
 void LoadNetworkGPU();
@@ -139,7 +140,7 @@ void SaveNeuralNetworkHandler(bool* status);
 void SaveNeuralNetwork();
 void SaveNeuralNetwork(std::string dir);
 void SaveNeuralNetworkInternal(std::string dir);
-void SetCPUSaveThreadCount(int x);
+void SetCPUSaveThreadCount(uint64_t x);
 
 float getRandomFloat();
 float getRandomFloat(float HI, float LO);
@@ -154,7 +155,7 @@ Network_GPU* GetNetworkPointer();
 
 std::vector<std::vector<float>> GetNetworkOutput(GLuint location);
 void GetGenomeOutput_MTwTDC(ThreadDataContainer* TDC);
-float GetNodeOutput(int x);
+float GetNodeOutput(uint64_t x);
 float GetNodeOutput(Node_GPU N);
 float GetRandomFloat(float min, float max);
 void TrainGenome_MTwTDC(ThreadDataContainer* TDC);
@@ -200,21 +201,21 @@ void checkShaderCompileStatus(GLuint shader);
 void ShutDownOpenGL();
 
 template<typename T>
-void Set_SSBO_Buffer(std::vector<T> &obj, GLuint ssbo, int buffer_index) {
+void Set_SSBO_Buffer(std::vector<T> &obj, GLuint ssbo, uint64_t buffer_index) {
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
     glBufferData(GL_SHADER_STORAGE_BUFFER, obj.size() * sizeof(T), obj.data(), GL_STATIC_DRAW);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, buffer_index, ssbo);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
 template<typename T>
-void Set_SSBO_Buffer(T &obj, GLuint ssbo, int buffer_index) {
+void Set_SSBO_Buffer(T &obj, GLuint ssbo, uint64_t buffer_index) {
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
     glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(T), &obj, GL_STATIC_DRAW);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, buffer_index, ssbo);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
 template<typename T>
-void Set_SSBO_Buffer(T obj, GLuint ssbo, int buffer_index) {
+void Set_SSBO_Buffer(T obj, GLuint ssbo, uint64_t buffer_index) {
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
     glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(T), &obj, GL_STATIC_DRAW);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, buffer_index, ssbo);
