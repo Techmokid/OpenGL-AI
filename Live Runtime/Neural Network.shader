@@ -1,6 +1,3 @@
-
-// TO IMPLIMENT - Include the activation functions as part of the learning process
-
 // Using any version other than 430 causes OpenGL compile error due to used OpenGL version
 #version 430
 
