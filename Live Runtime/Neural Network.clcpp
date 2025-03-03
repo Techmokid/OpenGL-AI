@@ -1,0 +1,229 @@
+__kernel void neural_network_kernel(__global Genome_GPU *genomes, __global Node_GPU *nodes, __global NodeConnection_GPU *connections) {
+	// Get global ID
+	//uint64_t ID = gl_GlobalInvocationID.x;  // OpenGL
+	int ID = get_global_id(0);                // OpenCL
+	if (ID >= num_genomes) return;
+	
+	uint64_t numOutputs = 0;
+	uint64_t outputNodeIndex = 0;
+	uint64_t nodesStart = gArr[ID].Nodes_Start_Index;
+	uint64_t nodesEnd = gArr[ID].Nodes_End_Index;
+	
+	// Did the neural network perform better or worse than last iteration? Ignore if this is the first epoch
+	bool revertToPrev = (epoch != 1) && (gArr[ID].fitness < gArr[ID].prev_fitness);
+	if (doTraining) {
+		if (revertToPrev) {
+			gArr[ID].FailedNetworkIterations++;
+			
+			// Now we decide if it performed TOO badly. If so, reset the genome entirely.
+			if (gArr[ID].FailedNetworkIterations > MAX_FAILED_ITERATIONS) {
+				uint64_t betterGenomeCount  = 0;
+				uint64_t bestGenomeIndex1st = 0;
+				uint64_t bestGenomeIndex2nd = 0;
+				uint64_t bestGenomeIndex3rd = 0;
+				for (uint64_t g = 0; g < uint64_t(gArrSize); g++) {
+					if (gArr[g].prev_fitness > gArr[ID].prev_fitness) { betterGenomeCount++; }
+					
+					if (gArr[g].prev_fitness > gArr[bestGenomeIndex3rd].prev_fitness) { bestGenomeIndex3rd = g; }
+					if (gArr[g].prev_fitness > gArr[bestGenomeIndex2nd].prev_fitness) {
+						bestGenomeIndex3rd = bestGenomeIndex2nd;
+						bestGenomeIndex2nd = g;
+					}
+					if (gArr[g].prev_fitness > gArr[bestGenomeIndex1st].prev_fitness) {
+						bestGenomeIndex2nd = bestGenomeIndex1st;
+						bestGenomeIndex1st = g;
+					}
+				}
+				
+				if (betterGenomeCount/float(gArrSize) < genomeSurvivalPerc) {
+					// We have performed too poorly and must be either reset entirely or genetically mutated with the best performing genomes
+					bool randomize = random(uint64_t(ID)) > 0.0;
+					for (uint64_t n = gArr[ID].Nodes_Start_Index; n <= gArr[ID].Nodes_End_Index; n++) {
+						for (uint64_t c = nArr[n].wSI; c <= nArr[n].wEI; c++) {
+							float selectedWeight = 0;
+							float r = random(uint64_t(4.651*ID * n + 83.162*c/n));
+							selectedWeight = r;
+							
+							if (!randomize) {
+								uint64_t nIndex = n - gArr[ID].Nodes_Start_Index;
+								uint64_t cIndex = c - nArr[n].wSI;
+								if (r > 0.5) {
+									nIndex += gArr[bestGenomeIndex1st].Nodes_Start_Index;
+									selectedWeight = cArr[nArr[nIndex].wSI + cIndex].Prev_Weight;
+								} else if (r > 0) {
+									nIndex += gArr[bestGenomeIndex2nd].Nodes_Start_Index;
+									selectedWeight = cArr[nArr[nIndex].wSI + cIndex].Prev_Weight;
+								} else if (r > -0.5) {
+									nIndex += gArr[bestGenomeIndex3rd].Nodes_Start_Index;
+									selectedWeight = cArr[nArr[nIndex].wSI + cIndex].Prev_Weight;
+								} else {
+									selectedWeight = 4.651*ID*n + 83.162*c/n;
+								}
+							}
+							
+							cArr[c].Prev_Weight = selectedWeight;
+							cArr[c].Weight = cArr[c].Prev_Weight;
+						}
+					}
+					
+					gArr[ID].fitness = 0;
+					gArr[ID].prev_fitness = 0;
+				}
+			}
+			
+			gArr[ID].fitness = gArr[ID].prev_fitness;
+		} else {
+			gArr[ID].FailedNetworkIterations = 0;
+		}
+		
+		gArr[ID].prev_fitness = gArr[ID].fitness;
+	} else {
+		revertToPrev = false;
+	}
+	
+	// If required, revert back to a better working version of the genome
+	float largestWeight = OUTPUT_ERROR_VALUE;
+	for (uint64_t nI = nodesStart; nI <= nodesEnd; nI++) {
+		for (uint64_t nC = nArr[nI].wSI; nC <= nArr[nI].wEI; nC++) {
+			if (revertToPrev) { cArr[nC].Weight = cArr[nC].Prev_Weight; }
+			
+			cArr[nC].Weight += random(nC);
+			
+			if (abs(cArr[nC].Weight) > largestWeight) { largestWeight = abs(cArr[nC].Weight); }
+		}
+		
+		if (revertToPrev) { nArr[nI].nB = nArr[nI].pNB; }
+		
+		nArr[nI].nB += random(nI);
+	
+		// I wish there was a way to store the result of this for the next iteration so that we don't recalculate every epoch.
+		// Not a big deal as it takes such an insignificant amount of time, but still...
+		if (nArr[nI].nIO) { numOutputs++; }
+	}
+	
+	// Normalize the weights
+	if (largestWeight != 0) {
+		for (uint64_t nI = nodesStart; nI <= nodesEnd; nI++) {
+			for (uint64_t nC = nArr[nI].wSI; nC <= nArr[nI].wEI; nC++) {
+				cArr[nC].Weight = cArr[nC].Weight / largestWeight;
+			}
+		}
+	}
+	
+	
+	//----------------------------------------------------------------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------------------------------------------------------------------------------
+	
+	
+	// Now that we have reverted and analyzed all of the network, we can finally get the networks new output
+	// Here we want to get the neural networks output given it's inputs by computing all of the nodes from start to finish
+	// For each node we compute it's output. Due to the way the CPU gives us the nodes in structured order, we know that we can just iterate directly through without needing to precompute a previous node
+	// For more complex neural geometries that aren't in the standard node-layers structure, I may need to rethink this approach later. Not important for now though
+	for (uint64_t nodeIndex = nodesStart; nodeIndex <= nodesEnd; nodeIndex++) {
+		if (nArr[nodeIndex].nII) {
+			nArr[nodeIndex].pO = inputArray[nodeIndex - nodesStart];
+		} else {
+			for (uint64_t connectionIndex = nArr[nodeIndex].wSI; connectionIndex <= nArr[nodeIndex].wEI; connectionIndex++) {
+				nArr[nodeIndex].pO += cArr[connectionIndex].Weight * nArr[cArr[connectionIndex].NodePos].pO;
+			}
+			
+			nArr[nodeIndex].pO += nArr[nodeIndex].nB;
+			// Now that we have added up the weighted inputs for this node, we run it's activation function
+			nArr[nodeIndex].pO = 0;
+			switch (nArr[nodeIndex].nTT) {
+			case -1: //Disable Node. This disables the node entirely, and is for decreasing memory requirements later
+				break;
+			case 0:  //Step
+				nArr[nodeIndex].pO = nArr[nodeIndex].pO >= 0.0 ? 1 : 0;
+				break;
+			case 1:  //Sine
+				nArr[nodeIndex].pO = sin(nArr[nodeIndex].pO);
+				break;
+			case 2:  //Modded Sine
+				nArr[nodeIndex].pO = nArr[nodeIndex].pO * sin(nArr[nodeIndex].pO);
+				break;
+			case 3:  //Cosine
+				nArr[nodeIndex].pO = cos(nArr[nodeIndex].pO);
+				break;
+			case 4:  //Modded Cosine
+				nArr[nodeIndex].pO = nArr[nodeIndex].pO * cos(nArr[nodeIndex].pO);
+				break;
+			case 5:  //Sigmoid
+				nArr[nodeIndex].pO = 1/(1 + pow(e, -nArr[nodeIndex].pO));
+				break;
+			case 6:  //SiLU
+				nArr[nodeIndex].pO = nArr[nodeIndex].pO * 1/(1 + pow(e, -nArr[nodeIndex].pO));
+				break;
+			case 7:  //ReLU
+				nArr[nodeIndex].pO = nArr[nodeIndex].pO<=0?0:nArr[nodeIndex].pO;
+				break;
+			case 8:  //Leaky ReLU
+				nArr[nodeIndex].pO = nArr[nodeIndex].pO<=0?0.01*nArr[nodeIndex].pO:nArr[nodeIndex].pO;
+				break;
+			case 9:  //Parametric ReLU
+				nArr[nodeIndex].pO = nArr[nodeIndex].pO<=0?HYPERPARAMETER_P_ReLU*nArr[nodeIndex].pO:nArr[nodeIndex].pO;
+				break;
+			case 10: //Softplus
+				nArr[nodeIndex].pO = log(1 + pow(e,nArr[nodeIndex].pO));
+				break;
+			case 11: //Modified Softplus
+				nArr[nodeIndex].pO = nArr[nodeIndex].pO * log(1 + pow(e,nArr[nodeIndex].pO));
+				break;
+			case 12: //Hyperparameterized Softplus
+				nArr[nodeIndex].pO = log(1 + pow(e,HYPERPARAMETER_K_SOFTPLUS*nArr[nodeIndex].pO))/HYPERPARAMETER_K_SOFTPLUS;
+				break;
+			case 13: //SReLU
+				nArr[nodeIndex].pO = max(-HYPERPARAMETER_A_ELU, nArr[nodeIndex].pO);
+				break;
+			case 14: //ELU
+				nArr[nodeIndex].pO = nArr[nodeIndex].pO<=0?HYPERPARAMETER_A_ELU*(pow(e,nArr[nodeIndex].pO) - 1):nArr[nodeIndex].pO;
+				break;
+			case 15: //Mish
+				nArr[nodeIndex].pO = nArr[nodeIndex].pO*tanh(log(1 + pow(e,nArr[nodeIndex].pO)));
+				break;
+			case 16: //Metallic Means
+				nArr[nodeIndex].pO = (nArr[nodeIndex].pO + sqrt(pow(nArr[nodeIndex].pO,2) + 4))/2;
+				break;
+			default: //Default Node Response
+				nArr[nodeIndex].pO = nArr[nodeIndex].pO;
+				break;
+			}
+		
+			// Finally, if we are the output node, we set the output array to our value
+			if (nArr[nodeIndex].nIO) {
+				outputArray[numOutputs*ID + outputNodeIndex] = nArr[nodeIndex].pO;
+				outputNodeIndex++;
+			}
+		}
+	}
+}
+
+// Struct Definitions (translated from GLSL to OpenCL)
+typedef struct {
+    ulong ID;
+    float fitness;
+    float prev_fitness;
+    ulong Nodes_Start_Index;
+    ulong Nodes_End_Index;
+    ulong FailedNetworkIterations;
+} Genome_GPU;
+
+typedef struct {
+    ulong ID;
+    ulong nTT;
+    float nB;
+    float pNB;
+    bool nII;
+    bool nIO;
+    float nIV;
+    float pO;
+    ulong wSI;
+    ulong wEI;
+} Node_GPU;
+
+typedef struct {
+    ulong NodePos;
+    float Weight;
+    float Prev_Weight;
+} NodeConnection_GPU;
